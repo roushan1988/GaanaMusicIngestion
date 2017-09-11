@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:task="http://www.springframework.org/schema/task"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa-1.3.xsd
+		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <context:component-scan base-package="com.til.prime.timesSubscription" />
+    <mvc:annotation-driven />
+    <tx:annotation-driven order="100" transaction-manager="transactionManager" />
+    <bean id="responseInterceptor" class="com.til.prime.timesSubscription.aspect.ResponseInterceptor"/>
+    <task:annotation-driven />
+    <context:annotation-config />
+    <aop:aspectj-autoproxy />
+    <mvc:resources mapping="/static/**" location="/static/" />
+    <mvc:resources mapping="/favicon.ico" location="/static/images/" />
+    <mvc:view-controller path="error" view-name="/WEB-INF/views/error" />
+    <context:property-placeholder location="classpath:mysql.properties, classpath:application-redis.properties" />
+    <bean id="restTemplate" class="org.springframework.web.client.RestTemplate" />
+    <bean class="org.springframework.validation.DefaultMessageCodesResolver"
+          p:prefix="validation." />
+    <jpa:repositories base-package="com.til.prime.timesSubscription.dao" />
+    <bean id="entityManagerFactory"
+          class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="dataSource" ref="dataSource" />
+        <property name="jpaVendorAdapter" ref="jpaVendorAdapter" />
+        <!-- spring based scanning for entity classes -->
+        <property name="packagesToScan" value="com.til.prime.timesSubscription.model" />
+        <property name="jpaProperties">
+            <props>
+                <prop key="hibernate.format_sql">false</prop>
+            </props>
+        </property>
+    </bean>
+
+    <bean id="config_properties"
+          class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+        <property name="ignoreResourceNotFound" value="true" />
+        <property name="locations">
+            <list>
+                <value>classpath*:application.properties</value>
+                <value>file:///opt/primepayments/application.properties</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean class="com.til.prime.timesSubscription.util.RestTemplateUtil">
+        <property name="properties" ref="config_properties" />
+    </bean>
+
+    <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="entityManagerFactory" />
+    </bean>
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <property name="driverClass" value="${mysql.db.driver}" />
+        <property name="jdbcUrl" value="${mysql.db.url}" />
+        <property name="user" value="${mysql.db.user}" />
+        <property name="password" value="${mysql.db.pass}" />
+        <property name="initialPoolSize" value="${jdbc.initialpoolsize}" />
+        <property name="maxPoolSize" value="${jdbc.maxpoolsize}" />
+        <property name="minPoolSize" value="${jdbc.minpoolsize}" />
+        <property name="checkoutTimeout" value="${jdbc.checkoutTimeout}" />
+        <property name="maxStatements" value="${jdbc.maxStatements}" />
+        <property name="testConnectionOnCheckin" value="false" />
+        <property name="testConnectionOnCheckout" value="true" />
+        <property name="maxIdleTime" value="${jdbc.maxIdleTime}" />
+        <property name="idleConnectionTestPeriod" value="${jdbc.idleConnectionTestPeriod}" />
+    </bean>
+    <bean id="jpaVendorAdapter"
+          class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+        <property name="showSql" value="true" />
+        <property name="generateDdl" value="false" />
+        <property name="database" value="MYSQL" />
+    </bean>
+</beans>

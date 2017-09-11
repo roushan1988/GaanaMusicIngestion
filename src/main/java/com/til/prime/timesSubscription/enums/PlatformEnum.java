@@ -1,0 +1,28 @@
+package com.til.prime.timesSubscription.enums;
+
+import java.util.HashSet;
+import java.util.Set;
+
+public enum PlatformEnum {
+    ANDROID("android"), IOS("ios"), WEB("web");
+
+    PlatformEnum(String ssoChannel) {
+        this.ssoChannel = ssoChannel;
+    }
+
+    private final String ssoChannel;
+
+    public String getSsoChannel() {
+        return ssoChannel;
+    }
+
+    private static final Set<String> names = new HashSet<String>(){{
+        for(PlatformEnum platformEnum: PlatformEnum.values()){
+            add(platformEnum.name());
+        }
+    }};
+
+    public static Set<String> names(){
+        return names;
+    }
+}

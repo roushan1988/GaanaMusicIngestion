@@ -1,0 +1,41 @@
+package com.til.prime.timesSubscription.dto.external;
+
+public class SSOValidateResponse {
+    private String code;
+    private String gassoid;
+    private String emailId;
+
+    public String getCode() {
+        return code;
+    }
+
+    public void setCode(String code) {
+        this.code = code;
+    }
+
+    public String getGassoid() {
+        return gassoid;
+    }
+
+    public void setGassoid(String userId) {
+        this.gassoid = userId;
+    }
+
+    public String getEmailId() {
+        return emailId;
+    }
+
+    public void setEmailId(String emailId) {
+        this.emailId = emailId;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("SSOValidateResponse{");
+        sb.append("code='").append(code).append('\'');
+        sb.append(", gassoid='").append(gassoid).append('\'');
+        sb.append(", emailId='").append(emailId).append('\'');
+        sb.append('}');
+        return sb.toString();
+    }
+}
