@@ -32,6 +32,8 @@ public class UserSubscriptionAuditModel extends BaseModel {
     private boolean orderCompleted;
     @Column(name="sso_communicated")
     private boolean ssoCommunicated;
+    @Column(name="auto_renewal")
+    private boolean autoRenewal;
     @Column(name="start_date")
     private Date startDate;
     @Column(name="end_date")
@@ -43,10 +45,13 @@ public class UserSubscriptionAuditModel extends BaseModel {
     @Enumerated(EnumType.STRING)
     private TransactionStatusEnum transactionStatus;
     @Column
+    @Enumerated(EnumType.STRING)
     private BusinessEnum business;
     @Column
+    @Enumerated(EnumType.STRING)
     private ChannelEnum channel;
     @Column
+    @Enumerated(EnumType.STRING)
     private PlatformEnum platform;
 
     public Long getUserSubscriptionId() {
@@ -143,6 +148,14 @@ public class UserSubscriptionAuditModel extends BaseModel {
 
     public void setSsoCommunicated(boolean ssoCommunicated) {
         this.ssoCommunicated = ssoCommunicated;
+    }
+
+    public boolean isAutoRenewal() {
+        return autoRenewal;
+    }
+
+    public void setAutoRenewal(boolean autoRenewal) {
+        this.autoRenewal = autoRenewal;
     }
 
     public Date getStartDate() {

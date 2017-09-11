@@ -16,7 +16,6 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.util.Date;
 import java.util.HashMap;
@@ -50,8 +49,8 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
         PreConditions.notNull(request.getDurationDays(), ValidationError.INVALID_DURATION_DAYS, validationResponse);
         PreConditions.notNullEnumCheck(request.getPlanType(), PlanTypeEnum.names(), ValidationError.INVALID_PLAN_TYPE, validationResponse);
         PreConditions.notNullEnumCheck(request.getBusiness(), BusinessEnum.names(), ValidationError.INVALID_BUSINESS, validationResponse);
-        PreConditions.notNullEnumCheck(request.getChannel(), ChannelEnum.names(), ValidationError.INVALID_BUSINESS, validationResponse);
-        PreConditions.notNullEnumCheck(request.getPlatform(), PlatformEnum.names(), ValidationError.INVALID_BUSINESS, validationResponse);
+        PreConditions.notNullEnumCheck(request.getChannel(), ChannelEnum.names(), ValidationError.INVALID_CHANNEL, validationResponse);
+        PreConditions.notNullEnumCheck(request.getPlatform(), PlatformEnum.names(), ValidationError.INVALID_PLATFORM, validationResponse);
         return updateValid(validationResponse);
     }
 
@@ -59,12 +58,12 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
     public ValidationResponse validatePostInitPurchasePlan(InitPurchaseRequest request, SubscriptionVariantModel variantModel, UserSubscriptionModel restrictedModel, UserSubscriptionModel lastUserSubscription, ValidationResponse validationResponse) {
         PreConditions.notNull(variantModel, ValidationError.INVALID_SUBSCRIPTION_VARIANT, validationResponse);
         PreConditions.mustBeNull(restrictedModel, ValidationError.USER_PLAN_DOES_NOT_QUALIFY, validationResponse);
-        PreConditions.mustBeEqual(request.getPlanType(), variantModel.getPlanType().name(), ValidationError.INVALID_PLAN_TYPE, validationResponse);
+        if(variantModel!=null) {
+            PreConditions.mustBeEqual(request.getPlanType(), variantModel.getPlanType().name(), ValidationError.INVALID_PLAN_TYPE, validationResponse);
+        }
         if(lastUserSubscription!=null){
-            PreConditions.notGreater(lastUserSubscription.getSubscriptionVariant().getPlanType().getOrder(), PlanTypeEnum.valueOf(request.getPlanType()), ValidationError.INVALID_PLAN_TYPE, validationResponse);
+            PreConditions.notGreater(lastUserSubscription.getSubscriptionVariant().getPlanType().getOrder(), PlanTypeEnum.valueOf(request.getPlanType()).getOrder(), ValidationError.INVALID_PLAN_TYPE, validationResponse);
             PreConditions.notAfter(lastUserSubscription.getEndDate(), TimeUtils.addDaysInDate(new Date(), GlobalConstants.MAX_DAYS_DIFF_FOR_NEW_SUBSCRIPTION_PURCHASE), ValidationError.USER_PLAN_DOES_NOT_QUALIFY, validationResponse);
-            PreConditions.mustBeEqual(request.getPlatform(), PlatformEnum.names(), ValidationError.INVALID_PLATFORM, validationResponse);
-            PreConditions.mustBeEqual(request.getChannel(), ChannelEnum.names(), ValidationError.INVALID_CHANNEL, validationResponse);
         }
         return updateValid(validationResponse);
     }
@@ -79,7 +78,6 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
         PreConditions.notNull(request.getVariantId(), ValidationError.INVALID_VARIANT_ID, validationResponse);
         PreConditions.notNull(request.getPrice(), ValidationError.INVALID_PRICE, validationResponse);
         PreConditions.notNull(request.getDurationDays(), ValidationError.INVALID_DURATION_DAYS, validationResponse);
-        PreConditions.notNull(request.getPaymentMethod(), ValidationError.INVALID_DURATION_DAYS, validationResponse);
         PreConditions.notNullEnumCheck(request.getPlanType(), PlanTypeEnum.names(), ValidationError.INVALID_PLAN_TYPE, validationResponse);
         PreConditions.notNullEnumCheck(request.getBusiness(), BusinessEnum.names(), ValidationError.INVALID_BUSINESS, validationResponse);
         PreConditions.notEmpty(request.getPaymentMethod(), ValidationError.INVALID_PAYMENT_METHOD, validationResponse);
@@ -90,16 +88,18 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
     public ValidationResponse validatePostInitGenerateOrder(GenerateOrderRequest request, SubscriptionVariantModel variantModel, UserSubscriptionModel userSubscriptionModel, UserSubscriptionModel restrictedModel, ValidationResponse validationResponse) {
         PreConditions.notNull(userSubscriptionModel, ValidationError.INVALID_USER_SUBSCRIPTION_ID, validationResponse);
         PreConditions.notNull(variantModel, ValidationError.INVALID_SUBSCRIPTION_VARIANT, validationResponse);
-        if(request.isRetryOnFailure()){
-            PreConditions.notNull(userSubscriptionModel.getOrderId(), ValidationError.ORDER_NOT_GENERATED, validationResponse);
-        }else{
-            PreConditions.mustBeNull(userSubscriptionModel.getOrderId(), ValidationError.ORDER_ALREADY_GENERATED, validationResponse);
+        if(userSubscriptionModel!=null) {
+            if (request.isRetryOnFailure()) {
+                PreConditions.notNull(userSubscriptionModel.getOrderId(), ValidationError.ORDER_NOT_GENERATED, validationResponse);
+            } else {
+                PreConditions.mustBeNull(userSubscriptionModel.getOrderId(), ValidationError.ORDER_ALREADY_GENERATED, validationResponse);
+            }
         }
         if(variantModel!=null) {
             PreConditions.mustBeEqual(request.getBusiness(), userSubscriptionModel.getBusiness().name(), ValidationError.INVALID_USER_SUBSCRIPTION_DETAILS, validationResponse);
             PreConditions.mustBeEqual(request.getPlanId(), variantModel.getSubscriptionPlan().getId(), ValidationError.INVALID_USER_SUBSCRIPTION_DETAILS, validationResponse);
             PreConditions.mustBeEqual(request.getVariantId(), variantModel.getId(), ValidationError.INVALID_USER_SUBSCRIPTION_DETAILS, validationResponse);
-            PreConditions.mustBeEqual(request.getPrice(), variantModel.getPrice(), ValidationError.INVALID_USER_SUBSCRIPTION_DETAILS, validationResponse);
+            PreConditions.bigDecimalComparisonMustBeEqual(request.getPrice(), variantModel.getPrice(), ValidationError.INVALID_USER_SUBSCRIPTION_DETAILS, validationResponse);
             PreConditions.mustBeEqual(request.getDurationDays(), variantModel.getDurationDays(), ValidationError.INVALID_USER_SUBSCRIPTION_DETAILS, validationResponse);
             PreConditions.mustBeEqual(request.getPlanType(), variantModel.getPlanType().name(), ValidationError.INVALID_USER_SUBSCRIPTION_DETAILS, validationResponse);
         }
@@ -130,7 +130,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
         if(userSubscriptionModel!=null){
             PreConditions.mustBeFalse(userSubscriptionModel.isOrderCompleted(), ValidationError.INVALID_USER_SUBSCRIPTION_DETAILS, validationResponse);
             PreConditions.mustBeEqual(request.getPaymentMethod(), userSubscriptionModel.getPaymentMethod(), ValidationError.INVALID_PAYMENT_METHOD, validationResponse);
-            PreConditions.mustBeEqual(userSubscriptionModel.getSubscriptionVariant().getPrice(), request.getPrice(), ValidationError.INVALID_PRICE, validationResponse);
+            PreConditions.bigDecimalComparisonMustBeEqual(userSubscriptionModel.getSubscriptionVariant().getPrice(), request.getPrice(), ValidationError.INVALID_PRICE, validationResponse);
             if(request.isAutoRenewal()){
                 PreConditions.mustBeTrue(userSubscriptionModel.getSubscriptionVariant().isRecurring(), ValidationError.INVALID_RECURRING_PAYMENT, validationResponse);
             }
@@ -154,7 +154,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
         PreConditions.mustBeEqual(request.getSecretKey(), GlobalConstants.PAYMENTS_SECRET_KEY, ValidationError.INVALID_SECRET_KEY, validationResponse);
         PreConditions.notNull(request.getUserSubscriptionId(), ValidationError.INVALID_USER_SUBSCRIPTION_ID, validationResponse);
         PreConditions.notEmpty(request.getOrderId(), ValidationError.INVALID_ORDER_ID, validationResponse);
-        PreConditions.notNull(request.getSubscriptionVariantId(), ValidationError.INVALID_SUBSCRIPTION_VARIANT, validationResponse);
+        PreConditions.notNull(request.getVariantId(), ValidationError.INVALID_SUBSCRIPTION_VARIANT, validationResponse);
         return updateValid(validationResponse);
     }
 
@@ -168,7 +168,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
     }
 
     @Override
-    public ValidationResponse validatePreExtendTrial(ExtendTrialRequest request) {
+    public ValidationResponse validatePreExtendExpiry(ExtendExpiryRequest request) {
         ValidationResponse validationResponse = validatePreCancelSubscription(request);
         PreConditions.notNullPositiveCheck(request.getExtensionDays(), ValidationError.INVALID_EXTENSION_DAYS, validationResponse);
         if(request.getExtensionDays()!=null){
@@ -178,7 +178,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
     }
 
     @Override
-    public ValidationResponse validatePostExtendTrial(ExtendTrialRequest request, UserSubscriptionModel userSubscriptionModel, ValidationResponse validationResponse) {
+    public ValidationResponse validatePostExtendExpiry(ExtendExpiryRequest request, UserSubscriptionModel userSubscriptionModel, ValidationResponse validationResponse) {
         PreConditions.notNull(userSubscriptionModel, ValidationError.INVALID_USER_SUBSCRIPTION_ID, validationResponse);
         if(userSubscriptionModel!=null){
             PreConditions.notAfter(new Date(), TimeUtils.addDaysInDate(userSubscriptionModel.getEndDate(), request.getExtensionDays().intValue()), ValidationError.ALREADY_EXPIRED, validationResponse);
@@ -203,7 +203,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
         PreConditions.mustBeNull(restrictedModel, ValidationError.USER_PLAN_DOES_NOT_QUALIFY, validationResponse);
         PreConditions.mustBeEqual(request.getPlanType(), variantModel.getPlanType().name(), ValidationError.INVALID_PLAN_TYPE, validationResponse);
         if(lastModel!=null){
-            PreConditions.notGreater(lastModel.getSubscriptionVariant().getPlanType().getOrder(), PlanTypeEnum.valueOf(request.getPlanType()), ValidationError.INVALID_PLAN_TYPE, validationResponse);
+            PreConditions.notGreater(lastModel.getSubscriptionVariant().getPlanType().getOrder(), PlanTypeEnum.valueOf(request.getPlanType()).getOrder(), ValidationError.INVALID_PLAN_TYPE, validationResponse);
             PreConditions.notAfter(lastModel.getEndDate(), TimeUtils.addDaysInDate(new Date(), GlobalConstants.MAX_DAYS_DIFF_FOR_NEW_SUBSCRIPTION_PURCHASE), ValidationError.USER_PLAN_DOES_NOT_QUALIFY, validationResponse);
         }
         return updateValid(validationResponse);

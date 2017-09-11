@@ -136,7 +136,7 @@ public class UserSubscriptionDTO {
         final StringBuilder sb = new StringBuilder("UserSubscriptionDTO{");
         sb.append("orderId='").append(orderId).append('\'');
         sb.append(", userSubscriptionId=").append(userSubscriptionId);
-        sb.append(", subscriptionVariantId=").append(subscriptionVariantId);
+        sb.append(", variantId=").append(subscriptionVariantId);
         sb.append(", name='").append(name).append('\'');
         sb.append(", planType='").append(planType).append('\'');
         sb.append(", durationDays=").append(durationDays);

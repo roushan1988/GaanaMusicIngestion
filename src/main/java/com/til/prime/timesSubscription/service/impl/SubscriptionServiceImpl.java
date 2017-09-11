@@ -140,14 +140,15 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     public SubmitPurchaseResponse submitPurchasePlan(SubmitPurchaseRequest request) {
         ValidationResponse validationResponse = subscriptionValidationService.validatePreSubmitPurchasePlan(request);
         UserSubscriptionModel userSubscriptionModel = null;
-        SubmitPurchaseResponse response = null;
+        SubmitPurchaseResponse response = new SubmitPurchaseResponse();
         if(validationResponse.isValid()){
             userSubscriptionModel = userSubscriptionRepository.findByIdAndOrderIdAndSubscriptionVariantIdAndDeleted(
                     request.getUserSubscriptionId(), request.getOrderId(), request.getVariantId(), false);
             validationResponse = subscriptionValidationService.validatePostSubmitPurchasePlan(request, userSubscriptionModel, validationResponse);
         }
         if(validationResponse.isValid()){
-            userSubscriptionModel = subscriptionServiceHelper.updateSubmitPurchaseUserSubscription(request, userSubscriptionModel);
+            UserSubscriptionModel lastUserSubscription = userSubscriptionRepository.findFirstByUserSsoIdAndBusinessAndOrderCompletedAndDeletedOrderByIdDesc(request.getUser().getSsoId(), userSubscriptionModel.getBusiness(), true, false);
+            userSubscriptionModel = subscriptionServiceHelper.updateSubmitPurchaseUserSubscription(request, userSubscriptionModel, lastUserSubscription);
             userSubscriptionModel = saveUserSubscription(userSubscriptionModel, false, request.getUser().getSsoId(), request.getUser().getTicketId(), userSubscriptionModel.isOrderCompleted()? EventEnum.PAYMENT_SUCCESS: EventEnum.PAYMENT_FAILURE);
         }
         response = subscriptionServiceHelper.prepareSubmitPurchaseResponse(response, userSubscriptionModel, validationResponse);
@@ -164,19 +165,25 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         if(validationResponse.isValid()){
             if(!request.isCurrentSubscription()){
                 if(StringUtils.isEmpty(request.getBusiness())){
-                    userSubscriptionModelList = userSubscriptionRepository.findByUserSsoIdAndOrderCompletedAndDeleted(request.getUser().getSsoId(),true, false);
+                    userSubscriptionModelList = request.isIncludeDeleted()?
+                            userSubscriptionRepository.findByUserSsoIdAndOrderCompleted(request.getUser().getSsoId(),true):
+                            userSubscriptionRepository.findByUserSsoIdAndOrderCompletedAndDeleted(request.getUser().getSsoId(),true, false);
                 }else{
-                    userSubscriptionModelList = userSubscriptionRepository.findByUserSsoIdAndBusinessAndOrderCompletedAndDeleted(request.getUser().getSsoId(),
-                            BusinessEnum.valueOf(request.getBusiness()), true, false);
+                    userSubscriptionModelList = request.isIncludeDeleted()?
+                            userSubscriptionRepository.findByUserSsoIdAndBusinessAndOrderCompleted(request.getUser().getSsoId(), BusinessEnum.valueOf(request.getBusiness()), true):
+                            userSubscriptionRepository.findByUserSsoIdAndBusinessAndOrderCompletedAndDeleted(request.getUser().getSsoId(), BusinessEnum.valueOf(request.getBusiness()), true, false);
                 }
             }else{
                 Date currentDate = new Date();
                 UserSubscriptionModel userSubscriptionModel = new UserSubscriptionModel();
                 if(StringUtils.isEmpty(request.getBusiness())){
-                    userSubscriptionModel = userSubscriptionRepository.findFirstByUserSsoIdAndOrderCompletedAndStartDateBeforeAndEndDateAfterAndDeleted(request.getUser().getSsoId(),true, currentDate, currentDate, false);
+                    userSubscriptionModel = request.isIncludeDeleted()?
+                            userSubscriptionRepository.findFirstByUserSsoIdAndOrderCompletedAndStartDateBeforeAndEndDateAfter(request.getUser().getSsoId(),true, currentDate, currentDate):
+                            userSubscriptionRepository.findFirstByUserSsoIdAndOrderCompletedAndStartDateBeforeAndEndDateAfterAndDeleted(request.getUser().getSsoId(),true, currentDate, currentDate, false);
                 }else{
-                    userSubscriptionModel = userSubscriptionRepository.findFirstByUserSsoIdAndBusinessAndOrderCompletedAndStartDateBeforeAndEndDateAfterAndDeleted(request.getUser().getSsoId(),
-                            BusinessEnum.valueOf(request.getBusiness()), true, currentDate, currentDate, false);
+                    userSubscriptionModel = request.isIncludeDeleted()?
+                            userSubscriptionRepository.findFirstByUserSsoIdAndBusinessAndOrderCompletedAndStartDateBeforeAndEndDateAfter(request.getUser().getSsoId(), BusinessEnum.valueOf(request.getBusiness()), true, currentDate, currentDate):
+                            userSubscriptionRepository.findFirstByUserSsoIdAndBusinessAndOrderCompletedAndStartDateBeforeAndEndDateAfterAndDeleted(request.getUser().getSsoId(), BusinessEnum.valueOf(request.getBusiness()), true, currentDate, currentDate, false);
                 }
                 userSubscriptionModelList = new ArrayList<>();
                 userSubscriptionModelList.add(userSubscriptionModel);
@@ -193,7 +200,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         UserSubscriptionModel userSubscriptionModel = null;
         CancelSubscriptionResponse response = new CancelSubscriptionResponse();
         if(validationResponse.isValid()){
-            userSubscriptionModel = userSubscriptionRepository.findByIdAndOrderIdAndSubscriptionVariantIdAndDeleted(request.getUserSubscriptionId(), request.getOrderId(), request.getSubscriptionVariantId(), false);
+            userSubscriptionModel = userSubscriptionRepository.findByIdAndOrderIdAndSubscriptionVariantIdAndDeleted(request.getUserSubscriptionId(), request.getOrderId(), request.getVariantId(), false);
             validationResponse = subscriptionValidationService.validatePostCancelSubscription(request, userSubscriptionModel, validationResponse);
         }
         BigDecimal refundAmount = null;
@@ -207,19 +214,19 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
-    public ExtendTrialResponse extendTrial(ExtendTrialRequest request) {
-        ValidationResponse validationResponse = subscriptionValidationService.validatePreExtendTrial(request);
+    public ExtendExpiryResponse extendExpiry(ExtendExpiryRequest request) {
+        ValidationResponse validationResponse = subscriptionValidationService.validatePreExtendExpiry(request);
         UserSubscriptionModel userSubscriptionModel = null;
-        ExtendTrialResponse response = new ExtendTrialResponse();
+        ExtendExpiryResponse response = new ExtendExpiryResponse();
         if(validationResponse.isValid()){
-            userSubscriptionModel = userSubscriptionRepository.findByIdAndOrderIdAndSubscriptionVariantIdAndDeleted(request.getUserSubscriptionId(), request.getOrderId(), request.getSubscriptionVariantId(), false);
-            validationResponse = subscriptionValidationService.validatePostExtendTrial(request, userSubscriptionModel, validationResponse);
+            userSubscriptionModel = userSubscriptionRepository.findByIdAndOrderIdAndSubscriptionVariantIdAndDeleted(request.getUserSubscriptionId(), request.getOrderId(), request.getVariantId(), false);
+            validationResponse = subscriptionValidationService.validatePostExtendExpiry(request, userSubscriptionModel, validationResponse);
         }
         if(validationResponse.isValid()){
             userSubscriptionModel = subscriptionServiceHelper.extendTrial(userSubscriptionModel, request.getExtensionDays());
             userSubscriptionModel = saveUserSubscription(userSubscriptionModel, false, request.getUser().getSsoId(), request.getUser().getTicketId(), EventEnum.SUBSCRIPTION_TRIAL_EXTENSION);
         }
-        response = subscriptionServiceHelper.prepareExtendTrialResponse(response, userSubscriptionModel, validationResponse);
+        response = subscriptionServiceHelper.prepareExtendExpiryResponse(response, userSubscriptionModel, validationResponse);
         return response;
     }
 
@@ -265,6 +272,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 userSubscriptionModel = userSubscriptionRepository.save(userSubscriptionModel);
                 UserSubscriptionAuditModel auditModel = subscriptionServiceHelper.getUserSubscriptionAuditModel(userSubscriptionModel, event);
                 auditModel = userSubscriptionAuditRepository.save(auditModel);
+                break retryLoop;
             } catch (Exception e) {
                 retryCount--;
                 if(retryCount>0){

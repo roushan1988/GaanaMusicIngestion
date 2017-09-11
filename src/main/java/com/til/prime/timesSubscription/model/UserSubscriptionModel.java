@@ -43,12 +43,15 @@ public class UserSubscriptionModel extends BaseModel {
     @Enumerated(EnumType.STRING)
     private TransactionStatusEnum transactionStatus;
     @Column
+    @Enumerated(EnumType.STRING)
     private BusinessEnum business;
     @Column(name="auto_renewal")
     private boolean autoRenewal;
     @Column
+    @Enumerated(EnumType.STRING)
     private ChannelEnum channel;
     @Column
+    @Enumerated(EnumType.STRING)
     private PlatformEnum platform;
 
     public UserSubscriptionModel() {

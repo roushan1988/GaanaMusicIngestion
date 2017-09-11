@@ -2,7 +2,7 @@ package com.til.prime.timesSubscription.dto.external;
 
 import java.util.Date;
 
-public class ExtendTrialResponse extends GenericResponse {
+public class ExtendExpiryResponse extends GenericResponse {
     private Long userSubscriptionId;
     private String orderId;
     private Long planId;
@@ -60,7 +60,7 @@ public class ExtendTrialResponse extends GenericResponse {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("ExtendTrialResponse{");
+        final StringBuilder sb = new StringBuilder("ExtendExpiryResponse{");
         sb.append("userSubscriptionId=").append(userSubscriptionId);
         sb.append(", orderId='").append(orderId).append('\'');
         sb.append(", planId=").append(planId);

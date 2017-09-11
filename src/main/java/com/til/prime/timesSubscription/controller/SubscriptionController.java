@@ -62,7 +62,7 @@ public class SubscriptionController {
     @Loggable
     @RequestMapping(path="/submitPurchase", method = RequestMethod.POST)
     @ResponseBody
-    public SubmitPurchaseResponse submitPurchase(SubmitPurchaseRequest request){
+    public SubmitPurchaseResponse submitPurchase(@RequestBody SubmitPurchaseRequest request){
         try {
             return subscriptionService.submitPurchasePlan(request);
         }catch (Exception e){
@@ -75,7 +75,7 @@ public class SubscriptionController {
     @Loggable
     @RequestMapping(path="/getPurchaseHistory", method = RequestMethod.GET)
     @ResponseBody
-    public PurchaseHistoryResponse getPurchaseHistory(PurchaseHistoryRequest request){
+    public PurchaseHistoryResponse getPurchaseHistory(@RequestBody PurchaseHistoryRequest request){
         try {
             return subscriptionService.getPurchaseHistory(request);
         }catch (Exception e){
@@ -88,7 +88,7 @@ public class SubscriptionController {
     @Loggable
     @RequestMapping(path="/cancelSubscription", method = RequestMethod.POST)
     @ResponseBody
-    public CancelSubscriptionResponse cancelSubscription(CancelSubscriptionRequest request){
+    public CancelSubscriptionResponse cancelSubscription(@RequestBody CancelSubscriptionRequest request){
         try {
             return subscriptionService.cancelSubscription(request);
         }catch (Exception e){
@@ -99,15 +99,15 @@ public class SubscriptionController {
     }
 
     @Loggable
-    @RequestMapping(path="/extendTrial", method = RequestMethod.POST)
+    @RequestMapping(path="/extendExpiry", method = RequestMethod.POST)
     @ResponseBody
-    public ExtendTrialResponse extendTrial(@RequestBody ExtendTrialRequest request){
+    public ExtendExpiryResponse extendExpiry(@RequestBody ExtendExpiryRequest request){
         try {
-            return subscriptionService.extendTrial(request);
+            return subscriptionService.extendExpiry(request);
         }catch (Exception e){
             LOG.error("Exception in extendTrial: ", e);
-            ExtendTrialResponse response = new ExtendTrialResponse();
-            return (ExtendTrialResponse) ResponseUtil.createExceptionResponse(response);
+            ExtendExpiryResponse response = new ExtendExpiryResponse();
+            return (ExtendExpiryResponse) ResponseUtil.createExceptionResponse(response);
         }
     }
 

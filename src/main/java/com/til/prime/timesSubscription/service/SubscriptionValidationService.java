@@ -1,7 +1,6 @@
 package com.til.prime.timesSubscription.service;
 
 import com.til.prime.timesSubscription.dto.external.*;
-import com.til.prime.timesSubscription.enums.ValidationError;
 import com.til.prime.timesSubscription.model.SubscriptionVariantModel;
 import com.til.prime.timesSubscription.model.UserSubscriptionModel;
 
@@ -16,8 +15,8 @@ public interface SubscriptionValidationService {
     ValidationResponse validatePurchaseHistory(PurchaseHistoryRequest request);
     ValidationResponse validatePreCancelSubscription(CancelSubscriptionRequest request);
     ValidationResponse validatePostCancelSubscription(CancelSubscriptionRequest request, UserSubscriptionModel userSubscriptionModel, ValidationResponse validationResponse);
-    ValidationResponse validatePreExtendTrial(ExtendTrialRequest request);
-    ValidationResponse validatePostExtendTrial(ExtendTrialRequest request, UserSubscriptionModel userSubscriptionModel, ValidationResponse validationResponse);
+    ValidationResponse validatePreExtendExpiry(ExtendExpiryRequest request);
+    ValidationResponse validatePostExtendExpiry(ExtendExpiryRequest request, UserSubscriptionModel userSubscriptionModel, ValidationResponse validationResponse);
     ValidationResponse validatePreCheckEligibility(CheckEligibilityRequest request);
     ValidationResponse validatePostCheckEligibility(CheckEligibilityRequest request, SubscriptionVariantModel variantModel, UserSubscriptionModel lastModel, UserSubscriptionModel restrictedModel, ValidationResponse validationResponse);
     ValidationResponse validateUser(GenericRequest request, ValidationResponse validationResponse);

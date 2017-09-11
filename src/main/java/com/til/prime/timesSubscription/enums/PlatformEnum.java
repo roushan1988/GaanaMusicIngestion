@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public enum PlatformEnum {
-    ANDROID("android"), IOS("ios"), WEB("web");
+    ANDROID("ANDROID_APP"), IOS("IOS_APP"), WEB("WEB"), MOBILE_BROWSER("WAP");
 
     PlatformEnum(String ssoChannel) {
         this.ssoChannel = ssoChannel;

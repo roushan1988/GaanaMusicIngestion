@@ -1,6 +1,6 @@
 package com.til.prime.timesSubscription.dto.external;
 
-public class ExtendTrialRequest extends CancelSubscriptionRequest {
+public class ExtendExpiryRequest extends CancelSubscriptionRequest {
     private Long extensionDays;
 
     public Long getExtensionDays() {
@@ -13,11 +13,11 @@ public class ExtendTrialRequest extends CancelSubscriptionRequest {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("ExtendTrialRequest{");
+        final StringBuilder sb = new StringBuilder("ExtendExpiryRequest{");
         sb.append("extensionDays=").append(extensionDays);
         sb.append(", userSubscriptionId=").append(userSubscriptionId);
         sb.append(", orderId='").append(orderId).append('\'');
-        sb.append(", subscriptionVariantId=").append(subscriptionVariantId);
+        sb.append(", variantId=").append(variantId);
         sb.append(", user=").append(user);
         sb.append(", secretKey='").append(secretKey).append('\'');
         sb.append('}');

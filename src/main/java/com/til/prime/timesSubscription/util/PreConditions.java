@@ -5,6 +5,7 @@ import com.til.prime.timesSubscription.enums.ValidationError;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
@@ -35,6 +36,12 @@ public class PreConditions {
 
 	public static <T> void mustBeEqual(Object obj, Object obj2, ValidationError error, ValidationResponse validationResponse) {
 		if (!((obj!=null && obj2!=null && obj.equals(obj2)) || (obj==null && obj2==null))) {
+			validationResponse.getValidationErrorSet().add(error);
+		}
+	}
+
+	public static <T> void bigDecimalComparisonMustBeEqual(BigDecimal obj, BigDecimal obj2, ValidationError error, ValidationResponse validationResponse) {
+		if (!((obj!=null && obj2!=null && obj.compareTo(obj2)==0) || (obj==null && obj2==null))) {
 			validationResponse.getValidationErrorSet().add(error);
 		}
 	}

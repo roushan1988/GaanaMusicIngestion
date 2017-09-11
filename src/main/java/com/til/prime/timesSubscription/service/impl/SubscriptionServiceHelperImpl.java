@@ -66,7 +66,9 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
     }
 
     @Override
-    public UserSubscriptionModel updateSubmitPurchaseUserSubscription(SubmitPurchaseRequest request, UserSubscriptionModel userSubscriptionModel) {
+    public UserSubscriptionModel updateSubmitPurchaseUserSubscription(SubmitPurchaseRequest request, UserSubscriptionModel userSubscriptionModel, UserSubscriptionModel lastUserSubscription) {
+        SubscriptionVariantModel variantModel = userSubscriptionModel.getSubscriptionVariant();
+        userSubscriptionModel.setPlanStatus(PlanStatusEnum.getPlanStatus(variantModel.getPlanType(), variantModel.getPrice(), lastUserSubscription,  request.isAutoRenewal()));
         userSubscriptionModel.setPaymentReference(request.getPaymentReference());
         userSubscriptionModel.setTransactionStatus(request.isPaymentSuccess()? TransactionStatusEnum.SUBSCRIPTION_TRANS_SUCCESS: TransactionStatusEnum.SUBSCRIPTION_TRANS_FAILED);
         userSubscriptionModel.setOrderCompleted(request.isPaymentSuccess());
@@ -146,7 +148,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
     @Override
     public List<UserSubscriptionDTO> generateUserSubscriptionDTOList(List<UserSubscriptionModel> userSubscriptionModelList) {
         List<UserSubscriptionDTO> userSubscriptionDTOList = new ArrayList<>();
-        if(CollectionUtils.isNotEmpty(userSubscriptionDTOList)) {
+        if(CollectionUtils.isNotEmpty(userSubscriptionModelList)) {
             for (UserSubscriptionModel model : userSubscriptionModelList) {
                 UserSubscriptionDTO dto = ModelToDTOConvertorUtil.getUserSubscriptionDTO(model);
                 userSubscriptionDTOList.add(dto);
@@ -200,6 +202,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
         auditModel.setBusiness(userSubscriptionModel.getBusiness());
         auditModel.setChannel(userSubscriptionModel.getChannel());
         auditModel.setPlatform(userSubscriptionModel.getPlatform());
+        auditModel.setAutoRenewal(userSubscriptionModel.isAutoRenewal());
         return auditModel;
     }
 
@@ -223,7 +226,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
     }
 
     @Override
-    public ExtendTrialResponse prepareExtendTrialResponse(ExtendTrialResponse response, UserSubscriptionModel userSubscriptionModel, ValidationResponse validationResponse) {
+    public ExtendExpiryResponse prepareExtendExpiryResponse(ExtendExpiryResponse response, UserSubscriptionModel userSubscriptionModel, ValidationResponse validationResponse) {
         if(validationResponse.isValid()){
             SubscriptionVariantModel variantModel = userSubscriptionModel.getSubscriptionVariant();
             response.setUserSubscriptionId(userSubscriptionModel.getId());
@@ -232,9 +235,9 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
             response.setOrderId(userSubscriptionModel.getOrderId());
             response.setStartDate(userSubscriptionModel.getStartDate());
             response.setEndDate(userSubscriptionModel.getEndDate());
-            response = (ExtendTrialResponse) ResponseUtil.createSuccessResponse(response);
+            response = (ExtendExpiryResponse) ResponseUtil.createSuccessResponse(response);
         }else{
-            response = (ExtendTrialResponse) ResponseUtil.createFailureResponse(response, validationResponse.getValidationErrorSet());
+            response = (ExtendExpiryResponse) ResponseUtil.createFailureResponse(response, validationResponse.getValidationErrorSet());
         }
         return response;
     }
@@ -257,6 +260,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
         userModel.setMobile(request.getUser().getMobile());
         userModel.setEmail(request.getUser().getEmail());
         userModel.setCity(request.getUser().getCity());
+        userModel.setCreated(new Date());
         return userModel;
     }
 

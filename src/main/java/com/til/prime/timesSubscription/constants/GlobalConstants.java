@@ -22,10 +22,10 @@ public class GlobalConstants {
     public static final int DB_RETRY_COUNT = 3;
     public static final int SINGLE_TRY = 1;
     public static final String VALIDATION_FAILURE = "Certain Validations Failed";
-    public static final String EXCEPTION_MESSAGE = "Something wrong occured";
+    public static final String EXCEPTION_MESSAGE = "Oops! Something wrong occured";
     public static final int MAX_DAYS_DIFF_FOR_NEW_SUBSCRIPTION_PURCHASE = 365*2;
     public static final String PAYMENTS_SECRET_KEY = "g45Gy8nd78NngHjjkjggdeerh678bhYg788nbVbH";
-    public static final int MAX_SUBSCRIPTION_EXTENSION_DAYS = 180;
+    public static final long MAX_SUBSCRIPTION_EXTENSION_DAYS = 180l;
     public static final String CONTENT_TYPE_JSON = "application/json";
     public static final String GET = "GET";
     public static final String POST = "POST";

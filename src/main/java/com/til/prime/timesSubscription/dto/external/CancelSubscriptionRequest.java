@@ -3,7 +3,7 @@ package com.til.prime.timesSubscription.dto.external;
 public class CancelSubscriptionRequest extends GenericRequest {
     protected Long userSubscriptionId;
     protected String orderId;
-    protected Long subscriptionVariantId;
+    protected Long variantId;
 
     public Long getUserSubscriptionId() {
         return userSubscriptionId;
@@ -21,12 +21,12 @@ public class CancelSubscriptionRequest extends GenericRequest {
         this.orderId = orderId;
     }
 
-    public Long getSubscriptionVariantId() {
-        return subscriptionVariantId;
+    public Long getVariantId() {
+        return variantId;
     }
 
-    public void setSubscriptionVariantId(Long subscriptionVariantId) {
-        this.subscriptionVariantId = subscriptionVariantId;
+    public void setVariantId(Long variantId) {
+        this.variantId = variantId;
     }
 
     @Override
@@ -34,7 +34,7 @@ public class CancelSubscriptionRequest extends GenericRequest {
         final StringBuilder sb = new StringBuilder("CancelSubscriptionRequest{");
         sb.append("userSubscriptionId=").append(userSubscriptionId);
         sb.append(", orderId='").append(orderId).append('\'');
-        sb.append(", subscriptionVariantId=").append(subscriptionVariantId);
+        sb.append(", variantId=").append(variantId);
         sb.append(", user=").append(user);
         sb.append(", secretKey='").append(secretKey).append('\'');
         sb.append('}');
