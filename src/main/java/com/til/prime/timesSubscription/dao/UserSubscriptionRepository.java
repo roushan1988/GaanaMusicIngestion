@@ -3,10 +3,14 @@ package com.til.prime.timesSubscription.dao;
 import com.til.prime.timesSubscription.enums.BusinessEnum;
 import com.til.prime.timesSubscription.enums.PlanTypeEnum;
 import com.til.prime.timesSubscription.model.UserSubscriptionModel;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Repository;
 
 import java.util.Date;
 import java.util.List;
 
+@Repository
 public interface UserSubscriptionRepository extends GenericJpaRepository<UserSubscriptionModel, Long> {
     UserSubscriptionModel findByIdAndOrderIdAndSubscriptionVariantIdAndDeleted(Long id, String orderId, Long variantId, boolean deleted);
     UserSubscriptionModel findFirstByUserSsoIdAndBusinessAndSubscriptionVariantPlanTypeAndOrderCompletedAndDeletedOrderByIdDesc(String ssoId, BusinessEnum business, PlanTypeEnum planType, boolean orderCompleted, boolean deleted);
@@ -20,4 +24,6 @@ public interface UserSubscriptionRepository extends GenericJpaRepository<UserSub
     UserSubscriptionModel findFirstByUserSsoIdAndOrderCompletedAndStartDateBeforeAndEndDateAfter(String ssoId, boolean orderCompleted, Date date, Date date2);
     UserSubscriptionModel findFirstByUserSsoIdAndBusinessAndOrderCompletedAndDeletedOrderByIdDesc(String ssoId, BusinessEnum business, boolean orderCompleted, boolean deleted);
     UserSubscriptionModel findFirstByUserSsoIdAndBusinessAndOrderCompletedOrderByIdDesc(String ssoId, BusinessEnum business, boolean orderCompleted);
+    Long countBySsoCommunicatedFalseAndOrderCompletedTrueAndDeletedFalse();
+    Page<UserSubscriptionModel> findBySsoCommunicatedFalseAndOrderCompletedTrueAndDeletedFalseOrderById(Pageable pageable);
 }

@@ -27,7 +27,7 @@
     <mvc:resources mapping="/static/**" location="/static/" />
     <mvc:resources mapping="/favicon.ico" location="/static/images/" />
     <mvc:view-controller path="error" view-name="/WEB-INF/views/error" />
-    <context:property-placeholder location="classpath:mysql.properties, classpath:application-redis.properties" />
+    <context:property-placeholder location="classpath:mysql.properties, classpath:application-redis.properties, classpath:application.properties" />
     <bean id="restTemplate" class="org.springframework.web.client.RestTemplate" />
     <bean class="org.springframework.validation.DefaultMessageCodesResolver"
           p:prefix="validation." />

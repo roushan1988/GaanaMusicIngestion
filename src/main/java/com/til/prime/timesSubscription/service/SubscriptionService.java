@@ -1,7 +1,9 @@
 package com.til.prime.timesSubscription.service;
 
 import com.til.prime.timesSubscription.dto.external.*;
+import com.til.prime.timesSubscription.enums.EventEnum;
 import com.til.prime.timesSubscription.model.UserModel;
+import com.til.prime.timesSubscription.model.UserSubscriptionModel;
 
 public interface SubscriptionService {
 
@@ -14,4 +16,5 @@ public interface SubscriptionService {
     ExtendExpiryResponse extendExpiry(ExtendExpiryRequest request);
     GenericResponse checkEligibility(CheckEligibilityRequest request);
     UserModel getOrCreateUser(GenericRequest request);
+    UserSubscriptionModel saveUserSubscription(UserSubscriptionModel userSubscriptionModel, boolean retryForOrderId, String ssoId, String ticketId, EventEnum event);
 }

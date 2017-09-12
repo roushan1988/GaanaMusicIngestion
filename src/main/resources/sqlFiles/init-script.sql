@@ -94,6 +94,7 @@ CREATE TABLE `user_subscription` (
   INDEX `INDEX_USER` (`user_id`),
   INDEX `INDEX_SUBSCRIPTION_VARIANT` (`subscription_variant_id`),
   INDEX `INDEX_BUSINESS` (`business`),
+  INDEX `INDEX_SSO_COMMUNICATED` (`sso_communicated`),
   CONSTRAINT `FK_USER_SUBSCRIPTION_USER` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`),
   CONSTRAINT `FK_SUBSCRIPTION_VARIANT` FOREIGN KEY (`subscription_variant_id`) REFERENCES `subscription_variant` (`id`)
 );
@@ -133,6 +134,49 @@ CREATE TABLE `user_subscription_audit` (
   CONSTRAINT `FK_AUDIT_USER_SUBSCRIPTION_VARIANT` FOREIGN KEY (`subscription_variant_id`) REFERENCES `subscription_variant` (`id`),
   CONSTRAINT `FK_AUDIT_SUBSCRIPTION_PLAN` FOREIGN KEY (`subscription_plan_id`) REFERENCES `subscription_plan` (`id`),
   CONSTRAINT `FK_AUDIT_USER` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`)
+);
+
+CREATE TABLE `subscription_property` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `key_name` varchar(128) NOT NULL,
+  `key_value` varchar(256) NOT NULL,
+  `created` datetime NOT NULL,
+  `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `deleted` tinyint(1) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `my_idx` (`key_name`),
+  UNIQUE KEY `key_name` (`key_name`)
+);
+
+CREATE TABLE `job` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(128) NOT NULL,
+  `job_key` varchar(128) NOT NULL,
+  `owner` varchar(128) DEFAULT NULL,
+  `created` datetime NOT NULL,
+  `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `deleted` tinyint(1) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `INDEX_NAME` (`name`),
+  UNIQUE KEY `INDEX_JOB_KEY` (`job_key`)
+);
+
+CREATE TABLE `job_audit` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `job_id` int(11) NOT NULL,
+  `owner` varchar(128) DEFAULT NULL,
+  `start_time` datetime NOT NULL,
+  `end_time` datetime NOT NULL,
+  `completed` tinyint(1) NOT NULL,
+  `records_affected` int(11) NOT NULL,
+  `affected_model_details` longtext DEFAULT NULL,
+  `response` longtext DEFAULT NULL,
+  `exception` longtext DEFAULT NULL,
+  `created` datetime NOT NULL,
+  `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `deleted` tinyint(1) NOT NULL,
+  PRIMARY KEY (`id`),
+  CONSTRAINT `FK_AUDIT_JOB` FOREIGN KEY (`job_id`) REFERENCES `job` (`id`)
 );
 
 insert into subscription_plan values (null, "TEST PLAN", "TEST PLAN DESCRIPTION", "TIMES_PRIME", "INR", "IN", "REGULAR", now(), now(), false);

@@ -74,12 +74,12 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
         userSubscriptionModel.setOrderCompleted(request.isPaymentSuccess());
         userSubscriptionModel.setAutoRenewal(request.isAutoRenewal());
         if (userSubscriptionModel.isOrderCompleted()) {
-            userSubscriptionModel = updateSSOStatus(userSubscriptionModel, request.getPrice());
+            userSubscriptionModel = updateSSOStatus(userSubscriptionModel);
         }
         return userSubscriptionModel;
     }
 
-    public UserSubscriptionModel updateSSOStatus(UserSubscriptionModel userSubscriptionModel, BigDecimal price){
+    public UserSubscriptionModel updateSSOStatus(UserSubscriptionModel userSubscriptionModel){
         boolean success = communicateSSO(userSubscriptionModel);
         userSubscriptionModel.setSsoCommunicated(success);
         return userSubscriptionModel;

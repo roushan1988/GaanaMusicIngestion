@@ -85,7 +85,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             UserModel userModel = getOrCreateUser(request);
             userSubscriptionModel = subscriptionServiceHelper.generateInitPurchaseUserSubscription(request, subscriptionVariantModel, lastUserSubscription, userModel, request.getPrice());
             if (userSubscriptionModel.isOrderCompleted()) {
-                userSubscriptionModel = subscriptionServiceHelper.updateSSOStatus(userSubscriptionModel, request.getPrice());
+                userSubscriptionModel = subscriptionServiceHelper.updateSSOStatus(userSubscriptionModel);
             }
             EventEnum eventEnum = EventEnum.getEventByInitPlanStatus(userSubscriptionModel.getPlanStatus());
             userSubscriptionModel = saveUserSubscription(userSubscriptionModel, true, request.getUser().getSsoId(), request.getUser().getTicketId(), eventEnum);
@@ -264,7 +264,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         return userModel;
     }
 
-    private UserSubscriptionModel saveUserSubscription(UserSubscriptionModel userSubscriptionModel, boolean retryForOrderId, String ssoId, String ticketId, EventEnum event){
+    @Override
+    public UserSubscriptionModel saveUserSubscription(UserSubscriptionModel userSubscriptionModel, boolean retryForOrderId, String ssoId, String ticketId, EventEnum event){
         int retryCount = retryForOrderId? GlobalConstants.DB_RETRY_COUNT : GlobalConstants.SINGLE_TRY;
         retryLoop:
         while (retryCount > 0) {
