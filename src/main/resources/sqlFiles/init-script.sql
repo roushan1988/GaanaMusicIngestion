@@ -48,6 +48,7 @@ CREATE TABLE `subscription_variant`(
   `deleted` tinyint(1) NOT NULL,
   PRIMARY KEY (`id`),
   INDEX `INDEX_PLAN_TYPE` (`plan_type`),
+  INDEX `INDEX_SUBSCRIPTION_PLAN` (`subscription_plan_id`),
   UNIQUE KEY `UK_PLAN_PRICE_DURATION_DAYS` (`subscription_plan_id`, `price`, `duration_days`),
   CONSTRAINT `FK_SUBSCRIPTION` FOREIGN KEY (`subscription_plan_id`) REFERENCES `subscription_plan` (`id`)
 );
@@ -63,6 +64,7 @@ CREATE TABLE `offer`(
   `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `deleted` tinyint(1) NOT NULL,
   PRIMARY KEY (`id`),
+  INDEX `INDEX_SUBSCRIPTION_PLAN2` (`subscription_plan_id`),
   CONSTRAINT `FK_SUBSCRIPTION2` FOREIGN KEY (`subscription_plan_id`) REFERENCES `subscription_plan` (`id`)
 );
 

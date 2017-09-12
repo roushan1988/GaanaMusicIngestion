@@ -1,6 +1,7 @@
 package com.til.prime.timesSubscription.enums;
 
 public enum EventEnum {
+    USER_CREATION,
     PLAN_CREATION,
     PLAN_FETCH,
     FREE_TRIAL,
