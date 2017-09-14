@@ -4,7 +4,7 @@ USE `times_subscription`;
 CREATE TABLE `user`(
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(64) NOT NULL,
-  `mobile` varchar(256) NOT NULL,
+  `mobile` varchar(32) NOT NULL,
   `email` varchar(32) NOT NULL,
   `sso_id` varchar(64) NOT NULL,
   `city` varchar(32) NOT NULL,
