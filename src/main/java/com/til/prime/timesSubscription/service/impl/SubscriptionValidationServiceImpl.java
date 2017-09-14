@@ -69,7 +69,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
     }
 
     @Override
-    public ValidationResponse validatePreInitGenerateOrder(GenerateOrderRequest request) {
+    public ValidationResponse validatePreGenerateOrder(GenerateOrderRequest request) {
         ValidationResponse validationResponse = new ValidationResponse();
         validationResponse = validateCredentials(request, validationResponse);
         PreConditions.mustBeEqual(request.getSecretKey(), GlobalConstants.PAYMENTS_SECRET_KEY, ValidationError.INVALID_SECRET_KEY, validationResponse);
@@ -85,7 +85,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
     }
 
     @Override
-    public ValidationResponse validatePostInitGenerateOrder(GenerateOrderRequest request, SubscriptionVariantModel variantModel, UserSubscriptionModel userSubscriptionModel, UserSubscriptionModel restrictedModel, ValidationResponse validationResponse) {
+    public ValidationResponse validatePostGenerateOrder(GenerateOrderRequest request, SubscriptionVariantModel variantModel, UserSubscriptionModel userSubscriptionModel, UserSubscriptionModel restrictedModel, ValidationResponse validationResponse) {
         PreConditions.notNull(userSubscriptionModel, ValidationError.INVALID_USER_SUBSCRIPTION_ID, validationResponse);
         PreConditions.notNull(variantModel, ValidationError.INVALID_SUBSCRIPTION_VARIANT, validationResponse);
         if(userSubscriptionModel!=null) {

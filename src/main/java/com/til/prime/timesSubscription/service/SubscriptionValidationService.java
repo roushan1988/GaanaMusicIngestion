@@ -8,8 +8,8 @@ public interface SubscriptionValidationService {
     ValidationResponse validateAllPlans(PlanListRequest request);
     ValidationResponse validatePreInitPurchasePlan(InitPurchaseRequest request);
     ValidationResponse validatePostInitPurchasePlan(InitPurchaseRequest request, SubscriptionVariantModel variantModel, UserSubscriptionModel restrictedModel, UserSubscriptionModel lastUserSubscription, ValidationResponse validationResponse);
-    ValidationResponse validatePreInitGenerateOrder(GenerateOrderRequest request);
-    ValidationResponse validatePostInitGenerateOrder(GenerateOrderRequest request, SubscriptionVariantModel variantModel, UserSubscriptionModel userSubscriptionModel, UserSubscriptionModel restrictedModel, ValidationResponse validationResponse);
+    ValidationResponse validatePreGenerateOrder(GenerateOrderRequest request);
+    ValidationResponse validatePostGenerateOrder(GenerateOrderRequest request, SubscriptionVariantModel variantModel, UserSubscriptionModel userSubscriptionModel, UserSubscriptionModel restrictedModel, ValidationResponse validationResponse);
     ValidationResponse validatePreSubmitPurchasePlan(SubmitPurchaseRequest request);
     ValidationResponse validatePostSubmitPurchasePlan(SubmitPurchaseRequest request, UserSubscriptionModel userSubscriptionModel, ValidationResponse validationResponse);
     ValidationResponse validatePurchaseHistory(PurchaseHistoryRequest request);

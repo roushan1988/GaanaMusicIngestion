@@ -96,7 +96,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Override
     public GenerateOrderResponse generateOrder(GenerateOrderRequest request) {
-        ValidationResponse validationResponse = subscriptionValidationService.validatePreInitGenerateOrder(request);
+        ValidationResponse validationResponse = subscriptionValidationService.validatePreGenerateOrder(request);
         SubscriptionVariantModel subscriptionVariantModel = null;
         UserSubscriptionModel userSubscriptionModel = null;
         UserSubscriptionModel newUserSubscriptionModel = null;
@@ -116,7 +116,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 restrictedUsageUserSubscription = userSubscriptionRepository.findFirstByUserSsoIdAndBusinessAndSubscriptionVariantPlanTypeAndOrderCompletedAndDeletedOrderByIdDesc(
                         request.getUser().getSsoId(), business, planType, true, false);
             }
-            validationResponse = subscriptionValidationService.validatePostInitGenerateOrder(request, subscriptionVariantModel, userSubscriptionModel, restrictedUsageUserSubscription, validationResponse);
+            validationResponse = subscriptionValidationService.validatePostGenerateOrder(request, subscriptionVariantModel, userSubscriptionModel, restrictedUsageUserSubscription, validationResponse);
         }
         if(validationResponse.isValid()) {
             if(request.isRetryOnFailure()){
