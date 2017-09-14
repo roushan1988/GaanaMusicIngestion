@@ -27,7 +27,7 @@
     <mvc:resources mapping="/static/**" location="/static/" />
     <mvc:resources mapping="/favicon.ico" location="/static/images/" />
     <mvc:view-controller path="error" view-name="/WEB-INF/views/error" />
-    <context:property-placeholder location="file:///opt/timesSubscription/mysql.properties, classpath:application.properties" />
+    <context:property-placeholder location="file:///opt/timesSubscription/mysql.properties, file:///opt/timesSubscription/application.properties, classpath:application.properties" />
     <bean id="restTemplate" class="org.springframework.web.client.RestTemplate" />
     <bean class="org.springframework.validation.DefaultMessageCodesResolver"
           p:prefix="validation." />
@@ -51,7 +51,7 @@
         <property name="locations">
             <list>
                 <value>classpath*:application.properties</value>
-                <value>file:///opt/primepayments/application.properties</value>
+                <value>file:///opt/timesSubscription/application.properties</value>
             </list>
         </property>
     </bean>
