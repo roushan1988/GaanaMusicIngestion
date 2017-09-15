@@ -1,5 +1,7 @@
 package com.til.prime.timesSubscription.dto.external;
 
+import com.til.prime.timesSubscription.enums.PlatformEnum;
+
 import java.math.BigDecimal;
 
 public class GenerateOrderRequest extends GenericRequest {
@@ -12,6 +14,9 @@ public class GenerateOrderRequest extends GenericRequest {
     private String business;
     private String paymentMethod;
     private boolean retryOnFailure;
+    private boolean renewal;
+    private boolean job;
+    private String platform;
 
     public Long getUserSubscriptionId() {
         return userSubscriptionId;
@@ -85,6 +90,30 @@ public class GenerateOrderRequest extends GenericRequest {
         this.retryOnFailure = retryOnFailure;
     }
 
+    public boolean isRenewal() {
+        return renewal;
+    }
+
+    public void setRenewal(boolean renewal) {
+        this.renewal = renewal;
+    }
+
+    public boolean isJob() {
+        return job;
+    }
+
+    public void setJob(boolean job) {
+        this.job = job;
+    }
+
+    public String getPlatform() {
+        return platform;
+    }
+
+    public void setPlatform(String platform) {
+        this.platform = platform;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("GenerateOrderRequest{");
@@ -97,6 +126,9 @@ public class GenerateOrderRequest extends GenericRequest {
         sb.append(", business='").append(business).append('\'');
         sb.append(", paymentMethod='").append(paymentMethod).append('\'');
         sb.append(", retryOnFailure=").append(retryOnFailure);
+        sb.append(", renewal=").append(renewal);
+        sb.append(", job=").append(job);
+        sb.append(", platform='").append(platform).append('\'');
         sb.append(", user=").append(user);
         sb.append(", secretKey='").append(secretKey).append('\'');
         sb.append('}');

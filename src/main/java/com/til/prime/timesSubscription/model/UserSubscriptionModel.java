@@ -57,18 +57,26 @@ public class UserSubscriptionModel extends BaseModel {
     public UserSubscriptionModel() {
     }
 
-    public UserSubscriptionModel(UserSubscriptionModel model, GenerateOrderRequest request) {
+    public UserSubscriptionModel(UserSubscriptionModel model, GenerateOrderRequest request, boolean renewalRequest) {
         this.user = model.getUser();
         this.ticketId = model.getTicketId();
         this.subscriptionVariant = model.subscriptionVariant;
-        this.startDate = model.getStartDate();
-        this.endDate = model.getEndDate();
-        this.planStatus = model.getPlanStatus();
-        this.transactionStatus = model.getTransactionStatus();
         this.business = model.getBusiness();
         this.channel = model.getChannel();
-        this.platform = model.getPlatform();
         setCreated(new Date());
+        if(renewalRequest){
+            this.startDate = TimeUtils.addMillisInDate(model.getEndDate(), 1);
+            this.endDate = TimeUtils.addDaysInDate(startDate, model.getSubscriptionVariant().getDurationDays().intValue());
+            this.platform = request.isJob()? PlatformEnum.JOB : PlatformEnum.valueOf(request.getPlatform());
+            this.planStatus = PlanStatusEnum.INIT;
+            this.transactionStatus = TransactionStatusEnum.SUBSCRIPTION_TRANS_INITIATED;
+        }else{
+            this.startDate = model.getStartDate();
+            this.endDate = model.getEndDate();
+            this.platform = model.getPlatform();
+            this.planStatus = model.getPlanStatus();
+            this.transactionStatus = model.getTransactionStatus();
+        }
     }
 
     public UserModel getUser() {

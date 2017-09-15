@@ -101,6 +101,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         UserSubscriptionModel userSubscriptionModel = null;
         UserSubscriptionModel newUserSubscriptionModel = null;
         UserSubscriptionModel restrictedUsageUserSubscription = null;
+        UserSubscriptionModel lastUserSubscription = null;
         GenerateOrderResponse response = new GenerateOrderResponse();
         PlanTypeEnum planType = null;
         BusinessEnum business = null;
@@ -119,13 +120,19 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             validationResponse = subscriptionValidationService.validatePostGenerateOrder(request, subscriptionVariantModel, userSubscriptionModel, restrictedUsageUserSubscription, validationResponse);
         }
         if(validationResponse.isValid()) {
-            if(request.isRetryOnFailure()){
+            if(request.isRetryOnFailure() || request.isRenewal()){
                 useNewSubscription = true;
-                newUserSubscriptionModel = new UserSubscriptionModel(userSubscriptionModel, request);
+                if(request.isRenewal()){
+                    lastUserSubscription = userSubscriptionRepository.findFirstByUserSsoIdAndBusinessAndOrderCompletedAndDeletedOrderByIdDesc(request.getUser().getSsoId(), business, true, false);
+                    newUserSubscriptionModel = new UserSubscriptionModel(lastUserSubscription, request, request.isRenewal());
+                }else{
+                    newUserSubscriptionModel = new UserSubscriptionModel(userSubscriptionModel, request, request.isRenewal());
+                }
             }
             if(useNewSubscription){
                 newUserSubscriptionModel = subscriptionServiceHelper.updateGenerateOrderUserSubscription(request, newUserSubscriptionModel);
                 newUserSubscriptionModel = saveUserSubscription(newUserSubscriptionModel, true, request.getUser().getSsoId(), request.getUser().getTicketId(), EventEnum.ORDER_ID_GENERATION);
+
             }else{
                 userSubscriptionModel = subscriptionServiceHelper.updateGenerateOrderUserSubscription(request, userSubscriptionModel);
                 userSubscriptionModel = saveUserSubscription(userSubscriptionModel, true, request.getUser().getSsoId(), request.getUser().getTicketId(), EventEnum.ORDER_ID_GENERATION);
