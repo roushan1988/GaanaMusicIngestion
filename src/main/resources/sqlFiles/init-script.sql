@@ -198,3 +198,5 @@ insert into offer values (null, 2, "GAANA", false, "Gaana subscription", 1, now(
 insert into offer values (null, 2, "ET", false, "ET subscription", 1, now(), now(), false);
 insert into offer values (null, 2, "TOI", false, "TOI subscription", 1, now(), now(), false);
 insert into offer values (null, 2, "DINEOUT", false, "DINEOUT subscription", 1, now(), now(), false);
+
+insert into job values (null, "SSO_COMMUNICATION_JOB", "SSO_COMMUNICATION", null, now(), now(), false);
