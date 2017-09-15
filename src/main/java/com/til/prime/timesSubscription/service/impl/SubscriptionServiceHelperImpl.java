@@ -138,6 +138,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
             response.setPlanStatus(userSubscriptionModel.getPlanStatus().name());
             response.setTransactionStatus(userSubscriptionModel.getTransactionStatus().name());
             response.setOrderCompleted(userSubscriptionModel.isOrderCompleted());
+            response.setAutoRenewal(userSubscriptionModel.isAutoRenewal());
             response = (SubmitPurchaseResponse) ResponseUtil.createSuccessResponse(response);
         }else{
             response = (SubmitPurchaseResponse) ResponseUtil.createFailureResponse(response, validationResponse.getValidationErrorSet());

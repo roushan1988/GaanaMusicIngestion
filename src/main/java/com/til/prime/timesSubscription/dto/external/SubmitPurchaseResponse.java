@@ -7,6 +7,7 @@ public class SubmitPurchaseResponse extends GenericResponse {
     private String planStatus;
     private String transactionStatus;
     private boolean orderCompleted;
+    private boolean autoRenewal;
 
     public String getOrderId() {
         return orderId;
@@ -56,6 +57,14 @@ public class SubmitPurchaseResponse extends GenericResponse {
         this.orderCompleted = orderCompleted;
     }
 
+    public boolean isAutoRenewal() {
+        return autoRenewal;
+    }
+
+    public void setAutoRenewal(boolean autoRenewal) {
+        this.autoRenewal = autoRenewal;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("SubmitPurchaseResponse{");
@@ -65,6 +74,7 @@ public class SubmitPurchaseResponse extends GenericResponse {
         sb.append(", planStatus='").append(planStatus).append('\'');
         sb.append(", transactionStatus='").append(transactionStatus).append('\'');
         sb.append(", orderCompleted=").append(orderCompleted);
+        sb.append(", autoRenewal=").append(autoRenewal);
         sb.append(", success=").append(success);
         sb.append(", responseCode=").append(responseCode);
         sb.append(", responseMessage='").append(responseMessage).append('\'');
