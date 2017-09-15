@@ -1,7 +1,5 @@
 package com.til.prime.timesSubscription.dto.external;
 
-import com.til.prime.timesSubscription.enums.PlatformEnum;
-
 import java.math.BigDecimal;
 
 public class GenerateOrderRequest extends GenericRequest {
