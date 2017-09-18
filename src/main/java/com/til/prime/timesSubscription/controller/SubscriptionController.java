@@ -123,4 +123,17 @@ public class SubscriptionController {
             return ResponseUtil.createExceptionResponse(response);
         }
     }
+
+    @Loggable
+    @RequestMapping(path="/checkStatus", method = RequestMethod.GET)
+    @ResponseBody
+    public CheckStatusResponse checkStatus(@RequestBody CheckStatusRequest request){
+        try {
+            return subscriptionService.checkStatus(request);
+        }catch (Exception e){
+            LOG.error("Exception in extendTrial: ", e);
+            CheckStatusResponse response = new CheckStatusResponse();
+            return (CheckStatusResponse) ResponseUtil.createExceptionResponse(response);
+        }
+    }
 }

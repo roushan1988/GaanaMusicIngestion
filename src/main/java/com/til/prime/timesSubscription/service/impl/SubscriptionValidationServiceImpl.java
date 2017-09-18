@@ -74,7 +74,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
     @Override
     public ValidationResponse validatePreGenerateOrder(GenerateOrderRequest request) {
         ValidationResponse validationResponse = new ValidationResponse();
-        validationResponse = validateCredentials(request, validationResponse);
+        validationResponse = validateEncryptionForOrder(request, validationResponse);
         PreConditions.mustBeEqual(request.getSecretKey(), properties.getProperty(GlobalConstants.PAYMENTS_SECRET_KEY), ValidationError.INVALID_SECRET_KEY, validationResponse);
         PreConditions.notNull(request.getUserSubscriptionId(), ValidationError.INVALID_USER_SUBSCRIPTION_ID, validationResponse);
         PreConditions.notNull(request.getPlanId(), ValidationError.INVALID_PLAN_ID, validationResponse);
@@ -119,7 +119,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
     @Override
     public ValidationResponse validatePreSubmitPurchasePlan(SubmitPurchaseRequest request) {
         ValidationResponse validationResponse = new ValidationResponse();
-        validationResponse = validateEncryptionForSubmitpurchase(request, validationResponse);
+        validationResponse = validateEncryptionForSubmitPurchase(request, validationResponse);
         PreConditions.mustBeEqual(request.getSecretKey(), properties.getProperty(GlobalConstants.PAYMENTS_SECRET_KEY), ValidationError.INVALID_SECRET_KEY, validationResponse);
         PreConditions.notNull(request.getUserSubscriptionId(), ValidationError.INVALID_USER_SUBSCRIPTION_ID, validationResponse);
         PreConditions.notEmpty(request.getOrderId(), ValidationError.INVALID_ORDER_ID, validationResponse);
@@ -216,6 +216,22 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
     }
 
     @Override
+    public ValidationResponse validatePreCheckStatus(CheckStatusRequest request) {
+        ValidationResponse validationResponse = new ValidationResponse();
+        validationResponse = validateEncryptionForCheckStatus(request, validationResponse);
+        PreConditions.notNull(request.getVariantId(), ValidationError.INVALID_VARIANT_ID, validationResponse);
+        PreConditions.notNull(request.getUserSubscriptionId(), ValidationError.INVALID_USER_SUBSCRIPTION_ID, validationResponse);
+        PreConditions.notEmpty(request.getOrderId(), ValidationError.INVALID_ORDER_ID, validationResponse);
+        return updateValid(validationResponse);
+    }
+
+    @Override
+    public ValidationResponse validatePostCheckStatus(CheckStatusRequest request, UserSubscriptionModel userSubscriptionModel, ValidationResponse validationResponse) {
+        PreConditions.notNull(userSubscriptionModel, ValidationError.INVALID_USER_SUBSCRIPTION_DETAILS, validationResponse);
+        return updateValid(validationResponse);
+    }
+
+    @Override
     public ValidationResponse validateUser(GenericRequest request, ValidationResponse validationResponse) {
         validationResponse = validateCredentials(request, validationResponse);
         if(request.getUser()!=null) {
@@ -241,12 +257,46 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
     }
 
     @Override
-    public ValidationResponse validateEncryptionForSubmitpurchase(SubmitPurchaseRequest request, ValidationResponse validationResponse) {
+    public ValidationResponse validateEncryptionForSubmitPurchase(SubmitPurchaseRequest request, ValidationResponse validationResponse) {
         PreConditions.notEmpty(request.getChecksum(), ValidationError.INVALID_ENCRYPTION, validationResponse);
-        if(StringUtils.isNotEmpty(request.getChecksum())) {
+        PreConditions.mustBeEqual(request.getSecretKey(), properties.getProperty(GlobalConstants.PAYMENTS_SECRET_KEY), ValidationError.INVALID_SECRET_KEY, validationResponse);
+        if(StringUtils.isNotEmpty(request.getChecksum()) && StringUtils.isNotEmpty(request.getSecretKey())) {
             try {
                 StringBuilder sb = new StringBuilder();
-                sb.append(request.getUserSubscriptionId()).append(request.getVariantId()).append(request.getOrderId()).append(request.getPrice().doubleValue());
+                sb.append(request.getSecretKey()).append(request.getUserSubscriptionId()).append(request.getVariantId()).append(request.getOrderId()).append(request.getPrice().doubleValue());
+                String checksum = checksumService.calculateChecksumHmacSHA256(properties.getProperty(GlobalConstants.PAYMENTS_ENCRYPTION_KEY), sb.toString());
+                PreConditions.mustBeEqual(checksum, request.getChecksum(), ValidationError.INVALID_ENCRYPTION, validationResponse);
+            } catch (Exception e) {
+                validationResponse.getValidationErrorSet().add(ValidationError.INVALID_ENCRYPTION);
+            }
+        }
+        return updateValid(validationResponse);
+    }
+
+    public ValidationResponse validateEncryptionForOrder(GenerateOrderRequest request, ValidationResponse validationResponse) {
+        PreConditions.mustBeEqual(request.getSecretKey(), properties.getProperty(GlobalConstants.PAYMENTS_SECRET_KEY), ValidationError.INVALID_SECRET_KEY, validationResponse);
+        PreConditions.notEmpty(request.getChecksum(), ValidationError.INVALID_ENCRYPTION, validationResponse);
+        if(StringUtils.isNotEmpty(request.getChecksum()) && StringUtils.isNotEmpty(request.getSecretKey())) {
+            try {
+                StringBuilder sb = new StringBuilder();
+                sb.append(request.getSecretKey()).append(request.getUserSubscriptionId()).append(request.getPlanId()).append(request.getVariantId()).append(request.getPrice().doubleValue());
+                String checksum = checksumService.calculateChecksumHmacSHA256(properties.getProperty(GlobalConstants.PAYMENTS_ENCRYPTION_KEY), sb.toString());
+                PreConditions.mustBeEqual(checksum, request.getChecksum(), ValidationError.INVALID_ENCRYPTION, validationResponse);
+            } catch (Exception e) {
+                validationResponse.getValidationErrorSet().add(ValidationError.INVALID_ENCRYPTION);
+            }
+        }
+        return updateValid(validationResponse);
+    }
+
+    @Override
+    public ValidationResponse validateEncryptionForCheckStatus(CheckStatusRequest request, ValidationResponse validationResponse) {
+        PreConditions.mustBeEqual(request.getSecretKey(), properties.getProperty(GlobalConstants.PAYMENTS_SECRET_KEY), ValidationError.INVALID_SECRET_KEY, validationResponse);
+        PreConditions.notEmpty(request.getChecksum(), ValidationError.INVALID_ENCRYPTION, validationResponse);
+        if(StringUtils.isNotEmpty(request.getChecksum()) && StringUtils.isNotEmpty(request.getSecretKey())) {
+            try {
+                StringBuilder sb = new StringBuilder();
+                sb.append(request.getSecretKey()).append(request.getUserSubscriptionId()).append(request.getVariantId()).append(request.getOrderId());
                 String checksum = checksumService.calculateChecksumHmacSHA256(properties.getProperty(GlobalConstants.PAYMENTS_ENCRYPTION_KEY), sb.toString());
                 PreConditions.mustBeEqual(checksum, request.getChecksum(), ValidationError.INVALID_ENCRYPTION, validationResponse);
             } catch (Exception e) {

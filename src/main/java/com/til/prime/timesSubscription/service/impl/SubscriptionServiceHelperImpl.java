@@ -254,6 +254,17 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
     }
 
     @Override
+    public CheckStatusResponse prepareCheckStatusResponse(CheckStatusResponse response, UserSubscriptionDTO userSubscriptionDTO, ValidationResponse validationResponse) {
+        if(validationResponse.isValid()){
+            response.setUserSubscriptionDTO(userSubscriptionDTO);
+            response = (CheckStatusResponse) ResponseUtil.createSuccessResponse(response);
+        }else{
+            response = (CheckStatusResponse) ResponseUtil.createFailureResponse(response, validationResponse.getValidationErrorSet());
+        }
+        return response;
+    }
+
+    @Override
     public UserModel getUser(GenericRequest request) {
         UserModel userModel = new UserModel();
         userModel.setSsoId(request.getUser().getSsoId());

@@ -15,6 +15,7 @@ public class GenerateOrderRequest extends GenericRequest {
     private boolean renewal;
     private boolean job;
     private String platform;
+    private String checksum;
 
     public Long getUserSubscriptionId() {
         return userSubscriptionId;
@@ -112,6 +113,14 @@ public class GenerateOrderRequest extends GenericRequest {
         this.platform = platform;
     }
 
+    public String getChecksum() {
+        return checksum;
+    }
+
+    public void setChecksum(String checksum) {
+        this.checksum = checksum;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("GenerateOrderRequest{");
@@ -123,6 +132,7 @@ public class GenerateOrderRequest extends GenericRequest {
         sb.append(", planType='").append(planType).append('\'');
         sb.append(", business='").append(business).append('\'');
         sb.append(", paymentMethod='").append(paymentMethod).append('\'');
+        sb.append(", checksum='").append(checksum).append('\'');
         sb.append(", retryOnFailure=").append(retryOnFailure);
         sb.append(", renewal=").append(renewal);
         sb.append(", job=").append(job);

@@ -262,6 +262,23 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
+    public CheckStatusResponse checkStatus(CheckStatusRequest request) {
+        ValidationResponse validationResponse = subscriptionValidationService.validatePreCheckStatus(request);
+        CheckStatusResponse response = new CheckStatusResponse();
+        UserSubscriptionModel userSubscriptionModel = null;
+        UserSubscriptionDTO userSubscriptionDTO = null;
+        if(validationResponse.isValid()){
+            userSubscriptionModel = userSubscriptionRepository.findByIdAndOrderIdAndSubscriptionVariantIdAndDeleted(request.getUserSubscriptionId(), request.getOrderId(), request.getVariantId(), false);
+            validationResponse = subscriptionValidationService.validatePostCheckStatus(request, userSubscriptionModel, validationResponse);
+        }
+        if(validationResponse.isValid()){
+            userSubscriptionDTO = ModelToDTOConvertorUtil.getUserSubscriptionDTO(userSubscriptionModel);
+        }
+        response = subscriptionServiceHelper.prepareCheckStatusResponse(response, userSubscriptionDTO, validationResponse);
+        return response;
+    }
+
+    @Override
     public UserModel getOrCreateUser(GenericRequest request) {
         UserModel userModel = userRepository.findBySsoId(request.getUser().getSsoId());
         if(userModel==null){
