@@ -13,6 +13,7 @@ public class GlobalConstants {
     public static final String SSO_UPDATE_PROFILE_URL_KEY = "sso.update.profile.url";
     public static final String TP_SITE_ID_KEY = "sso.tp.site.id";
     public static final String TP_CHANNEL_KEY = "sso.tp.channel";
+    public static final String PAYMENTS_ENCRYPTION_KEY= "payments.encryption.key";
     public static final String TICKETID = "ticketId";
     public static final String SITEID = "siteId";
     public static final int ORDER_ID_LENGTH = 32;

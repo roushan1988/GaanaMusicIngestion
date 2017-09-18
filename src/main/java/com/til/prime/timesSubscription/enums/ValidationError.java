@@ -32,6 +32,7 @@ public enum ValidationError {
 	ORDER_ALREADY_GENERATED(29, "Order already generated"),
 	ORDER_NOT_GENERATED(30, "Order not generated"),
 	USER_DETAILS_MISSING(31, "User details missing"),
+	INVALID_ENCRYPTION(32, "Invalid Encryption"),
 	;
 
 	private Integer errorCode;

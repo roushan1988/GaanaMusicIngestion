@@ -11,6 +11,7 @@ public class SubmitPurchaseRequest extends GenericRequest {
     private BigDecimal price;
     private String paymentReference;
     private boolean autoRenewal;
+    private String checksum;
 
     public Long getUserSubscriptionId() {
         return userSubscriptionId;
@@ -76,6 +77,14 @@ public class SubmitPurchaseRequest extends GenericRequest {
         this.autoRenewal = autoRenewal;
     }
 
+    public String getChecksum() {
+        return checksum;
+    }
+
+    public void setChecksum(String checksum) {
+        this.checksum = checksum;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("SubmitPurchaseRequest{");
@@ -86,6 +95,7 @@ public class SubmitPurchaseRequest extends GenericRequest {
         sb.append(", paymentMethod='").append(paymentMethod).append('\'');
         sb.append(", price=").append(price);
         sb.append(", paymentReference='").append(paymentReference).append('\'');
+        sb.append(", checksum='").append(checksum).append('\'');
         sb.append(", autoRenewal=").append(autoRenewal);
         sb.append(", user=").append(user);
         sb.append(", secretKey='").append(secretKey).append('\'');

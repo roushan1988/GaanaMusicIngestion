@@ -21,4 +21,5 @@ public interface SubscriptionValidationService {
     ValidationResponse validatePostCheckEligibility(CheckEligibilityRequest request, SubscriptionVariantModel variantModel, UserSubscriptionModel lastModel, UserSubscriptionModel restrictedModel, ValidationResponse validationResponse);
     ValidationResponse validateUser(GenericRequest request, ValidationResponse validationResponse);
     ValidationResponse validateCredentials(GenericRequest request, ValidationResponse validationResponse);
+    ValidationResponse validateEncryptionForSubmitpurchase(SubmitPurchaseRequest request, ValidationResponse validationResponse);
 }
