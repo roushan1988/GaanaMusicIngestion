@@ -29,6 +29,7 @@ public class GlobalConstants {
     public static final String PAYMENTS_SECRET_KEY = "payments.secret.key";
     public static final long MAX_SUBSCRIPTION_EXTENSION_DAYS = 180l;
     public static final String CONTENT_TYPE_JSON = "application/json";
+    public static final String CONTENT_TYPE = "Content-Type";
     public static final String GET = "GET";
     public static final String POST = "POST";
     public static final String SUCCESS = "SUCCESS";

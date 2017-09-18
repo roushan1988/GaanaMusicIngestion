@@ -3,6 +3,7 @@ package com.til.prime.timesSubscription.service.impl;
 import com.google.common.collect.Maps;
 import com.til.prime.timesSubscription.constants.GlobalConstants;
 import com.til.prime.timesSubscription.convertor.ModelToDTOConvertorUtil;
+import com.til.prime.timesSubscription.dao.UserSubscriptionRepository;
 import com.til.prime.timesSubscription.dto.external.*;
 import com.til.prime.timesSubscription.enums.*;
 import com.til.prime.timesSubscription.model.SubscriptionVariantModel;
@@ -18,6 +19,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.*;
@@ -281,14 +283,14 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
         RETRY_LOOP:
         while (retryCount>0){
             try{
-                Map<String, Object> headers = Maps.newHashMap();
+                Map<String, String> headers = Maps.newHashMap();
+                headers.put(GlobalConstants.CONTENT_TYPE, GlobalConstants.CONTENT_TYPE_JSON);
                 headers.put(GlobalConstants.CHANNEL, properties.getProperty(GlobalConstants.TP_CHANNEL_KEY));
                 headers.put(GlobalConstants.SSOID, userSubscriptionModel.getUser().getSsoId());
-                headers.put(GlobalConstants.STATUS, userSubscriptionModel.getPlanStatus().getCode());
+                headers.put(GlobalConstants.STATUS, Integer.toString(userSubscriptionModel.getPlanStatus().getCode()));
                 headers.put(GlobalConstants.PLATFORM, userSubscriptionModel.getPlatform().getSsoChannel());
-                String response = httpConnectionUtils.requestWithHeader(Maps.newHashMap(), headers, properties.getProperty(GlobalConstants.SSO_UPDATE_PROFILE_URL_KEY), GlobalConstants.CONTENT_TYPE_JSON, GlobalConstants.POST);
-                SSOProfileUpdateResponse parsedResponse = GlobalConstants.gson.fromJson(response, SSOProfileUpdateResponse.class);
-                if(parsedResponse.getCode()==200 && GlobalConstants.SUCCESS.equals(parsedResponse.getStatus()) && GlobalConstants.OK.equals(parsedResponse.getMessage())){
+                SSOProfileUpdateResponse response = httpConnectionUtils.requestWithHeaders(Maps.newHashMap(), headers, properties.getProperty(GlobalConstants.SSO_UPDATE_PROFILE_URL_KEY), SSOProfileUpdateResponse.class, GlobalConstants.POST);
+                if(response.getCode()==200 && GlobalConstants.SUCCESS.equals(response.getStatus()) && GlobalConstants.OK.equals(response.getMessage())){
                     return true;
                 }
                 return false;

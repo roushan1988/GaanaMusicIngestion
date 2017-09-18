@@ -17,6 +17,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.util.Date;
 import java.util.HashMap;
@@ -317,7 +318,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
 
     public void test() {
         ValidationResponse validationResponse = new ValidationResponse();
-        validateSSOLogin("gauidPqjeMGkikuHy6j4x0tnL87bV4WASTWy8_vYtyrNLvgI", "0ac3fc29d04e48679387fc68151592f6", validationResponse);
+        validateSSOLogin("9mh2ty8bdn6kdcxsi90urc2nz", "9464cb4968b745758082ed4c019c41b5", validationResponse);
         System.out.println(validationResponse);
     }
 
@@ -331,7 +332,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
                 String ssoResponse = getSSOIdForTicketId(ticketId);
                 LOG.info("got sso response for [validateLogin] with ssoId" + ssoId + ", ticketId " + ticketId + ", response " + ssoResponse);
                 SSOValidateResponse ssoValidateResponse = gson.fromJson(ssoResponse, SSOValidateResponse.class);
-                if (ssoValidateResponse.getGassoid().equals(ssoId)) {
+                if (ssoValidateResponse.getUserId().equals(ssoId)) {
                     LOG.info("User Validated From SSO Response [validateLogin] with ssoId " + ssoId + ", ticketId " + ticketId + ", response :" + ssoResponse);
                 } else {
                     LOG.info("User Validation Failed From SSO Response [validateLogin] with ssoId " + ssoId + ", ticketId " + ticketId + ", response : " + ssoResponse);

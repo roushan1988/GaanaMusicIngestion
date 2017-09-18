@@ -2,10 +2,7 @@ package com.til.prime.timesSubscription.util;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
 
@@ -148,6 +145,31 @@ public class HttpConnectionUtils {
 		}
 		return result;
 
+	}
+
+	public <T> T requestWithHeaders(Object data, Map<String, String> headerMap, String url, Class<T> clazz, String method){
+		logger.info("Making HttpRequest url " + url + ", data: "+data+", contentType: application/json, method " + method);
+		HttpHeaders headers = new HttpHeaders();
+		for(String key: headerMap.keySet()){
+			headers.set(key, headerMap.get(key));
+		}
+		HttpEntity<Object> entity = new HttpEntity<Object>(data, headers);
+		ResponseEntity<T> responseEntity = null;
+		try {
+			switch (method) {
+				case ("GET"):
+					responseEntity = restTemplateUtil.getRestTemplate().exchange(url, HttpMethod.GET, entity, clazz);
+				case ("POST"):
+					responseEntity = restTemplateUtil.getRestTemplate().exchange(url, HttpMethod.POST, entity, clazz);
+			}
+		}catch (Exception e){
+			logger.info("Got Exception For HttpRequest url " + url +", data: "+data+ " error  "
+					+ e);
+			throw e;
+		}
+		T response = responseEntity.getBody();
+		logger.info("Response for url: "+url+", data: "+data+", response: "+response);
+		return response;
 	}
 
 	public String requestWithHeader(Map<String, Object> params,
