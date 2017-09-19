@@ -25,7 +25,7 @@ public class GlobalConstants {
     public static final String VALIDATION_FAILURE = "Certain Validations Failed";
     public static final String EXCEPTION_MESSAGE = "Oops! Something wrong occured";
     public static final String EXCEPTION = "Exception";
-    public static final int MAX_DAYS_DIFF_FOR_NEW_SUBSCRIPTION_PURCHASE = 365*2;
+    public static final int MAX_DAYS_DIFF_FOR_NEW_SUBSCRIPTION_PURCHASE = (365*2)+90;
     public static final String PAYMENTS_SECRET_KEY = "payments.secret.key";
     public static final long MAX_SUBSCRIPTION_EXTENSION_DAYS = 180l;
     public static final String CONTENT_TYPE_JSON = "application/json";
