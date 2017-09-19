@@ -22,8 +22,54 @@ public class HttpConnectionUtils {
 	private static org.apache.log4j.Logger logger = org.apache.log4j.Logger
 			.getLogger(HttpConnectionUtils.class);
 
+	public <T> T requestForObject(Object data, String url, Class<T> clazz, String method){
+		logger.info("Making HttpRequest url " + url + ", data: "+data+", contentType: application/json, method " + method);
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		T response = null;
+		try {
+			switch (method) {
+				case ("GET"):
+					response = restTemplateUtil.getRestTemplate().getForObject(url, clazz);
+				case ("POST"):
+					response = restTemplateUtil.getRestTemplate().postForObject(url, data, clazz);
+			}
+		}catch (Exception e){
+			logger.info("Got Exception For HttpRequest url " + url +", data: "+data+ " error  "
+					+ e);
+			throw e;
+		}
+		logger.info("Response for url: "+url+", data: "+data+", response: "+response);
+		return response;
+	}
+
+	public <T> T requestWithHeaders(Object data, Map<String, String> headerMap, String url, Class<T> clazz, String method){
+		logger.info("Making HttpRequest url " + url + ", data: "+data+", contentType: application/json, method " + method);
+		HttpHeaders headers = new HttpHeaders();
+		for(String key: headerMap.keySet()){
+			headers.set(key, headerMap.get(key));
+		}
+		HttpEntity<Object> entity = new HttpEntity<Object>(data, headers);
+		ResponseEntity<T> responseEntity = null;
+		try {
+			switch (method) {
+				case ("GET"):
+					responseEntity = restTemplateUtil.getRestTemplate().exchange(url, HttpMethod.GET, entity, clazz);
+				case ("POST"):
+					responseEntity = restTemplateUtil.getRestTemplate().exchange(url, HttpMethod.POST, entity, clazz);
+			}
+		}catch (Exception e){
+			logger.info("Got Exception For HttpRequest url " + url +", data: "+data+ " error  "
+					+ e);
+			throw e;
+		}
+		T response = responseEntity.getBody();
+		logger.info("Response for url: "+url+", data: "+data+", response: "+response);
+		return response;
+	}
+
 	public String request(String data, String url, String contentType,
-			String method) throws Exception {
+						  String method) throws Exception {
 		logger.info("Making HttpRequest url " + url + " contentType "
 				+ contentType + " method " + method);
 		try {
@@ -70,7 +116,7 @@ public class HttpConnectionUtils {
 	}
 
 	public String request(Map<String, Object> params, String url,
-			String contentType, String method) throws Exception {
+						  String contentType, String method) throws Exception {
 		logger.info("Making HttpRequest url " + url + " contentType "
 				+ contentType + " method " + method);
 		try {
@@ -130,7 +176,7 @@ public class HttpConnectionUtils {
 	public String prepareParams(Map<String, Object> m) {
 		String result = "";
 		try {
-			for (Entry<String, Object> e : m.entrySet()) {
+			for (Map.Entry<String, Object> e : m.entrySet()) {
 				if (StringUtils.isNotBlank(e.getValue().toString())) {
 					result = result
 							+ addParam(e.getKey(), String.valueOf(e.getValue()))
@@ -147,34 +193,9 @@ public class HttpConnectionUtils {
 
 	}
 
-	public <T> T requestWithHeaders(Object data, Map<String, String> headerMap, String url, Class<T> clazz, String method){
-		logger.info("Making HttpRequest url " + url + ", data: "+data+", contentType: application/json, method " + method);
-		HttpHeaders headers = new HttpHeaders();
-		for(String key: headerMap.keySet()){
-			headers.set(key, headerMap.get(key));
-		}
-		HttpEntity<Object> entity = new HttpEntity<Object>(data, headers);
-		ResponseEntity<T> responseEntity = null;
-		try {
-			switch (method) {
-				case ("GET"):
-					responseEntity = restTemplateUtil.getRestTemplate().exchange(url, HttpMethod.GET, entity, clazz);
-				case ("POST"):
-					responseEntity = restTemplateUtil.getRestTemplate().exchange(url, HttpMethod.POST, entity, clazz);
-			}
-		}catch (Exception e){
-			logger.info("Got Exception For HttpRequest url " + url +", data: "+data+ " error  "
-					+ e);
-			throw e;
-		}
-		T response = responseEntity.getBody();
-		logger.info("Response for url: "+url+", data: "+data+", response: "+response);
-		return response;
-	}
-
 	public String requestWithHeader(Map<String, Object> params,
-			Map<String, Object> header, String url, String contentType,
-			String method) throws Exception {
+									Map<String, Object> header, String url, String contentType,
+									String method) throws Exception {
 		logger.info("Making HttpRequest url " + url + " contentType "
 				+ contentType + " method " + method);
 		try {
@@ -189,7 +210,7 @@ public class HttpConnectionUtils {
 			conn.addRequestProperty("Content-Type", contentType);
 			conn.setRequestProperty("Accept", contentType);
 
-			for (Entry<String, Object> e : header.entrySet()) {
+			for (Map.Entry<String, Object> e : header.entrySet()) {
 				conn.setRequestProperty(e.getKey(), e.getValue().toString());
 			}
 
@@ -227,13 +248,13 @@ public class HttpConnectionUtils {
 	}
 
 	public ResponseEntity<String> getViaStringTemplate(
-            MultiValueMap<String, String> params, String url) {
+			MultiValueMap<String, String> params, String url) {
 		return restTemplateUtil.getRestTemplate().getForEntity(url,
 				String.class, params);
 	}
 
 	public ResponseEntity<String> postViaStringTemplate(HttpHeaders headers,
-                                                        MultiValueMap<String, String> params, String apiUrl) {
+														MultiValueMap<String, String> params, String apiUrl) {
 		HttpEntity<?> httpEntity = new HttpEntity<Object>(params, headers);
 
 		return restTemplateUtil.getRestTemplate().exchange(apiUrl,
@@ -241,7 +262,7 @@ public class HttpConnectionUtils {
 	}
 
 	public ResponseEntity<String> postViaStringTemplateSB(HttpHeaders headers,
-                                                          MultiValueMap<String, StringBuilder> params, String apiUrl) {
+														  MultiValueMap<String, StringBuilder> params, String apiUrl) {
 		HttpEntity<?> httpEntity = new HttpEntity<Object>(params, headers);
 
 		return restTemplateUtil.getRestTemplate().exchange(apiUrl,
@@ -249,7 +270,7 @@ public class HttpConnectionUtils {
 	}
 
 	public ResponseEntity<String> postJsonViaStringTemplate(
-            HttpHeaders headers, String params, String apiUrl) {
+			HttpHeaders headers, String params, String apiUrl) {
 		HttpEntity<?> httpEntity = new HttpEntity<Object>(params, headers);
 
 		return restTemplateUtil.getRestTemplate().exchange(apiUrl,
@@ -257,7 +278,7 @@ public class HttpConnectionUtils {
 	}
 
 	public void postFormDataStringBuilder(String url,
-			Map<String, String> params, PrintWriter out, String method) {
+										  Map<String, String> params, PrintWriter out, String method) {
 
 		out.println("<html>");
 		out.println("<head>");
@@ -283,7 +304,7 @@ public class HttpConnectionUtils {
 	}
 
 	public void postFormData(String url, Map<String, String> params,
-			PrintWriter out, String method) {
+							 PrintWriter out, String method) {
 
 		out.println("<html>");
 		out.println("<head>");
