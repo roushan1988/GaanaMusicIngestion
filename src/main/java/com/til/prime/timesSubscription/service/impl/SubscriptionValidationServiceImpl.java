@@ -37,6 +37,9 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
     @Override
     public ValidationResponse validateAllPlans(PlanListRequest request) {
         ValidationResponse validationResponse = new ValidationResponse();
+        if(request.getUser()!=null){
+            validationResponse = validateUser(request, validationResponse);
+        }
         PreConditions.notNullEnumCheck(request.getBusiness(), BusinessEnum.names(), ValidationError.INVALID_BUSINESS, validationResponse);
         PreConditions.notNullEnumCheck(request.getCountry(), CountryEnum.names(), ValidationError.INVALID_COUNTRY, validationResponse);
         return updateValid(validationResponse);

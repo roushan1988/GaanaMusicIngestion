@@ -1,6 +1,7 @@
 package com.til.prime.timesSubscription.dto.external;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 public class InitPurchaseResponse extends GenericResponse {
     private Long userSubscriptionId;
@@ -9,6 +10,7 @@ public class InitPurchaseResponse extends GenericResponse {
     private Long variantId;
     private boolean paymentRequired;
     private BigDecimal paymentAmount;
+    private Date endDate;
 
     public Long getUserSubscriptionId() {
         return userSubscriptionId;
@@ -58,6 +60,14 @@ public class InitPurchaseResponse extends GenericResponse {
         this.paymentAmount = paymentAmount;
     }
 
+    public Date getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(Date endDate) {
+        this.endDate = endDate;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("InitPurchaseResponse{");
@@ -67,6 +77,7 @@ public class InitPurchaseResponse extends GenericResponse {
         sb.append(", variantId=").append(variantId);
         sb.append(", paymentRequired=").append(paymentRequired);
         sb.append(", paymentAmount=").append(paymentAmount);
+        sb.append(", endDate=").append(endDate);
         sb.append(", success=").append(success);
         sb.append(", responseCode=").append(responseCode);
         sb.append(", responseMessage='").append(responseMessage).append('\'');

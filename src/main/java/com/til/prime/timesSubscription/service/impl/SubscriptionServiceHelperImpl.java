@@ -3,7 +3,6 @@ package com.til.prime.timesSubscription.service.impl;
 import com.google.common.collect.Maps;
 import com.til.prime.timesSubscription.constants.GlobalConstants;
 import com.til.prime.timesSubscription.convertor.ModelToDTOConvertorUtil;
-import com.til.prime.timesSubscription.dao.UserSubscriptionRepository;
 import com.til.prime.timesSubscription.dto.external.*;
 import com.til.prime.timesSubscription.enums.*;
 import com.til.prime.timesSubscription.model.SubscriptionVariantModel;
@@ -19,7 +18,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.*;
@@ -99,7 +97,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
     }
 
     @Override
-    public InitPurchaseResponse prepareInitPurchaseResponse(InitPurchaseResponse response, UserSubscriptionModel userSubscriptionModel, ValidationResponse validationResponse) {
+    public InitPurchaseResponse prepareInitPurchaseResponse(InitPurchaseResponse response, UserSubscriptionModel userSubscriptionModel, UserSubscriptionModel lastUserSubscription, ValidationResponse validationResponse) {
         if(validationResponse.isValid()){
             SubscriptionVariantModel variantModel = userSubscriptionModel.getSubscriptionVariant();
             response.setUserSubscriptionId(userSubscriptionModel.getId());
@@ -110,6 +108,9 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
             response.setPaymentAmount(userSubscriptionModel.getSubscriptionVariant().getPrice());
             response = (InitPurchaseResponse) ResponseUtil.createSuccessResponse(response);
         }else{
+            if(lastUserSubscription!=null){
+                response.setEndDate(lastUserSubscription.getEndDate());
+            }
             response = (InitPurchaseResponse) ResponseUtil.createFailureResponse(response, validationResponse.getValidationErrorSet());
         }
         return response;

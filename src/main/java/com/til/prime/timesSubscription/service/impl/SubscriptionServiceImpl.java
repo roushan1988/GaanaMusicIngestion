@@ -45,12 +45,18 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         PlanListResponse response = new PlanListResponse();
         List<SubscriptionPlanDTO> subscriptionPlans = null;
         if(validationResponse.isValid()){
+            BusinessEnum businessEnum = BusinessEnum.valueOf(request.getBusiness());
             List<SubscriptionPlanModel> subscriptionPlanModels = subscriptionPlanRepository.findByBusinessAndCountryAndDeleted
                     (BusinessEnum.valueOf(request.getBusiness()), CountryEnum.valueOf(request.getCountry()), false);
             subscriptionPlans = new ArrayList<>();
             if(CollectionUtils.isNotEmpty(subscriptionPlanModels)) {
                 for (SubscriptionPlanModel subscriptionPlanModel : subscriptionPlanModels) {
-                    subscriptionPlans.add(ModelToDTOConvertorUtil.getSubscriptionPlanDTO(subscriptionPlanModel));
+                    if(request.getUser()!=null){
+                        UserSubscriptionModel lastUserSubscription = userSubscriptionRepository.findFirstByUserSsoIdAndBusinessAndOrderCompletedAndDeletedOrderByIdDesc(request.getUser().getSsoId(), businessEnum, true, false);
+                        subscriptionPlans.add(ModelToDTOConvertorUtil.getSubscriptionPlanDTO(subscriptionPlanModel, lastUserSubscription));
+                    }else{
+                        subscriptionPlans.add(ModelToDTOConvertorUtil.getSubscriptionPlanDTO(subscriptionPlanModel, null));
+                    }
                 }
             }
         }
@@ -90,7 +96,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             EventEnum eventEnum = EventEnum.getEventByInitPlanStatus(userSubscriptionModel.getPlanStatus());
             userSubscriptionModel = saveUserSubscription(userSubscriptionModel, true, request.getUser().getSsoId(), request.getUser().getTicketId(), eventEnum);
         }
-        response = subscriptionServiceHelper.prepareInitPurchaseResponse(response, userSubscriptionModel, validationResponse);
+        response = subscriptionServiceHelper.prepareInitPurchaseResponse(response, userSubscriptionModel, lastUserSubscription, validationResponse);
         return response;
     }
 

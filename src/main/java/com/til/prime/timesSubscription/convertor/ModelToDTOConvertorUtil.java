@@ -4,16 +4,27 @@ import com.til.prime.timesSubscription.dto.external.SubscriptionOfferDTO;
 import com.til.prime.timesSubscription.dto.external.SubscriptionPlanDTO;
 import com.til.prime.timesSubscription.dto.external.SubscriptionVariantDTO;
 import com.til.prime.timesSubscription.dto.external.UserSubscriptionDTO;
+import com.til.prime.timesSubscription.enums.PlanTypeEnum;
 import com.til.prime.timesSubscription.model.OfferModel;
 import com.til.prime.timesSubscription.model.SubscriptionPlanModel;
 import com.til.prime.timesSubscription.model.SubscriptionVariantModel;
 import com.til.prime.timesSubscription.model.UserSubscriptionModel;
 
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 public class ModelToDTOConvertorUtil {
 
-    public static final SubscriptionPlanDTO getSubscriptionPlanDTO(SubscriptionPlanModel model){
+    public static final SubscriptionPlanDTO getSubscriptionPlanDTO(SubscriptionPlanModel model, UserSubscriptionModel lastUserSubscription){
+        Set<PlanTypeEnum> restrictedPlanTypes = new HashSet<>();
+        if(lastUserSubscription!=null){
+            restrictedPlanTypes.add(PlanTypeEnum.TRIAL);
+            PlanTypeEnum planType = lastUserSubscription.getSubscriptionVariant().getPlanType();
+            if(planType==PlanTypeEnum.TRIAL_WITH_PAYMENT){
+                restrictedPlanTypes.add(PlanTypeEnum.TRIAL_WITH_PAYMENT);
+            }
+        }
         SubscriptionPlanDTO dto = new SubscriptionPlanDTO();
         dto.setPlanId(model.getId());
         dto.setName(model.getName());
@@ -25,7 +36,9 @@ public class ModelToDTOConvertorUtil {
         if(model.getVariants()!=null){
             dto.setVariants(new ArrayList<>());
             for(SubscriptionVariantModel variantModel: model.getVariants()){
-                dto.getVariants().add(new SubscriptionVariantDTO(variantModel.getId(), variantModel.getName(), variantModel.getPlanType(), variantModel.getPrice(), variantModel.getDurationDays(), variantModel.isRecurring()));
+                if(!restrictedPlanTypes.contains(variantModel.getPlanType())){
+                    dto.getVariants().add(new SubscriptionVariantDTO(variantModel.getId(), variantModel.getName(), variantModel.getPlanType(), variantModel.getPrice(), variantModel.getDurationDays(), variantModel.isRecurring()));
+                }
             }
         }
         if(model.getOffers()!=null){
