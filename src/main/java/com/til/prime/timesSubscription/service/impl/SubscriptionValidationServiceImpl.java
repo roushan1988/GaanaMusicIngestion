@@ -17,7 +17,6 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.util.Date;
 import java.util.HashMap;
@@ -328,7 +327,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
         RETRY_LOOP:
         while(retryCount>0) {
             try {
-                Gson gson = new Gson();
+                Gson gson = GlobalConstants.gson;
                 String ssoResponse = getSSOIdForTicketId(ticketId);
                 LOG.info("got sso response for [validateLogin] with ssoId" + ssoId + ", ticketId " + ticketId + ", response " + ssoResponse);
                 SSOValidateResponse ssoValidateResponse = gson.fromJson(ssoResponse, SSOValidateResponse.class);
