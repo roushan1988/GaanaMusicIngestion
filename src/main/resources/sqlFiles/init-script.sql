@@ -86,6 +86,7 @@ CREATE TABLE `user_subscription` (
   `business` varchar(32) NOT NULL,
   `channel` varchar(32) NOT NULL,
   `platform` varchar(32) NOT NULL,
+  `expired` tinyint(1) NOT NULL,
   `created` datetime NOT NULL,
   `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `deleted` tinyint(1) NOT NULL,
@@ -95,6 +96,8 @@ CREATE TABLE `user_subscription` (
   INDEX `INDEX_SUBSCRIPTION_VARIANT` (`subscription_variant_id`),
   INDEX `INDEX_BUSINESS` (`business`),
   INDEX `INDEX_SSO_COMMUNICATED` (`sso_communicated`),
+  INDEX `INDEX_END_DATE` (`end_date`),
+  INDEX `INDEX_EXPIRED` (`expired`),
   CONSTRAINT `FK_USER_SUBSCRIPTION_USER` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`),
   CONSTRAINT `FK_SUBSCRIPTION_VARIANT` FOREIGN KEY (`subscription_variant_id`) REFERENCES `subscription_variant` (`id`)
 );
@@ -121,6 +124,7 @@ CREATE TABLE `user_subscription_audit` (
   `business` varchar(32) NOT NULL,
   `channel` varchar(32) NOT NULL,
   `platform` varchar(32) NOT NULL,
+  `expired` tinyint(1) NOT NULL,
   `created` datetime NOT NULL,
   `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `deleted` tinyint(1) NOT NULL,
@@ -200,3 +204,8 @@ insert into offer values (null, 2, "TOI", false, "TOI subscription", 1, now(), n
 insert into offer values (null, 2, "DINEOUT", false, "DINEOUT subscription", 1, now(), now(), false);
 
 insert into job values (null, "SSO_COMMUNICATION_JOB", "SSO_COMMUNICATION", null, now(), now(), false);
+insert into job values (null, "SUBSCRIPTION_RENEWAL_JOB", "SUBSCRIPTION_RENEWAL", null, now(), now(), false);
+insert into job values (null, "SUBSCRIPTION_RENEWAL_REMINDER_JOB", "SUBSCRIPTION_RENEWAL_REMINDER", null, now(), now(), false);
+insert into job values (null, "SUBSCRIPTION_EXPIRY_JOB", "SUBSCRIPTION_EXPIRY", null, now(), now(), false);
+insert into job values (null, "SUBSCRIPTION_EXPIRY_REMINDER_JOB", "SUBSCRIPTION_EXPIRY_REMINDER", null, now(), now(), false);
+insert into job values (null, "EXPIRED_SUBSCRIPTION_RENEWAL_REMINDER_JOB", "EXPIRED_SUBSCRIPTION_RENEWAL_REMINDER", null, now(), now(), false);

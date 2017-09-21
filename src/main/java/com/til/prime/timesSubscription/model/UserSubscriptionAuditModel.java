@@ -53,6 +53,8 @@ public class UserSubscriptionAuditModel extends BaseModel {
     @Column
     @Enumerated(EnumType.STRING)
     private PlatformEnum platform;
+    @Column
+    private boolean expired=false;
 
     public Long getUserSubscriptionId() {
         return userSubscriptionId;
@@ -212,5 +214,13 @@ public class UserSubscriptionAuditModel extends BaseModel {
 
     public void setPlatform(PlatformEnum platform) {
         this.platform = platform;
+    }
+
+    public boolean isExpired() {
+        return expired;
+    }
+
+    public void setExpired(boolean expired) {
+        this.expired = expired;
     }
 }

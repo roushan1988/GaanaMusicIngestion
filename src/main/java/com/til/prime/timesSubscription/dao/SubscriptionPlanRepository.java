@@ -12,4 +12,5 @@ import java.util.List;
 public interface SubscriptionPlanRepository extends GenericJpaRepository<SubscriptionPlanModel, Long> {
     List<SubscriptionPlanModel> findByBusinessInAndCountryAndDeleted(Collection<BusinessEnum> businesses, CountryEnum country, boolean deleted);
     List<SubscriptionPlanModel> findByBusinessAndCountryAndDeleted(BusinessEnum business, CountryEnum country, boolean deleted);
+    List<SubscriptionPlanModel> findByIdAndBusinessAndCountryAndDeleted(Long planId, BusinessEnum business, CountryEnum country, boolean deleted);
 }

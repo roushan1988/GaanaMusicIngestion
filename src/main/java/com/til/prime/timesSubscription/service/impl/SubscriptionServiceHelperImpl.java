@@ -91,13 +91,16 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
             response.setPlanDTOList(subscriptionPlans);
             response = (PlanListResponse) ResponseUtil.createSuccessResponse(response);
         }else{
-            response = (PlanListResponse) ResponseUtil.createFailureResponse(response, validationResponse.getValidationErrorSet());
+            response = (PlanListResponse) ResponseUtil.createFailureResponse(response, validationResponse.getValidationErrorSet(), validationResponse.getMaxCategory());
         }
         return response;
     }
 
     @Override
     public InitPurchaseResponse prepareInitPurchaseResponse(InitPurchaseResponse response, UserSubscriptionModel userSubscriptionModel, UserSubscriptionModel lastUserSubscription, ValidationResponse validationResponse) {
+        if(lastUserSubscription!=null){
+            response.setDaysLeft(TimeUtils.getDifferenceInDays(new Date(), userSubscriptionModel.getEndDate()).intValue());
+        }
         if(validationResponse.isValid()){
             SubscriptionVariantModel variantModel = userSubscriptionModel.getSubscriptionVariant();
             response.setUserSubscriptionId(userSubscriptionModel.getId());
@@ -108,10 +111,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
             response.setPaymentAmount(userSubscriptionModel.getSubscriptionVariant().getPrice());
             response = (InitPurchaseResponse) ResponseUtil.createSuccessResponse(response);
         }else{
-            if(lastUserSubscription!=null){
-                response.setEndDate(lastUserSubscription.getEndDate());
-            }
-            response = (InitPurchaseResponse) ResponseUtil.createFailureResponse(response, validationResponse.getValidationErrorSet());
+            response = (InitPurchaseResponse) ResponseUtil.createFailureResponse(response, validationResponse.getValidationErrorSet(), validationResponse.getMaxCategory());
         }
         return response;
     }
@@ -126,7 +126,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
             response.setVariantId(variantModel.getId());
             response = (GenerateOrderResponse) ResponseUtil.createSuccessResponse(response);
         }else{
-            response = (GenerateOrderResponse) ResponseUtil.createFailureResponse(response, validationResponse.getValidationErrorSet());
+            response = (GenerateOrderResponse) ResponseUtil.createFailureResponse(response, validationResponse.getValidationErrorSet(), validationResponse.getMaxCategory());
         }
         return response;
     }
@@ -144,7 +144,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
             response.setAutoRenewal(userSubscriptionModel.isAutoRenewal());
             response = (SubmitPurchaseResponse) ResponseUtil.createSuccessResponse(response);
         }else{
-            response = (SubmitPurchaseResponse) ResponseUtil.createFailureResponse(response, validationResponse.getValidationErrorSet());
+            response = (SubmitPurchaseResponse) ResponseUtil.createFailureResponse(response, validationResponse.getValidationErrorSet(), validationResponse.getMaxCategory());
         }
         return response;
     }
@@ -167,7 +167,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
             response.setUserSubscriptionDTOList(userSubscriptionDTOList);
             response = (PurchaseHistoryResponse) ResponseUtil.createSuccessResponse(response);
         }else{
-            response = (PurchaseHistoryResponse) ResponseUtil.createFailureResponse(response, validationResponse.getValidationErrorSet());
+            response = (PurchaseHistoryResponse) ResponseUtil.createFailureResponse(response, validationResponse.getValidationErrorSet(), validationResponse.getMaxCategory());
         }
         return response;
     }
@@ -178,7 +178,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
             response.setRefundAmount(refundAmount);
             response = (CancelSubscriptionResponse) ResponseUtil.createSuccessResponse(response);
         }else{
-            response = (CancelSubscriptionResponse) ResponseUtil.createFailureResponse(response, validationResponse.getValidationErrorSet());
+            response = (CancelSubscriptionResponse) ResponseUtil.createFailureResponse(response, validationResponse.getValidationErrorSet(), validationResponse.getMaxCategory());
         }
         return response;
     }
@@ -207,6 +207,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
         auditModel.setChannel(userSubscriptionModel.getChannel());
         auditModel.setPlatform(userSubscriptionModel.getPlatform());
         auditModel.setAutoRenewal(userSubscriptionModel.isAutoRenewal());
+        auditModel.setExpired(userSubscriptionModel.isExpired());
         return auditModel;
     }
 
@@ -241,7 +242,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
             response.setEndDate(userSubscriptionModel.getEndDate());
             response = (ExtendExpiryResponse) ResponseUtil.createSuccessResponse(response);
         }else{
-            response = (ExtendExpiryResponse) ResponseUtil.createFailureResponse(response, validationResponse.getValidationErrorSet());
+            response = (ExtendExpiryResponse) ResponseUtil.createFailureResponse(response, validationResponse.getValidationErrorSet(), validationResponse.getMaxCategory());
         }
         return response;
     }
@@ -251,7 +252,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
         if(validationResponse.isValid()){
             response = ResponseUtil.createSuccessResponse(response);
         }else{
-            response = ResponseUtil.createFailureResponse(response, validationResponse.getValidationErrorSet());
+            response = ResponseUtil.createFailureResponse(response, validationResponse.getValidationErrorSet(), validationResponse.getMaxCategory());
         }
         return response;
     }
@@ -262,7 +263,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
             response.setUserSubscriptionDTO(userSubscriptionDTO);
             response = (CheckStatusResponse) ResponseUtil.createSuccessResponse(response);
         }else{
-            response = (CheckStatusResponse) ResponseUtil.createFailureResponse(response, validationResponse.getValidationErrorSet());
+            response = (CheckStatusResponse) ResponseUtil.createFailureResponse(response, validationResponse.getValidationErrorSet(), validationResponse.getMaxCategory());
         }
         return response;
     }

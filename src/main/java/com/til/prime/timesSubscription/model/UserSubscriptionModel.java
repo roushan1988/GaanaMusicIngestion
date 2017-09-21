@@ -1,14 +1,10 @@
 package com.til.prime.timesSubscription.model;
 
-import com.til.prime.timesSubscription.constants.GlobalConstants;
 import com.til.prime.timesSubscription.dto.external.GenerateOrderRequest;
 import com.til.prime.timesSubscription.enums.*;
-import com.til.prime.timesSubscription.util.OrderIdGeneratorUtil;
 import com.til.prime.timesSubscription.util.TimeUtils;
-import sun.dc.pr.PRError;
 
 import javax.persistence.*;
-import java.math.BigDecimal;
 import java.util.Date;
 
 @Entity
@@ -53,6 +49,8 @@ public class UserSubscriptionModel extends BaseModel {
     @Column
     @Enumerated(EnumType.STRING)
     private PlatformEnum platform;
+    @Column
+    private boolean expired=false;
 
     public UserSubscriptionModel() {
     }
@@ -205,5 +203,13 @@ public class UserSubscriptionModel extends BaseModel {
 
     public void setPlatform(PlatformEnum platform) {
         this.platform = platform;
+    }
+
+    public boolean isExpired() {
+        return expired;
+    }
+
+    public void setExpired(boolean expired) {
+        this.expired = expired;
     }
 }

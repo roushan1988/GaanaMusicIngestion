@@ -29,7 +29,7 @@ public class SubscriptionController {
         }catch (Exception e){
             LOG.error("Exception in getAllPlans: ", e);
             PlanListResponse response = new PlanListResponse();
-            return (PlanListResponse) ResponseUtil.createExceptionResponse(response);
+            return (PlanListResponse) ResponseUtil.createExceptionResponse(response, 10);
         }
     }
 
@@ -42,7 +42,7 @@ public class SubscriptionController {
         }catch (Exception e){
             LOG.error("Exception in initPurchase: ", e);
             InitPurchaseResponse response = new InitPurchaseResponse();
-            return (InitPurchaseResponse) ResponseUtil.createExceptionResponse(response);
+            return (InitPurchaseResponse) ResponseUtil.createExceptionResponse(response, 10);
         }
     }
 
@@ -55,7 +55,7 @@ public class SubscriptionController {
         }catch (Exception e){
             LOG.error("Exception in generateOrder: ", e);
             GenerateOrderResponse response = new GenerateOrderResponse();
-            return (GenerateOrderResponse) ResponseUtil.createExceptionResponse(response);
+            return (GenerateOrderResponse) ResponseUtil.createExceptionResponse(response, 10);
         }
     }
 
@@ -68,7 +68,7 @@ public class SubscriptionController {
         }catch (Exception e){
             LOG.error("Exception in submitPurchase: ", e);
             SubmitPurchaseResponse response = new SubmitPurchaseResponse();
-            return (SubmitPurchaseResponse) ResponseUtil.createExceptionResponse(response);
+            return (SubmitPurchaseResponse) ResponseUtil.createExceptionResponse(response, 10);
         }
     }
 
@@ -81,7 +81,7 @@ public class SubscriptionController {
         }catch (Exception e){
             LOG.error("Exception in getPurchaseHistory: ", e);
             PurchaseHistoryResponse response = new PurchaseHistoryResponse();
-            return (PurchaseHistoryResponse) ResponseUtil.createExceptionResponse(response);
+            return (PurchaseHistoryResponse) ResponseUtil.createExceptionResponse(response, 10);
         }
     }
 
@@ -94,7 +94,7 @@ public class SubscriptionController {
         }catch (Exception e){
             LOG.error("Exception in cancelSubscription: ", e);
             CancelSubscriptionResponse response = new CancelSubscriptionResponse();
-            return (CancelSubscriptionResponse) ResponseUtil.createExceptionResponse(response);
+            return (CancelSubscriptionResponse) ResponseUtil.createExceptionResponse(response, 10);
         }
     }
 
@@ -107,7 +107,7 @@ public class SubscriptionController {
         }catch (Exception e){
             LOG.error("Exception in extendTrial: ", e);
             ExtendExpiryResponse response = new ExtendExpiryResponse();
-            return (ExtendExpiryResponse) ResponseUtil.createExceptionResponse(response);
+            return (ExtendExpiryResponse) ResponseUtil.createExceptionResponse(response, 10);
         }
     }
 
@@ -120,7 +120,7 @@ public class SubscriptionController {
         }catch (Exception e){
             LOG.error("Exception in extendTrial: ", e);
             GenericResponse response = new GenericResponse();
-            return ResponseUtil.createExceptionResponse(response);
+            return ResponseUtil.createExceptionResponse(response, 10);
         }
     }
 
@@ -133,7 +133,7 @@ public class SubscriptionController {
         }catch (Exception e){
             LOG.error("Exception in extendTrial: ", e);
             CheckStatusResponse response = new CheckStatusResponse();
-            return (CheckStatusResponse) ResponseUtil.createExceptionResponse(response);
+            return (CheckStatusResponse) ResponseUtil.createExceptionResponse(response, 10);
         }
     }
 }

@@ -1,7 +1,6 @@
 package com.til.prime.timesSubscription.model;
 
 import com.til.prime.timesSubscription.enums.PlanTypeEnum;
-import sun.dc.pr.PRError;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -9,7 +8,7 @@ import java.util.List;
 
 @Entity
 @Table(name="subscription_variant")
-public class SubscriptionVariantModel extends BaseModel {
+public class SubscriptionVariantModel extends BaseModel implements Comparable<SubscriptionVariantModel> {
     @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "subscription_plan_id", nullable = false)
     private SubscriptionPlanModel subscriptionPlan;
@@ -81,5 +80,10 @@ public class SubscriptionVariantModel extends BaseModel {
 
     public void setUserSubscriptions(List<UserSubscriptionModel> userSubscriptions) {
         this.userSubscriptions = userSubscriptions;
+    }
+
+    @Override
+    public int compareTo(SubscriptionVariantModel o) {
+        return this.getPlanType().compareTo(o.getPlanType());
     }
 }

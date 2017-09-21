@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -46,11 +47,16 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         List<SubscriptionPlanDTO> subscriptionPlans = null;
         if(validationResponse.isValid()){
             BusinessEnum businessEnum = BusinessEnum.valueOf(request.getBusiness());
-            List<SubscriptionPlanModel> subscriptionPlanModels = subscriptionPlanRepository.findByBusinessAndCountryAndDeleted
-                    (BusinessEnum.valueOf(request.getBusiness()), CountryEnum.valueOf(request.getCountry()), false);
+            List<SubscriptionPlanModel> subscriptionPlanModels = null;
+            if(request.getPlanId()!=null) {
+                subscriptionPlanModels = subscriptionPlanRepository.findByIdAndBusinessAndCountryAndDeleted(request.getPlanId(), BusinessEnum.valueOf(request.getBusiness()), CountryEnum.valueOf(request.getCountry()), false);
+            }else{
+                subscriptionPlanModels = subscriptionPlanRepository.findByBusinessAndCountryAndDeleted(BusinessEnum.valueOf(request.getBusiness()), CountryEnum.valueOf(request.getCountry()), false);
+            }
             subscriptionPlans = new ArrayList<>();
             if(CollectionUtils.isNotEmpty(subscriptionPlanModels)) {
                 for (SubscriptionPlanModel subscriptionPlanModel : subscriptionPlanModels) {
+                    Collections.sort(subscriptionPlanModel.getVariants());
                     if(request.getUser()!=null){
                         UserSubscriptionModel lastUserSubscription = userSubscriptionRepository.findFirstByUserSsoIdAndBusinessAndOrderCompletedAndDeletedOrderByIdDesc(request.getUser().getSsoId(), businessEnum, true, false);
                         subscriptionPlans.add(ModelToDTOConvertorUtil.getSubscriptionPlanDTO(subscriptionPlanModel, lastUserSubscription));

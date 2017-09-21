@@ -3,6 +3,7 @@ package com.til.prime.timesSubscription.constants;
 import com.google.gson.Gson;
 
 public class GlobalConstants {
+    public static final String UTF_8 = "UTF-8";
     public static final String TYPE = "type";
     public static final String CHANNEL = "channel";
     public static final String SSOID = "ssoid";
@@ -35,5 +36,10 @@ public class GlobalConstants {
     public static final String SUCCESS = "SUCCESS";
     public static final String OK = "OK";
     public static final Gson gson = new Gson();
-    public static final Long CRON_BATCH_PROCESSING_COUNT= 100L;
+    public static final Long CRON_BATCH_PROCESSING_COUNT= 500L;
+    public static final String EMAIL_PROTOCOL= "email.protocol";
+    public static final String EMAIL_HOST= "email.host";
+    public static final String EMAIL_PORT= "email.port";
+    public static final String EMAIL_USERNAME= "email.username";
+    public static final String EMAIL_PASSWORD= "email.password";
 }

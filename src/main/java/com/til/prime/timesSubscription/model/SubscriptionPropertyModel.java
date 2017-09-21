@@ -1,23 +1,24 @@
 package com.til.prime.timesSubscription.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Table;
+import com.til.prime.timesSubscription.enums.PropertyEnum;
+
+import javax.persistence.*;
 
 @Entity
 @Table(name="subscription_property")
 public class SubscriptionPropertyModel extends BaseModel {
     @Column(name="key_name", nullable = false)
-    private String key;
+    @Enumerated(EnumType.STRING)
+    private PropertyEnum key;
 
     @Column(name="key_value", nullable = false)
     private String value;
 
-    public String getKey() {
+    public PropertyEnum getKey() {
         return key;
     }
 
-    public void setKey(String key) {
+    public void setKey(PropertyEnum key) {
         this.key = key;
     }
 

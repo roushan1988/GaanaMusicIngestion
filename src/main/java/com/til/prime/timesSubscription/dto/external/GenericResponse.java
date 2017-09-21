@@ -12,6 +12,7 @@ public class GenericResponse {
 	protected Boolean success=false;
 	protected ResponseCode responseCode;
 	protected String responseMessage;
+	protected Integer validationErrorCategory;
 	protected List<ValidationError> validationErrors= new ArrayList<ValidationError>();
 
 	public Boolean getSuccess() {
@@ -46,11 +47,20 @@ public class GenericResponse {
 		this.validationErrors = validationErrors;
 	}
 
+	public Integer getValidationErrorCategory() {
+		return validationErrorCategory;
+	}
+
+	public void setValidationErrorCategory(Integer validationErrorCategory) {
+		this.validationErrorCategory = validationErrorCategory;
+	}
+
 	@Override
 	public String toString() {
 		final StringBuilder sb = new StringBuilder("CouponResponse{");
 		sb.append("success=").append(success);
 		sb.append(", responseCode=").append(responseCode);
+		sb.append(", validationErrorCategory=").append(validationErrorCategory);
 		sb.append(", responseMessage='").append(responseMessage).append('\'');
 		sb.append(", validationErrors=").append(validationErrors);
 		sb.append('}');

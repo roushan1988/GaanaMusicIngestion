@@ -67,6 +67,7 @@ public class ModelToDTOConvertorUtil {
         dto.setBusiness(model.getBusiness().name());
         dto.setCountry(variantModel.getSubscriptionPlan().getCountry().name());
         dto.setCurrency(variantModel.getSubscriptionPlan().getCurrency().name());
+        dto.setExpired(model.isExpired());
         return dto;
     }
 }

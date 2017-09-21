@@ -25,5 +25,9 @@ public interface UserSubscriptionRepository extends GenericJpaRepository<UserSub
     UserSubscriptionModel findFirstByUserSsoIdAndBusinessAndOrderCompletedAndDeletedOrderByIdDesc(String ssoId, BusinessEnum business, boolean orderCompleted, boolean deleted);
     UserSubscriptionModel findFirstByUserSsoIdAndBusinessAndOrderCompletedOrderByIdDesc(String ssoId, BusinessEnum business, boolean orderCompleted);
     Long countBySsoCommunicatedFalseAndOrderCompletedTrueAndDeletedFalse();
+    Long countByExpiredFalseAndEndDateBeforeAndDeletedFalse(Date date);
+    Page<UserSubscriptionModel> findByExpiredFalseAndEndDateBeforeAndDeletedFalse(Date date, Pageable pageable);
+    Page<UserSubscriptionModel> findByExpiredAndEndDateBetweenAndDeletedFalse(boolean expired, Date date1, Date date2, Pageable pageable);
+    Long countByExpiredAndEndDateBetweenAndDeletedFalse(boolean expired, Date date1, Date date2);
     Page<UserSubscriptionModel> findBySsoCommunicatedFalseAndOrderCompletedTrueAndDeletedFalseOrderById(Pageable pageable);
 }

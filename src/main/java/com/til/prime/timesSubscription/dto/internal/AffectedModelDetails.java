@@ -1,18 +1,16 @@
 package com.til.prime.timesSubscription.dto.internal;
 
-import com.til.prime.timesSubscription.model.BaseModel;
-
 import java.util.ArrayList;
 import java.util.List;
 
-public class AffectedModelDetails {
-    private List<? extends BaseModel> affectedModels = new ArrayList<>();
+public class AffectedModelDetails<T> {
+    private List<T> affectedModels = new ArrayList<>();
 
-    public List<? extends BaseModel> getAffectedModels() {
+    public List<T> getAffectedModels() {
         return affectedModels;
     }
 
-    public void setAffectedModels(List<? extends BaseModel> affectedModels) {
+    public void setAffectedModels(List<T> affectedModels) {
         this.affectedModels = affectedModels;
     }
 }

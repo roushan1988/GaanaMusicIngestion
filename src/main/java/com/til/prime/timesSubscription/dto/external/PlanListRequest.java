@@ -3,6 +3,7 @@ package com.til.prime.timesSubscription.dto.external;
 public class PlanListRequest extends GenericRequest {
     private String business;
     private String country;
+    private Long planId;
 
     public String getBusiness() {
         return business;
@@ -21,11 +22,20 @@ public class PlanListRequest extends GenericRequest {
         this.country = country;
     }
 
+    public Long getPlanId() {
+        return planId;
+    }
+
+    public void setPlanId(Long planId) {
+        this.planId = planId;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("PlanListRequest{");
         sb.append("business='").append(business).append('\'');
         sb.append(", country='").append(country).append('\'');
+        sb.append(", planId=").append(planId);
         sb.append(", user=").append(user);
         sb.append(", secretKey='").append(secretKey).append('\'');
         sb.append('}');

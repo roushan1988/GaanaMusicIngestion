@@ -53,6 +53,16 @@ public class TimeUtils {
 		return dayStart.getTime();
 	}
 
+	public static final Date getDayStartTime(Date date){
+		Calendar dayStart = Calendar.getInstance();
+		dayStart.setTime(date);
+		dayStart.set(Calendar.HOUR_OF_DAY, 0);
+		dayStart.set(Calendar.MINUTE, 0);
+		dayStart.set(Calendar.SECOND, 0);
+		dayStart.set(Calendar.MILLISECOND, 0);
+		return dayStart.getTime();
+	}
+
 	public static final Long getDayStartEpoch(Long timeInMillis){
 		Calendar dayStart = Calendar.getInstance();
 		dayStart.setTimeZone(IST);
@@ -121,7 +131,27 @@ public class TimeUtils {
 		calendar2.set(Calendar.MINUTE, 0);
 		calendar2.set(Calendar.SECOND, 0);
 		calendar2.set(Calendar.MILLISECOND, 0);
-		Long endTime = calendar.getTimeInMillis();
+		Long endTime = calendar2.getTimeInMillis();
+		return Math.abs((endTime-startTime)/MILLIS_IN_A_DAY);
+	}
+
+	public static final Long getDifferenceInDays(Date start, Date end){
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTimeZone(IST);
+		calendar.setTime(start);
+		calendar.set(Calendar.HOUR_OF_DAY, 0);
+		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.SECOND, 0);
+		calendar.set(Calendar.MILLISECOND, 0);
+		Long startTime = calendar.getTimeInMillis();
+		Calendar calendar2 = Calendar.getInstance();
+		calendar2.setTimeZone(IST);
+		calendar2.setTime(end);
+		calendar2.set(Calendar.HOUR_OF_DAY, 0);
+		calendar2.set(Calendar.MINUTE, 0);
+		calendar2.set(Calendar.SECOND, 0);
+		calendar2.set(Calendar.MILLISECOND, 0);
+		Long endTime = calendar2.getTimeInMillis();
 		return Math.abs((endTime-startTime)/MILLIS_IN_A_DAY);
 	}
 
