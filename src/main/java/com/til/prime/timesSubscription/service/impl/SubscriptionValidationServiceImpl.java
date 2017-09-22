@@ -333,7 +333,14 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
                 Gson gson = GlobalConstants.gson;
                 String ssoResponse = getSSOIdForTicketId(ticketId);
                 LOG.info("got sso response for [validateLogin] with ssoId" + ssoId + ", ticketId " + ticketId + ", response " + ssoResponse);
-                SSOValidateResponse ssoValidateResponse = gson.fromJson(ssoResponse, SSOValidateResponse.class);
+                SSOValidateResponse ssoValidateResponse = null;
+                try {
+                     ssoValidateResponse = gson.fromJson(ssoResponse, SSOValidateResponse.class);
+                }catch (Exception e){
+                    LOG.info("User Validation Failed From SSO Response [validateLogin] with ssoId " + ssoId + ", ticketId " + ticketId + ", response : " + ssoResponse);
+                    validationResponse.getValidationErrorSet().add(ValidationError.INVALID_SSO_CREDENTIALS);
+                    return;
+                }
                 if (ssoValidateResponse.getUserId().equals(ssoId)) {
                     LOG.info("User Validated From SSO Response [validateLogin] with ssoId " + ssoId + ", ticketId " + ticketId + ", response :" + ssoResponse);
                 } else {

@@ -21,7 +21,7 @@ public class ResponseInterceptor extends WebContentInterceptor {
 		MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
 		Method method = methodSignature.getMethod();
 		if(method != null){
-			LOG.info("ResponseInterceptor api name "+method.getName());
+			LOG.info("ResponseTimeInterceptor controller: "+joinPoint.getTarget().getClass()+" api name: "+method.getName()+", ");
 		}
 		if (null != method.getParameterTypes() && null != joinPoint.getArgs() && joinPoint.getArgs().length > 0) {
 			LOG.info("ResponseInterceptor Request "+ joinPoint.getArgs()[0].toString());

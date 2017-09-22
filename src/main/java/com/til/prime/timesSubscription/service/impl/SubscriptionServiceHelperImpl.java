@@ -118,12 +118,14 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
 
     @Override
     public GenerateOrderResponse prepareGenerateOrderResponse(GenerateOrderResponse response, UserSubscriptionModel userSubscriptionModel, ValidationResponse validationResponse) {
-        if(validationResponse.isValid()){
+        if(userSubscriptionModel!=null){
             SubscriptionVariantModel variantModel = userSubscriptionModel.getSubscriptionVariant();
             response.setUserSubscriptionId(userSubscriptionModel.getId());
             response.setOrderId(userSubscriptionModel.getOrderId());
             response.setPlanId(variantModel.getSubscriptionPlan().getId());
             response.setVariantId(variantModel.getId());
+        }
+        if(validationResponse.isValid()){
             response = (GenerateOrderResponse) ResponseUtil.createSuccessResponse(response);
         }else{
             response = (GenerateOrderResponse) ResponseUtil.createFailureResponse(response, validationResponse.getValidationErrorSet(), validationResponse.getMaxCategory());
