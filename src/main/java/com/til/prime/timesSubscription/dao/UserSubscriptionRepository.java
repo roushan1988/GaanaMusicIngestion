@@ -2,6 +2,7 @@ package com.til.prime.timesSubscription.dao;
 
 import com.til.prime.timesSubscription.enums.BusinessEnum;
 import com.til.prime.timesSubscription.enums.PlanTypeEnum;
+import com.til.prime.timesSubscription.enums.StatusEnum;
 import com.til.prime.timesSubscription.model.UserSubscriptionModel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,10 +25,10 @@ public interface UserSubscriptionRepository extends GenericJpaRepository<UserSub
     UserSubscriptionModel findFirstByUserSsoIdAndOrderCompletedAndStartDateBeforeAndEndDateAfter(String ssoId, boolean orderCompleted, Date date, Date date2);
     UserSubscriptionModel findFirstByUserSsoIdAndBusinessAndOrderCompletedAndDeletedOrderByIdDesc(String ssoId, BusinessEnum business, boolean orderCompleted, boolean deleted);
     UserSubscriptionModel findFirstByUserSsoIdAndBusinessAndOrderCompletedOrderByIdDesc(String ssoId, BusinessEnum business, boolean orderCompleted);
-    Long countBySsoCommunicatedFalseAndOrderCompletedTrueAndDeletedFalse();
-    Long countByExpiredFalseAndEndDateBeforeAndDeletedFalse(Date date);
-    Page<UserSubscriptionModel> findByExpiredFalseAndEndDateBeforeAndDeletedFalse(Date date, Pageable pageable);
-    Page<UserSubscriptionModel> findByExpiredAndEndDateBetweenAndDeletedFalse(boolean expired, Date date1, Date date2, Pageable pageable);
-    Long countByExpiredAndEndDateBetweenAndDeletedFalse(boolean expired, Date date1, Date date2);
-    Page<UserSubscriptionModel> findBySsoCommunicatedFalseAndOrderCompletedTrueAndDeletedFalseOrderById(Pageable pageable);
+    Long countBySsoCommunicatedFalseAndOrderCompletedTrueAndDeletedFalseAndOrderCompletedTrue();
+    Long countByStatusAndEndDateBeforeAndDeletedFalseAndOrderCompletedTrue(StatusEnum status, Date date);
+    Page<UserSubscriptionModel> findByStatusAndEndDateBeforeAndDeletedFalseAndOrderCompletedTrue(StatusEnum status, Date date, Pageable pageable);
+    Page<UserSubscriptionModel> findByStatusAndEndDateBetweenAndDeletedFalseAndOrderCompletedTrue(StatusEnum status, Date date1, Date date2, Pageable pageable);
+    Long countByStatusAndEndDateBetweenAndDeletedFalseAndOrderCompletedTrue(StatusEnum status, Date date1, Date date2);
+    Page<UserSubscriptionModel> findBySsoCommunicatedFalseAndOrderCompletedTrueAndDeletedFalseAndOrderCompletedTrueOrderById(Pageable pageable);
 }

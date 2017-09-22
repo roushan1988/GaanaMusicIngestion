@@ -6,6 +6,7 @@ import com.til.prime.timesSubscription.dto.internal.AffectedModelDetails;
 import com.til.prime.timesSubscription.dto.internal.JobDetails;
 import com.til.prime.timesSubscription.enums.EventEnum;
 import com.til.prime.timesSubscription.enums.JobKeyEnum;
+import com.til.prime.timesSubscription.enums.StatusEnum;
 import com.til.prime.timesSubscription.model.JobModel;
 import com.til.prime.timesSubscription.model.UserSubscriptionModel;
 import com.til.prime.timesSubscription.service.SubscriptionService;
@@ -42,13 +43,13 @@ public class SubscriptionExpiryJob extends AbstractJob {
             JobModel jobModel = jobRepository.findByJobKey(jobKeyEnum);
             jobDetails.setJob(jobModel);
             jobDetails.setStartTime(new Date());
-            Long count = userSubscriptionRepository.countByExpiredFalseAndEndDateBeforeAndDeletedFalse(date);
+            Long count = userSubscriptionRepository.countByStatusAndEndDateBeforeAndDeletedFalseAndOrderCompletedTrue(date);
             for (Long x = 0l; x <= (Math.max(0l, count - 1) / GlobalConstants.CRON_BATCH_PROCESSING_COUNT); x++) {
-                Page<UserSubscriptionModel> page = userSubscriptionRepository.findByExpiredFalseAndEndDateBeforeAndDeletedFalse(date, new PageRequest(x.intValue(), GlobalConstants.CRON_BATCH_PROCESSING_COUNT.intValue()));
+                Page<UserSubscriptionModel> page = userSubscriptionRepository.findByStatusAndEndDateBeforeAndDeletedFalseAndOrderCompletedTrue(date, new PageRequest(x.intValue(), GlobalConstants.CRON_BATCH_PROCESSING_COUNT.intValue()));
                 List<UserSubscriptionModel> userSubscriptionModelList = page.getContent();
                 if (userSubscriptionModelList != null) {
                     for (UserSubscriptionModel userSubscriptionModel : userSubscriptionModelList) {
-                        userSubscriptionModel.setExpired(true);
+                        userSubscriptionModel.setStatus(StatusEnum.EXPIRED);
                         userSubscriptionModel = subscriptionService.saveUserSubscription(userSubscriptionModel, false, null, null, EventEnum.USER_SUBSCRIPTION_EXPIRY);
                         recordsAffected++;
                         affectedModels.add(userSubscriptionModel.getId());

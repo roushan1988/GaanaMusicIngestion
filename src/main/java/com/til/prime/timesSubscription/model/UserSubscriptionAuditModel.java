@@ -41,6 +41,9 @@ public class UserSubscriptionAuditModel extends BaseModel {
     @Column(name="plan_status")
     @Enumerated(EnumType.STRING)
     private PlanStatusEnum planStatus;
+    @Column
+    @Enumerated(EnumType.STRING)
+    private StatusEnum status;
     @Column(name="transaction_status")
     @Enumerated(EnumType.STRING)
     private TransactionStatusEnum transactionStatus;
@@ -222,5 +225,13 @@ public class UserSubscriptionAuditModel extends BaseModel {
 
     public void setExpired(boolean expired) {
         this.expired = expired;
+    }
+
+    public StatusEnum getStatus() {
+        return status;
+    }
+
+    public void setStatus(StatusEnum status) {
+        this.status = status;
     }
 }

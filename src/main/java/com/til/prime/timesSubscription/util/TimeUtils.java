@@ -158,4 +158,9 @@ public class TimeUtils {
 	public static final Long getDaysBeforeNow(Long time){
 		return (new Date().getTime()-time)/MILLIS_IN_A_DAY;
 	}
+
+	public static void main(String[] args) {
+		String a = "172a1931b1d0fd0985330c09b792f761d5c260194dfb4106e1a17d1789e95380";
+		String b = "172a1931b1d0fd0985330c09b792f761d5c260194dfb4106e1a17d1789e95380";
+	}
 }

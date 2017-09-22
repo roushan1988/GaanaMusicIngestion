@@ -31,12 +31,13 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
     private Properties properties;
 
     public UserSubscriptionModel generateInitPurchaseUserSubscription(InitPurchaseRequest request, SubscriptionVariantModel variantModel, UserSubscriptionModel lastUserSubscription, UserModel userModel, BigDecimal price){
+        Date date = new Date();
         PlanTypeEnum planType = PlanTypeEnum.valueOf(request.getPlanType());
         UserSubscriptionModel userSubscriptionModel = new UserSubscriptionModel();
         userSubscriptionModel.setUser(userModel);
         userSubscriptionModel.setTicketId(request.getUser().getTicketId());
         userSubscriptionModel.setSubscriptionVariant(variantModel);
-        userSubscriptionModel.setStartDate(lastUserSubscription==null? new Date(): TimeUtils.addMillisInDate(lastUserSubscription.getEndDate(), 1));
+        userSubscriptionModel.setStartDate(lastUserSubscription==null? date: TimeUtils.addMillisInDate(lastUserSubscription.getEndDate(), 1));
         userSubscriptionModel.setEndDate(TimeUtils.addDaysInDate(userSubscriptionModel.getStartDate(), request.getDurationDays().intValue()));
         userSubscriptionModel.setPlanStatus(PlanStatusEnum.INIT);
         userSubscriptionModel.setBusiness(variantModel.getSubscriptionPlan().getBusiness());
@@ -54,6 +55,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
         }else{
             userSubscriptionModel.setTransactionStatus(TransactionStatusEnum.SUBSCRIPTION_TRANS_INITIATED);
         }
+        userSubscriptionModel.setStatus(StatusEnum.getStatusForUserSubscription(userSubscriptionModel, date));
         return userSubscriptionModel;
     }
 
@@ -202,12 +204,12 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
         auditModel.setStartDate(userSubscriptionModel.getStartDate());
         auditModel.setEndDate(userSubscriptionModel.getEndDate());
         auditModel.setPlanStatus(userSubscriptionModel.getPlanStatus());
+        auditModel.setStatus(userSubscriptionModel.getStatus());
         auditModel.setTransactionStatus(userSubscriptionModel.getTransactionStatus());
         auditModel.setBusiness(userSubscriptionModel.getBusiness());
         auditModel.setChannel(userSubscriptionModel.getChannel());
         auditModel.setPlatform(userSubscriptionModel.getPlatform());
         auditModel.setAutoRenewal(userSubscriptionModel.isAutoRenewal());
-        auditModel.setExpired(userSubscriptionModel.isExpired());
         return auditModel;
     }
 
@@ -227,6 +229,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
     public UserSubscriptionModel extendTrial(UserSubscriptionModel userSubscriptionModel, Long extensionDays) {
         Date newEndDate = TimeUtils.addDaysInDate(userSubscriptionModel.getEndDate(), extensionDays.intValue());
         userSubscriptionModel.setEndDate(newEndDate);
+        userSubscriptionModel.setStatus(StatusEnum.getStatusForUserSubscription(userSubscriptionModel, null));
         return userSubscriptionModel;
     }
 

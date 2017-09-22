@@ -35,6 +35,9 @@ public class UserSubscriptionModel extends BaseModel {
     @Column(name="plan_status")
     @Enumerated(EnumType.STRING)
     private PlanStatusEnum planStatus;
+    @Column
+    @Enumerated(EnumType.STRING)
+    private StatusEnum status;
     @Column(name="transaction_status")
     @Enumerated(EnumType.STRING)
     private TransactionStatusEnum transactionStatus;
@@ -49,31 +52,32 @@ public class UserSubscriptionModel extends BaseModel {
     @Column
     @Enumerated(EnumType.STRING)
     private PlatformEnum platform;
-    @Column
-    private boolean expired=false;
 
     public UserSubscriptionModel() {
     }
 
     public UserSubscriptionModel(UserSubscriptionModel model, GenerateOrderRequest request, boolean renewalRequest) {
+        Date date = new Date();
         this.user = model.getUser();
         this.ticketId = model.getTicketId();
         this.subscriptionVariant = model.subscriptionVariant;
         this.business = model.getBusiness();
         this.channel = model.getChannel();
-        setCreated(new Date());
+        setCreated(date);
         if(renewalRequest){
             this.startDate = TimeUtils.addMillisInDate(model.getEndDate(), 1);
             this.endDate = TimeUtils.addDaysInDate(startDate, model.getSubscriptionVariant().getDurationDays().intValue());
             this.platform = request.isJob()? PlatformEnum.JOB : PlatformEnum.valueOf(request.getPlatform());
             this.planStatus = PlanStatusEnum.INIT;
             this.transactionStatus = TransactionStatusEnum.SUBSCRIPTION_TRANS_INITIATED;
+            this.status = StatusEnum.getStatusForUserSubscription(this.startDate, this.endDate, date);
         }else{
             this.startDate = model.getStartDate();
             this.endDate = model.getEndDate();
             this.platform = model.getPlatform();
             this.planStatus = model.getPlanStatus();
             this.transactionStatus = model.getTransactionStatus();
+            this.status = model.getStatus();
         }
     }
 
@@ -205,11 +209,11 @@ public class UserSubscriptionModel extends BaseModel {
         this.platform = platform;
     }
 
-    public boolean isExpired() {
-        return expired;
+    public StatusEnum getStatus() {
+        return status;
     }
 
-    public void setExpired(boolean expired) {
-        this.expired = expired;
+    public void setStatus(StatusEnum status) {
+        this.status = status;
     }
 }
