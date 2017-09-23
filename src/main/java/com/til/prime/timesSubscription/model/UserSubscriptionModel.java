@@ -10,12 +10,12 @@ import java.util.Date;
 @Entity
 @Table(name="user_subscription")
 public class UserSubscriptionModel extends BaseModel {
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.MERGE)
     @JoinColumn(name = "user_id", nullable = false)
     private UserModel user;
     @Column(name="ticket_id")
     private String ticketId;
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = {CascadeType.MERGE})
     @JoinColumn(name = "subscription_variant_id", nullable = false)
     private SubscriptionVariantModel subscriptionVariant;
     @Column(name="order_id")

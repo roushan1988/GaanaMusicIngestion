@@ -99,7 +99,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
     @Override
     public InitPurchaseResponse prepareInitPurchaseResponse(InitPurchaseResponse response, UserSubscriptionModel userSubscriptionModel, UserSubscriptionModel lastUserSubscription, ValidationResponse validationResponse) {
         if(lastUserSubscription!=null){
-            response.setDaysLeft(TimeUtils.getDifferenceInDays(new Date(), userSubscriptionModel.getEndDate()).intValue());
+            response.setDaysLeft(TimeUtils.getDifferenceInDays(new Date(), lastUserSubscription.getEndDate()).intValue());
         }
         if(validationResponse.isValid()){
             SubscriptionVariantModel variantModel = userSubscriptionModel.getSubscriptionVariant();
