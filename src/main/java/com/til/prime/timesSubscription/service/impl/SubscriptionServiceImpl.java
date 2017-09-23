@@ -132,7 +132,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             validationResponse = subscriptionValidationService.validatePostGenerateOrder(request, subscriptionVariantModel, userSubscriptionModel, restrictedUsageUserSubscription, validationResponse);
         }
         if(validationResponse.isValid()) {
-            if(request.isRetryOnFailure() || request.isRenewal()){
+            if(request.isRetryOnFailure() || request.isRenewal() || request.isDuplicate()){
                 useNewSubscription = true;
                 if(request.isRenewal()){
                     lastUserSubscription = userSubscriptionRepository.findFirstByUserSsoIdAndBusinessAndOrderCompletedAndDeletedOrderByIdDesc(request.getUser().getSsoId(), business, true, false);
