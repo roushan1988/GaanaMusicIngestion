@@ -77,7 +77,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
     @Override
     public ValidationResponse validatePreGenerateOrder(GenerateOrderRequest request) {
         ValidationResponse validationResponse = new ValidationResponse();
-//        validationResponse = validateEncryptionForOrder(request, validationResponse);
+        validationResponse = validateEncryptionForOrder(request, validationResponse);
         PreConditions.mustBeEqual(request.getSecretKey(), properties.getProperty(GlobalConstants.PAYMENTS_SECRET_KEY), ValidationError.INVALID_SECRET_KEY, validationResponse);
         PreConditions.notNull(request.getUserSubscriptionId(), ValidationError.INVALID_USER_SUBSCRIPTION_ID, validationResponse);
         PreConditions.notNull(request.getPlanId(), ValidationError.INVALID_PLAN_ID, validationResponse);
