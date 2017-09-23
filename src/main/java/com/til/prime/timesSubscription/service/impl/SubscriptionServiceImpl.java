@@ -161,8 +161,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         UserSubscriptionModel userSubscriptionModel = null;
         SubmitPurchaseResponse response = new SubmitPurchaseResponse();
         if(validationResponse.isValid()){
-            userSubscriptionModel = userSubscriptionRepository.findByIdAndOrderIdAndSubscriptionVariantIdAndDeleted(
-                    request.getUserSubscriptionId(), request.getOrderId(), request.getVariantId(), false);
+            userSubscriptionModel = userSubscriptionRepository.findByOrderIdAndSubscriptionVariantIdAndDeleted(request.getOrderId(), request.getVariantId(), false);
             validationResponse = subscriptionValidationService.validatePostSubmitPurchasePlan(request, userSubscriptionModel, validationResponse);
         }
         if(validationResponse.isValid()){
