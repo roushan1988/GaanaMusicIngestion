@@ -31,12 +31,13 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
     private Properties properties;
 
     public UserSubscriptionModel generateInitPurchaseUserSubscription(InitPurchaseRequest request, SubscriptionVariantModel variantModel, UserSubscriptionModel lastUserSubscription, UserModel userModel, BigDecimal price){
+        Date date = new Date();
         PlanTypeEnum planType = PlanTypeEnum.valueOf(request.getPlanType());
         UserSubscriptionModel userSubscriptionModel = new UserSubscriptionModel();
         userSubscriptionModel.setUser(userModel);
         userSubscriptionModel.setTicketId(request.getUser().getTicketId());
         userSubscriptionModel.setSubscriptionVariant(variantModel);
-        userSubscriptionModel.setStartDate(lastUserSubscription==null? new Date(): TimeUtils.addMillisInDate(lastUserSubscription.getEndDate(), 1));
+        userSubscriptionModel.setStartDate((lastUserSubscription==null && lastUserSubscription.getEndDate().before(date))? date: TimeUtils.addMillisInDate(lastUserSubscription.getEndDate(), 1));
         userSubscriptionModel.setEndDate(TimeUtils.addDaysInDate(userSubscriptionModel.getStartDate(), request.getDurationDays().intValue()));
         userSubscriptionModel.setPlanStatus(PlanStatusEnum.INIT);
         userSubscriptionModel.setBusiness(variantModel.getSubscriptionPlan().getBusiness());
