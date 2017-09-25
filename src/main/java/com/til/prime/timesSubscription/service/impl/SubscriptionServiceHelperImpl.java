@@ -101,6 +101,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
         if(lastUserSubscription!=null){
             response.setDaysLeft(TimeUtils.getDifferenceInDays(new Date(), lastUserSubscription.getEndDate()).intValue());
         }
+        response.setType(WebViewTypeEnum.TOAST.getName());
         if(validationResponse.isValid()){
             SubscriptionVariantModel variantModel = userSubscriptionModel.getSubscriptionVariant();
             response.setUserSubscriptionId(userSubscriptionModel.getId());

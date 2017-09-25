@@ -10,6 +10,7 @@ public class InitPurchaseResponse extends GenericResponse {
     private boolean paymentRequired;
     private BigDecimal paymentAmount;
     private int daysLeft;
+    private String type;
 
     public Long getUserSubscriptionId() {
         return userSubscriptionId;
@@ -67,6 +68,14 @@ public class InitPurchaseResponse extends GenericResponse {
         this.daysLeft = daysLeft;
     }
 
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("InitPurchaseResponse{");
@@ -77,6 +86,7 @@ public class InitPurchaseResponse extends GenericResponse {
         sb.append(", paymentRequired=").append(paymentRequired);
         sb.append(", paymentAmount=").append(paymentAmount);
         sb.append(", daysLeft=").append(daysLeft);
+        sb.append(", type='").append(type).append('\'');
         sb.append(", success=").append(success);
         sb.append(", responseCode=").append(responseCode);
         sb.append(", responseMessage='").append(responseMessage).append('\'');

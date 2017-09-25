@@ -21,7 +21,7 @@ public class SubscriptionController {
     private SubscriptionService subscriptionService;
 
     @Loggable
-    @RequestMapping(path="/getAllPlans", method = RequestMethod.GET)
+    @RequestMapping(path="/getAllPlans", method = {RequestMethod.GET, RequestMethod.POST})
     @ResponseBody
     public PlanListResponse getAllPlans(@RequestBody PlanListRequest request){
         try {
