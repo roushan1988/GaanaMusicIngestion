@@ -18,7 +18,7 @@ public class UserSubscriptionDTO {
     private String business;
     private String country;
     private String currency;
-    private boolean expired;
+    private String status;
 
     public Long getUserSubscriptionId() {
         return userSubscriptionId;
@@ -132,12 +132,12 @@ public class UserSubscriptionDTO {
         this.currency = currency;
     }
 
-    public boolean isExpired() {
-        return expired;
+    public String getStatus() {
+        return status;
     }
 
-    public void setExpired(boolean expired) {
-        this.expired = expired;
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     @Override
@@ -157,7 +157,7 @@ public class UserSubscriptionDTO {
         sb.append(", business='").append(business).append('\'');
         sb.append(", country='").append(country).append('\'');
         sb.append(", currency='").append(currency).append('\'');
-        sb.append(", expired=").append(expired);
+        sb.append(", status='").append(status).append('\'');
         sb.append('}');
         return sb.toString();
     }
