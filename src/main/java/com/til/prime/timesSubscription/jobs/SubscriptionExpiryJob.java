@@ -10,6 +10,7 @@ import com.til.prime.timesSubscription.enums.StatusEnum;
 import com.til.prime.timesSubscription.model.JobModel;
 import com.til.prime.timesSubscription.model.UserSubscriptionModel;
 import com.til.prime.timesSubscription.service.SubscriptionService;
+import com.til.prime.timesSubscription.util.TimeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -43,14 +44,22 @@ public class SubscriptionExpiryJob extends AbstractJob {
             JobModel jobModel = jobRepository.findByJobKey(jobKeyEnum);
             jobDetails.setJob(jobModel);
             jobDetails.setStartTime(new Date());
-            Long count = userSubscriptionRepository.countByStatusAndEndDateBeforeAndDeletedFalseAndOrderCompletedTrue(date);
+            Long count = userSubscriptionRepository.countByStatusAndEndDateBeforeAndDeletedFalseAndOrderCompletedTrue(StatusEnum.ACTIVE, date);
             for (Long x = 0l; x <= (Math.max(0l, count - 1) / GlobalConstants.CRON_BATCH_PROCESSING_COUNT); x++) {
-                Page<UserSubscriptionModel> page = userSubscriptionRepository.findByStatusAndEndDateBeforeAndDeletedFalseAndOrderCompletedTrue(date, new PageRequest(x.intValue(), GlobalConstants.CRON_BATCH_PROCESSING_COUNT.intValue()));
+                Page<UserSubscriptionModel> page = userSubscriptionRepository.findByStatusAndEndDateBeforeAndDeletedFalseAndOrderCompletedTrue(StatusEnum.ACTIVE, date, new PageRequest(x.intValue(), GlobalConstants.CRON_BATCH_PROCESSING_COUNT.intValue()));
                 List<UserSubscriptionModel> userSubscriptionModelList = page.getContent();
                 if (userSubscriptionModelList != null) {
                     for (UserSubscriptionModel userSubscriptionModel : userSubscriptionModelList) {
                         userSubscriptionModel.setStatus(StatusEnum.EXPIRED);
                         userSubscriptionModel = subscriptionService.saveUserSubscription(userSubscriptionModel, false, null, null, EventEnum.USER_SUBSCRIPTION_EXPIRY);
+                        UserSubscriptionModel userSubscriptionModel1 = userSubscriptionRepository.findFirstByUserSsoIdAndStatusAndStartDateAfterAndDeletedFalseAndOrderCompletedTrueOrderById(
+                                userSubscriptionModel.getUser().getSsoId(), StatusEnum.FUTURE, TimeUtils.addMillisInDate(userSubscriptionModel.getEndDate(), -2000));
+                        if(userSubscriptionModel1!=null){
+                            userSubscriptionModel1.setStatus(StatusEnum.ACTIVE);
+                            subscriptionService.saveUserSubscription(userSubscriptionModel1, false, userSubscriptionModel1.getUser().getSsoId(), userSubscriptionModel1.getTicketId(), EventEnum.USER_SUBSCRIPTION_ACTIVE);
+                            recordsAffected++;
+                            affectedModels.add(userSubscriptionModel1.getId());
+                        }
                         recordsAffected++;
                         affectedModels.add(userSubscriptionModel.getId());
                     }

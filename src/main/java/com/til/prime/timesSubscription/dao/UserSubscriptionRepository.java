@@ -30,5 +30,7 @@ public interface UserSubscriptionRepository extends GenericJpaRepository<UserSub
     Page<UserSubscriptionModel> findByStatusAndEndDateBeforeAndDeletedFalseAndOrderCompletedTrue(StatusEnum status, Date date, Pageable pageable);
     Page<UserSubscriptionModel> findByStatusAndEndDateBetweenAndDeletedFalseAndOrderCompletedTrue(StatusEnum status, Date date1, Date date2, Pageable pageable);
     Long countByStatusAndEndDateBetweenAndDeletedFalseAndOrderCompletedTrue(StatusEnum status, Date date1, Date date2);
+    Long countByUserSsoIdAndStatusAndStartDateAfterAndDeletedFalseAndOrderCompletedTrue(String ssoId, StatusEnum status, Date date1);
     Page<UserSubscriptionModel> findBySsoCommunicatedFalseAndOrderCompletedTrueAndDeletedFalseAndOrderCompletedTrueOrderById(Pageable pageable);
+    UserSubscriptionModel findFirstByUserSsoIdAndStatusAndStartDateAfterAndDeletedFalseAndOrderCompletedTrueOrderById(String ssoId, StatusEnum status, Date date1);
 }
