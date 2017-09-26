@@ -341,7 +341,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
                     validationResponse.getValidationErrorSet().add(ValidationError.INVALID_SSO_CREDENTIALS);
                     return;
                 }
-                if (ssoValidateResponse.getUserId().equals(ssoId)) {
+                if (ssoId.equals(ssoValidateResponse.getUserId())) {
                     LOG.info("User Validated From SSO Response [validateLogin] with ssoId " + ssoId + ", ticketId " + ticketId + ", response :" + ssoResponse);
                 } else {
                     LOG.info("User Validation Failed From SSO Response [validateLogin] with ssoId " + ssoId + ", ticketId " + ticketId + ", response : " + ssoResponse);
