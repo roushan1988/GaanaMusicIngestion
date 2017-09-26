@@ -13,6 +13,7 @@ public class GenerateOrderRequest extends GenericRequest {
     private String paymentMethod;
     private boolean retryOnFailure;
     private boolean renewal;
+    private boolean duplicate = true;
     private boolean job;
     private String platform;
     private String checksum;
@@ -97,6 +98,14 @@ public class GenerateOrderRequest extends GenericRequest {
         this.renewal = renewal;
     }
 
+    public boolean isDuplicate() {
+        return duplicate;
+    }
+
+    public void setDuplicate(boolean duplicate) {
+        this.duplicate = duplicate;
+    }
+
     public boolean isJob() {
         return job;
     }
@@ -135,6 +144,7 @@ public class GenerateOrderRequest extends GenericRequest {
         sb.append(", checksum='").append(checksum).append('\'');
         sb.append(", retryOnFailure=").append(retryOnFailure);
         sb.append(", renewal=").append(renewal);
+        sb.append(", duplicate=").append(duplicate);
         sb.append(", job=").append(job);
         sb.append(", platform='").append(platform).append('\'');
         sb.append(", user=").append(user);

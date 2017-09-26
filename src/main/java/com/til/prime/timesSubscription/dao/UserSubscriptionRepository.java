@@ -14,6 +14,7 @@ import java.util.List;
 @Repository
 public interface UserSubscriptionRepository extends GenericJpaRepository<UserSubscriptionModel, Long> {
     UserSubscriptionModel findByIdAndOrderIdAndSubscriptionVariantIdAndDeleted(Long id, String orderId, Long variantId, boolean deleted);
+    UserSubscriptionModel findByOrderIdAndSubscriptionVariantIdAndDeleted(String orderId, Long variantId, boolean deleted);
     UserSubscriptionModel findFirstByUserSsoIdAndBusinessAndSubscriptionVariantPlanTypeAndOrderCompletedAndDeletedOrderByIdDesc(String ssoId, BusinessEnum business, PlanTypeEnum planType, boolean orderCompleted, boolean deleted);
     List<UserSubscriptionModel> findByUserSsoIdAndBusinessAndOrderCompletedAndDeleted(String ssoId, BusinessEnum business, boolean orderCompleted, boolean deleted);
     List<UserSubscriptionModel> findByUserSsoIdAndBusinessAndOrderCompleted(String ssoId, BusinessEnum business, boolean orderCompleted);

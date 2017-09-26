@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public enum ChannelEnum {
-    GAANA, TOI, DINEOUT, ET;
+    TIMES_PRIME, GAANA, TOI, DINEOUT, ET;
 
     private static final Set<String> names = new HashSet<String>(){{
         for(ChannelEnum channelEnum: ChannelEnum.values()){

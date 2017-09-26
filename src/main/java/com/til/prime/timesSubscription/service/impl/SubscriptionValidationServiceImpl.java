@@ -128,7 +128,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
         PreConditions.notEmpty(request.getOrderId(), ValidationError.INVALID_ORDER_ID, validationResponse);
         PreConditions.notNull(request.getVariantId(), ValidationError.INVALID_VARIANT_ID, validationResponse);
         PreConditions.notEmpty(request.getPaymentMethod(), ValidationError.INVALID_PAYMENT_DETAILS, validationResponse);
-        PreConditions.notEmpty(request.getPaymentReference(), ValidationError.INVALID_PAYMENT_DETAILS, validationResponse);
+//        PreConditions.notEmpty(request.getPaymentReference(), ValidationError.INVALID_PAYMENT_DETAILS, validationResponse);
         PreConditions.notNull(request.getPrice(), ValidationError.INVALID_PRICE, validationResponse);
         return updateValid(validationResponse);
     }
@@ -333,8 +333,15 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
                 Gson gson = GlobalConstants.gson;
                 String ssoResponse = getSSOIdForTicketId(ticketId);
                 LOG.info("got sso response for [validateLogin] with ssoId" + ssoId + ", ticketId " + ticketId + ", response " + ssoResponse);
-                SSOValidateResponse ssoValidateResponse = gson.fromJson(ssoResponse, SSOValidateResponse.class);
-                if (ssoValidateResponse.getUserId().equals(ssoId)) {
+                SSOValidateResponse ssoValidateResponse = null;
+                try {
+                     ssoValidateResponse = gson.fromJson(ssoResponse, SSOValidateResponse.class);
+                }catch (Exception e){
+                    LOG.info("User Validation Failed From SSO Response [validateLogin] with ssoId " + ssoId + ", ticketId " + ticketId + ", response : " + ssoResponse);
+                    validationResponse.getValidationErrorSet().add(ValidationError.INVALID_SSO_CREDENTIALS);
+                    return;
+                }
+                if (ssoId.equals(ssoValidateResponse.getUserId())) {
                     LOG.info("User Validated From SSO Response [validateLogin] with ssoId " + ssoId + ", ticketId " + ticketId + ", response :" + ssoResponse);
                 } else {
                     LOG.info("User Validation Failed From SSO Response [validateLogin] with ssoId " + ssoId + ", ticketId " + ticketId + ", response : " + ssoResponse);

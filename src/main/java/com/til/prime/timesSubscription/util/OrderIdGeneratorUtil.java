@@ -5,9 +5,9 @@ import org.apache.commons.text.RandomStringGenerator;
 
 public class OrderIdGeneratorUtil {
 
-    private static final int SSO_ID_PREFIX_LENGTH = 5;
-    private static final int TICKET_ID_PREFIX_LENGTH = 5;
-    private static final int INDEPENDENT_SUFFIX_LENGTH = 22;
+    private static final int SSO_ID_PREFIX_LENGTH = 3;
+    private static final int TICKET_ID_PREFIX_LENGTH = 3;
+    private static final int INDEPENDENT_SUFFIX_LENGTH = 18;
 
     public static final String generateOrderId(String ssoId, String ticketId, int length){
         StringBuilder sb = new StringBuilder();

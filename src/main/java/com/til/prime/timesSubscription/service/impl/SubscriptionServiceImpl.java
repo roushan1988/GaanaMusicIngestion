@@ -132,7 +132,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             validationResponse = subscriptionValidationService.validatePostGenerateOrder(request, subscriptionVariantModel, userSubscriptionModel, restrictedUsageUserSubscription, validationResponse);
         }
         if(validationResponse.isValid()) {
-            if(request.isRetryOnFailure() || request.isRenewal()){
+            if(request.isRetryOnFailure() || request.isRenewal() || request.isDuplicate()){
                 useNewSubscription = true;
                 if(request.isRenewal()){
                     lastUserSubscription = userSubscriptionRepository.findFirstByUserSsoIdAndBusinessAndOrderCompletedAndDeletedOrderByIdDesc(request.getUser().getSsoId(), business, true, false);
@@ -161,14 +161,13 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         UserSubscriptionModel userSubscriptionModel = null;
         SubmitPurchaseResponse response = new SubmitPurchaseResponse();
         if(validationResponse.isValid()){
-            userSubscriptionModel = userSubscriptionRepository.findByIdAndOrderIdAndSubscriptionVariantIdAndDeleted(
-                    request.getUserSubscriptionId(), request.getOrderId(), request.getVariantId(), false);
+            userSubscriptionModel = userSubscriptionRepository.findByOrderIdAndSubscriptionVariantIdAndDeleted(request.getOrderId(), request.getVariantId(), false);
             validationResponse = subscriptionValidationService.validatePostSubmitPurchasePlan(request, userSubscriptionModel, validationResponse);
         }
         if(validationResponse.isValid()){
-            UserSubscriptionModel lastUserSubscription = userSubscriptionRepository.findFirstByUserSsoIdAndBusinessAndOrderCompletedAndDeletedOrderByIdDesc(request.getUser().getSsoId(), userSubscriptionModel.getBusiness(), true, false);
+            UserSubscriptionModel lastUserSubscription = userSubscriptionRepository.findFirstByUserSsoIdAndBusinessAndOrderCompletedAndDeletedOrderByIdDesc(userSubscriptionModel.getUser().getSsoId(), userSubscriptionModel.getBusiness(), true, false);
             userSubscriptionModel = subscriptionServiceHelper.updateSubmitPurchaseUserSubscription(request, userSubscriptionModel, lastUserSubscription);
-            userSubscriptionModel = saveUserSubscription(userSubscriptionModel, false, request.getUser().getSsoId(), request.getUser().getTicketId(), userSubscriptionModel.isOrderCompleted()? EventEnum.PAYMENT_SUCCESS: EventEnum.PAYMENT_FAILURE);
+            userSubscriptionModel = saveUserSubscription(userSubscriptionModel, false, userSubscriptionModel.getUser().getSsoId(), userSubscriptionModel.getTicketId(), userSubscriptionModel.isOrderCompleted()? EventEnum.PAYMENT_SUCCESS: EventEnum.PAYMENT_FAILURE);
         }
         response = subscriptionServiceHelper.prepareSubmitPurchaseResponse(response, userSubscriptionModel, validationResponse);
         return response;

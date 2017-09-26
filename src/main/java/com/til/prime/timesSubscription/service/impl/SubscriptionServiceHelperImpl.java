@@ -37,7 +37,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
         userSubscriptionModel.setUser(userModel);
         userSubscriptionModel.setTicketId(request.getUser().getTicketId());
         userSubscriptionModel.setSubscriptionVariant(variantModel);
-        userSubscriptionModel.setStartDate(lastUserSubscription==null? date: TimeUtils.addMillisInDate(lastUserSubscription.getEndDate(), 1));
+        userSubscriptionModel.setStartDate((lastUserSubscription==null || lastUserSubscription.getEndDate().before(date))? date: TimeUtils.addMillisInDate(lastUserSubscription.getEndDate(), 1));
         userSubscriptionModel.setEndDate(TimeUtils.addDaysInDate(userSubscriptionModel.getStartDate(), request.getDurationDays().intValue()));
         userSubscriptionModel.setPlanStatus(PlanStatusEnum.INIT);
         userSubscriptionModel.setBusiness(variantModel.getSubscriptionPlan().getBusiness());
@@ -101,8 +101,9 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
     @Override
     public InitPurchaseResponse prepareInitPurchaseResponse(InitPurchaseResponse response, UserSubscriptionModel userSubscriptionModel, UserSubscriptionModel lastUserSubscription, ValidationResponse validationResponse) {
         if(lastUserSubscription!=null){
-            response.setDaysLeft(TimeUtils.getDifferenceInDays(new Date(), userSubscriptionModel.getEndDate()).intValue());
+            response.setDaysLeft(TimeUtils.getDifferenceInDays(new Date(), lastUserSubscription.getEndDate()).intValue());
         }
+        response.setType(WebViewTypeEnum.TOAST.getName());
         if(validationResponse.isValid()){
             SubscriptionVariantModel variantModel = userSubscriptionModel.getSubscriptionVariant();
             response.setUserSubscriptionId(userSubscriptionModel.getId());
@@ -120,12 +121,14 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
 
     @Override
     public GenerateOrderResponse prepareGenerateOrderResponse(GenerateOrderResponse response, UserSubscriptionModel userSubscriptionModel, ValidationResponse validationResponse) {
-        if(validationResponse.isValid()){
+        if(userSubscriptionModel!=null){
             SubscriptionVariantModel variantModel = userSubscriptionModel.getSubscriptionVariant();
             response.setUserSubscriptionId(userSubscriptionModel.getId());
             response.setOrderId(userSubscriptionModel.getOrderId());
             response.setPlanId(variantModel.getSubscriptionPlan().getId());
             response.setVariantId(variantModel.getId());
+        }
+        if(validationResponse.isValid()){
             response = (GenerateOrderResponse) ResponseUtil.createSuccessResponse(response);
         }else{
             response = (GenerateOrderResponse) ResponseUtil.createFailureResponse(response, validationResponse.getValidationErrorSet(), validationResponse.getMaxCategory());
