@@ -29,4 +29,5 @@ public interface SubscriptionServiceHelper {
     GenericResponse prepareCheckEligibilityResponse(GenericResponse response, ValidationResponse validationResponse);
     CheckStatusResponse prepareCheckStatusResponse(CheckStatusResponse response, UserSubscriptionDTO userSubscriptionDTO, ValidationResponse validationResponse);
     UserModel getUser(GenericRequest request);
+    boolean renewSubscription(UserSubscriptionModel userSubscriptionModel);
 }

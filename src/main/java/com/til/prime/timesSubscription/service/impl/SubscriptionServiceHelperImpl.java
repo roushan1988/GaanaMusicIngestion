@@ -283,6 +283,33 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
         return userModel;
     }
 
+    @Override
+    public final boolean renewSubscription(UserSubscriptionModel userSubscriptionModel){
+        int retryCount = GlobalConstants.API_RETRY_COUNT;
+        RETRY_LOOP:
+        while (retryCount>0){
+            try{
+                Map<String, String> headers = Maps.newHashMap();
+                headers.put(GlobalConstants.CONTENT_TYPE, GlobalConstants.CONTENT_TYPE_JSON);
+                headers.put(GlobalConstants.CHANNEL, properties.getProperty(GlobalConstants.TP_CHANNEL_KEY));
+                headers.put(GlobalConstants.SSOID, userSubscriptionModel.getUser().getSsoId());
+                headers.put(GlobalConstants.STATUS, Integer.toString(userSubscriptionModel.getPlanStatus().getCode()));
+                headers.put(GlobalConstants.PLATFORM, userSubscriptionModel.getPlatform().getSsoChannel());
+                SSOProfileUpdateResponse response = httpConnectionUtils.requestWithHeaders(Maps.newHashMap(), headers, properties.getProperty(GlobalConstants.SSO_UPDATE_PROFILE_URL_KEY), SSOProfileUpdateResponse.class, GlobalConstants.POST);
+                if(response.getCode()==200 && GlobalConstants.SUCCESS.equals(response.getStatus()) && GlobalConstants.OK.equals(response.getMessage())){
+                    return true;
+                }
+                return false;
+            }catch (Exception e){
+                retryCount--;
+                if(retryCount>0){
+                    continue RETRY_LOOP;
+                }
+            }
+        }
+        return false;
+    }
+
     private final boolean communicateSSO(UserSubscriptionModel userSubscriptionModel){
         int retryCount = GlobalConstants.API_RETRY_COUNT;
         RETRY_LOOP:

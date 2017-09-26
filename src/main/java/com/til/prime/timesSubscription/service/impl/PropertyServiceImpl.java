@@ -61,6 +61,11 @@ public class PropertyServiceImpl implements PropertyService {
         return Arrays.stream(((String) getProperty(PropertyEnum.SUBSCRIPTION_EXPIRY_REMINDER_DAYS)).split(",")).map(i -> Long.parseLong(i)).collect(Collectors.toList());
     }
 
+    @Override
+    public List<Long> getExpiredSubscriptionRenewalReminderDays() {
+        return Arrays.stream(((String) getProperty(PropertyEnum.EXPIRED_SUBSCRIPTION_RENEWAL_REMINDER_DAYS)).split(",")).map(i -> Long.parseLong(i)).collect(Collectors.toList());
+    }
+
     private Object parseValue(String value, String type){
         switch(type){
             case "Integer": return Integer.parseInt(value);
