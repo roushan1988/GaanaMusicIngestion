@@ -37,7 +37,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
         userSubscriptionModel.setUser(userModel);
         userSubscriptionModel.setTicketId(request.getUser().getTicketId());
         userSubscriptionModel.setSubscriptionVariant(variantModel);
-        userSubscriptionModel.setStartDate((lastUserSubscription==null && lastUserSubscription.getEndDate().before(date))? date: TimeUtils.addMillisInDate(lastUserSubscription.getEndDate(), 1));
+        userSubscriptionModel.setStartDate((lastUserSubscription==null || lastUserSubscription.getEndDate().before(date))? date: TimeUtils.addMillisInDate(lastUserSubscription.getEndDate(), 1));
         userSubscriptionModel.setEndDate(TimeUtils.addDaysInDate(userSubscriptionModel.getStartDate(), request.getDurationDays().intValue()));
         userSubscriptionModel.setPlanStatus(PlanStatusEnum.INIT);
         userSubscriptionModel.setBusiness(variantModel.getSubscriptionPlan().getBusiness());
