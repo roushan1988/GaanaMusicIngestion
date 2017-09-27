@@ -9,12 +9,14 @@ import com.til.prime.timesSubscription.model.SubscriptionVariantModel;
 import com.til.prime.timesSubscription.model.UserModel;
 import com.til.prime.timesSubscription.model.UserSubscriptionAuditModel;
 import com.til.prime.timesSubscription.model.UserSubscriptionModel;
+import com.til.prime.timesSubscription.service.ChecksumService;
 import com.til.prime.timesSubscription.service.SubscriptionServiceHelper;
 import com.til.prime.timesSubscription.util.HttpConnectionUtils;
 import com.til.prime.timesSubscription.util.OrderIdGeneratorUtil;
 import com.til.prime.timesSubscription.util.ResponseUtil;
 import com.til.prime.timesSubscription.util.TimeUtils;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,11 +26,14 @@ import java.util.*;
 
 @Service
 public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper {
+    private static final Logger LOG = Logger.getLogger(SubscriptionServiceHelperImpl.class);
 
     @Autowired
     private HttpConnectionUtils httpConnectionUtils;
     @Resource(name = "config_properties")
     private Properties properties;
+    @Autowired
+    private ChecksumService checksumService;
 
     public UserSubscriptionModel generateInitPurchaseUserSubscription(InitPurchaseRequest request, SubscriptionVariantModel variantModel, UserSubscriptionModel lastUserSubscription, UserModel userModel, BigDecimal price){
         Date date = new Date();
@@ -127,6 +132,8 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
             response.setOrderId(userSubscriptionModel.getOrderId());
             response.setPlanId(variantModel.getSubscriptionPlan().getId());
             response.setVariantId(variantModel.getId());
+            response.setStartDate(userSubscriptionModel.getStartDate());
+            response.setEndDate(userSubscriptionModel.getEndDate());
         }
         if(validationResponse.isValid()){
             response = (GenerateOrderResponse) ResponseUtil.createSuccessResponse(response);
@@ -288,29 +295,41 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
 
     @Override
     public final boolean renewSubscription(UserSubscriptionModel userSubscriptionModel){
-        int retryCount = GlobalConstants.API_RETRY_COUNT;
-        RETRY_LOOP:
-        while (retryCount>0){
-            try{
-                Map<String, String> headers = Maps.newHashMap();
-                headers.put(GlobalConstants.CONTENT_TYPE, GlobalConstants.CONTENT_TYPE_JSON);
-                headers.put(GlobalConstants.CHANNEL, properties.getProperty(GlobalConstants.TP_CHANNEL_KEY));
-                headers.put(GlobalConstants.SSOID, userSubscriptionModel.getUser().getSsoId());
-                headers.put(GlobalConstants.STATUS, Integer.toString(userSubscriptionModel.getPlanStatus().getCode()));
-                headers.put(GlobalConstants.PLATFORM, userSubscriptionModel.getPlatform().getSsoChannel());
-                SSOProfileUpdateResponse response = httpConnectionUtils.requestWithHeaders(Maps.newHashMap(), headers, properties.getProperty(GlobalConstants.SSO_UPDATE_PROFILE_URL_KEY), SSOProfileUpdateResponse.class, GlobalConstants.POST);
-                if(response.getCode()==200 && GlobalConstants.SUCCESS.equals(response.getStatus()) && GlobalConstants.OK.equals(response.getMessage())){
-                    return true;
-                }
-                return false;
-            }catch (Exception e){
-                retryCount--;
-                if(retryCount>0){
-                    continue RETRY_LOOP;
-                }
-            }
+        try{
+            RenewSubscriptionRequest renewSubscriptionRequest = new RenewSubscriptionRequest();
+            renewSubscriptionRequest.setUserSubscriptionId(userSubscriptionModel.getId());
+            renewSubscriptionRequest.setOrderId(userSubscriptionModel.getOrderId());
+            renewSubscriptionRequest.setPlatform(PlatformEnum.JOB.name());
+            renewSubscriptionRequest.setPrice(userSubscriptionModel.getSubscriptionVariant().getPrice().doubleValue());
+            renewSubscriptionRequest.setJob(true);
+            updateSubscriptionChecksumForRenewSubscription(renewSubscriptionRequest);
+            PaymentsGenericResponse response = httpConnectionUtils.requestForObject(renewSubscriptionRequest, properties.getProperty(GlobalConstants.PAYMENTS_RENEW_SUBSCRIPTION_URL_KEY), PaymentsGenericResponse.class, GlobalConstants.POST);
+            return inferPaymentsResponse(response);
+        }catch (Exception e){
+            LOG.error("Exception in api call to payments for renewal of subscription with userSubscriptionId: "+userSubscriptionModel.getId()+", orderId: "+userSubscriptionModel.getOrderId(), e);
         }
         return false;
+    }
+
+    private void updateSubscriptionChecksumForRenewSubscription(RenewSubscriptionRequest request) {
+        try {
+            StringBuilder sb = new StringBuilder();
+            sb.append(request.getSecretKey()).append(request.getUserSubscriptionId()).append(request.getOrderId())
+                    .append(request.getPrice()).append(request.getPlatform()).append(request.isJob());
+            String checksum = checksumService.calculateChecksumHmacSHA256(properties.getProperty(GlobalConstants.PAYMENTS_ENCRYPTION_KEY), sb.toString());
+            request.setChecksum(checksum);
+        } catch (Exception e) {
+            LOG.error("error while calculating checksum for subscription call for submit payments: ", e);
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    private boolean inferPaymentsResponse(PaymentsGenericResponse response){
+        if(response.getStatus().equals(GlobalConstants.SUCCESS) && response.getStatusCode()==GlobalConstants.PAYMENTS_SUCCESS_STATUS_CODE){
+            return true;
+        }else{
+            return false;
+        }
     }
 
     private final boolean communicateSSO(UserSubscriptionModel userSubscriptionModel){

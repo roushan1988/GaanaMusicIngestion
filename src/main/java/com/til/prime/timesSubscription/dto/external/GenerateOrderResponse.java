@@ -1,10 +1,14 @@
 package com.til.prime.timesSubscription.dto.external;
 
+import java.util.Date;
+
 public class GenerateOrderResponse extends GenericResponse {
     private Long userSubscriptionId;
     private String orderId;
     private Long planId;
     private Long variantId;
+    private Date startDate;
+    private Date endDate;
 
     public Long getUserSubscriptionId() {
         return userSubscriptionId;
@@ -38,6 +42,22 @@ public class GenerateOrderResponse extends GenericResponse {
         this.variantId = variantId;
     }
 
+    public Date getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(Date startDate) {
+        this.startDate = startDate;
+    }
+
+    public Date getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(Date endDate) {
+        this.endDate = endDate;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("GenerateOrderResponse{");
@@ -45,6 +65,8 @@ public class GenerateOrderResponse extends GenericResponse {
         sb.append(", orderId='").append(orderId).append('\'');
         sb.append(", planId='").append(planId);
         sb.append(", variantId=").append(variantId);
+        sb.append(", startDate=").append(startDate);
+        sb.append(", endDate=").append(endDate);
         sb.append(", success=").append(success);
         sb.append(", responseCode=").append(responseCode);
         sb.append(", responseMessage='").append(responseMessage).append('\'');
