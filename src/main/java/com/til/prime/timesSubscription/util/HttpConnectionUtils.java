@@ -44,7 +44,7 @@ public class HttpConnectionUtils {
 	}
 
 	public <T> T requestWithHeaders(Object data, Map<String, String> headerMap, String url, Class<T> clazz, String method){
-		logger.info("Making HttpRequest url " + url + ", data: "+data+", contentType: application/json, method " + method);
+		logger.info("Making HttpRequest url " + url + ", headers: "+headerMap+", data: "+data+", contentType: application/json, method " + method);
 		HttpHeaders headers = new HttpHeaders();
 		for(String key: headerMap.keySet()){
 			headers.set(key, headerMap.get(key));
@@ -64,7 +64,7 @@ public class HttpConnectionUtils {
 			throw e;
 		}
 		T response = responseEntity.getBody();
-		logger.info("Response for url: "+url+", data: "+data+", response: "+response);
+		logger.info("Response for url: "+url+", headers: "+headerMap+", data: "+data+", response: "+response);
 		return response;
 	}
 

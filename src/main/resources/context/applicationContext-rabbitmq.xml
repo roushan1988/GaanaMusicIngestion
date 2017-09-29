@@ -11,5 +11,6 @@
 
     <rabbit:admin connection-factory="connectionFactory"/>
 
-    <rabbit:template id="amqpTemplate" connection-factory="connectionFactory" exchange="tpExchange"/>
+    <rabbit:template id="amqpTemplateSMS" connection-factory="connectionFactory" exchange="${rabbitmq.sms.exchange}"/>
+    <rabbit:template id="amqpTemplateEmail" connection-factory="connectionFactory" exchange="${rabbitmq.email.exchange}"/>
 </beans>

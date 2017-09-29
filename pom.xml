@@ -264,6 +264,20 @@
       <groupId>org.springframework.amqp</groupId>
       <artifactId>spring-amqp</artifactId>
       <version>1.7.4.RELEASE</version>
+      <exclusions>
+        <!-- https://mvnrepository.com/artifact/com.rabbitmq/http-client -->
+        <exclusion>
+          <groupId>com.rabbitmq</groupId>
+          <artifactId>http-client</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core -->
+    <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-annotations -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-annotations</artifactId>
+      <version>2.9.1</version>
     </dependency>
 
   </dependencies>

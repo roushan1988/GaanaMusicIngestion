@@ -11,8 +11,8 @@ public interface Job {
     boolean releaseLock();
     boolean updateCurrentExecutionOwner(boolean acquireLock);
     void runJob();
-    void beforeShutdown();
     JobDetails execute();
     void run();
+    void beforeShutdown();
     JobAuditModel getJobAudit(JobDetails jobDetails);
 }
