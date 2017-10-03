@@ -98,7 +98,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
             response.setPlanDTOList(subscriptionPlans);
             response = (PlanListResponse) ResponseUtil.createSuccessResponse(response);
         }else{
-            response = (PlanListResponse) ResponseUtil.createFailureResponse(response, validationResponse.getValidationErrorSet(), validationResponse.getMaxCategory());
+            response = (PlanListResponse) ResponseUtil.createFailureResponse(response, validationResponse, validationResponse.getMaxCategory());
         }
         return response;
     }
@@ -119,7 +119,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
             response.setPaymentAmount(userSubscriptionModel.getSubscriptionVariant().getPrice());
             response = (InitPurchaseResponse) ResponseUtil.createSuccessResponse(response);
         }else{
-            response = (InitPurchaseResponse) ResponseUtil.createFailureResponse(response, validationResponse.getValidationErrorSet(), validationResponse.getMaxCategory());
+            response = (InitPurchaseResponse) ResponseUtil.createFailureResponse(response, validationResponse, validationResponse.getMaxCategory());
         }
         return response;
     }
@@ -138,7 +138,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
         if(validationResponse.isValid()){
             response = (GenerateOrderResponse) ResponseUtil.createSuccessResponse(response);
         }else{
-            response = (GenerateOrderResponse) ResponseUtil.createFailureResponse(response, validationResponse.getValidationErrorSet(), validationResponse.getMaxCategory());
+            response = (GenerateOrderResponse) ResponseUtil.createFailureResponse(response, validationResponse, validationResponse.getMaxCategory());
         }
         return response;
     }
@@ -156,7 +156,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
             response.setAutoRenewal(userSubscriptionModel.isAutoRenewal());
             response = (SubmitPurchaseResponse) ResponseUtil.createSuccessResponse(response);
         }else{
-            response = (SubmitPurchaseResponse) ResponseUtil.createFailureResponse(response, validationResponse.getValidationErrorSet(), validationResponse.getMaxCategory());
+            response = (SubmitPurchaseResponse) ResponseUtil.createFailureResponse(response, validationResponse, validationResponse.getMaxCategory());
         }
         return response;
     }
@@ -179,7 +179,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
             response.setUserSubscriptionDTOList(userSubscriptionDTOList);
             response = (PurchaseHistoryResponse) ResponseUtil.createSuccessResponse(response);
         }else{
-            response = (PurchaseHistoryResponse) ResponseUtil.createFailureResponse(response, validationResponse.getValidationErrorSet(), validationResponse.getMaxCategory());
+            response = (PurchaseHistoryResponse) ResponseUtil.createFailureResponse(response, validationResponse, validationResponse.getMaxCategory());
         }
         return response;
     }
@@ -190,7 +190,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
             response.setRefundAmount(refundAmount);
             response = (CancelSubscriptionResponse) ResponseUtil.createSuccessResponse(response);
         }else{
-            response = (CancelSubscriptionResponse) ResponseUtil.createFailureResponse(response, validationResponse.getValidationErrorSet(), validationResponse.getMaxCategory());
+            response = (CancelSubscriptionResponse) ResponseUtil.createFailureResponse(response, validationResponse, validationResponse.getMaxCategory());
         }
         return response;
     }
@@ -255,7 +255,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
             response.setEndDate(userSubscriptionModel.getEndDate());
             response = (ExtendExpiryResponse) ResponseUtil.createSuccessResponse(response);
         }else{
-            response = (ExtendExpiryResponse) ResponseUtil.createFailureResponse(response, validationResponse.getValidationErrorSet(), validationResponse.getMaxCategory());
+            response = (ExtendExpiryResponse) ResponseUtil.createFailureResponse(response, validationResponse, validationResponse.getMaxCategory());
         }
         return response;
     }
@@ -265,7 +265,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
         if(validationResponse.isValid()){
             response = ResponseUtil.createSuccessResponse(response);
         }else{
-            response = ResponseUtil.createFailureResponse(response, validationResponse.getValidationErrorSet(), validationResponse.getMaxCategory());
+            response = ResponseUtil.createFailureResponse(response, validationResponse, validationResponse.getMaxCategory());
         }
         return response;
     }
@@ -276,7 +276,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
             response.setUserSubscriptionDTO(userSubscriptionDTO);
             response = (CheckStatusResponse) ResponseUtil.createSuccessResponse(response);
         }else{
-            response = (CheckStatusResponse) ResponseUtil.createFailureResponse(response, validationResponse.getValidationErrorSet(), validationResponse.getMaxCategory());
+            response = (CheckStatusResponse) ResponseUtil.createFailureResponse(response, validationResponse, validationResponse.getMaxCategory());
         }
         return response;
     }
