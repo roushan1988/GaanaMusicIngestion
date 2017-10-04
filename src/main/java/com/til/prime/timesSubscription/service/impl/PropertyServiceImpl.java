@@ -41,7 +41,7 @@ public class PropertyServiceImpl implements PropertyService {
     private Object getProperty(PropertyEnum propertyEnum){
         Object value = propertyMap.get(propertyEnum);
         if(value==null){
-            LOG.info("Find coupon property - " + propertyEnum.name());
+            LOG.info("Find property - " + propertyEnum.name());
             SubscriptionPropertyModel subscriptionProperty = subscriptionPropertyRepository.findByKey(propertyEnum);
             if(subscriptionProperty==null){
                 return null;

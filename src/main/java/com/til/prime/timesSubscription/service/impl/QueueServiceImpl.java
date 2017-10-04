@@ -35,7 +35,7 @@ public class QueueServiceImpl implements QueueService {
     @Autowired
     private AmqpTemplate amqpTemplateEmail;
 
-    //    @PostConstruct
+//    @PostConstruct
     public void test() throws Exception{
         SMSTask smsTask = new SMSTask();
         smsTask.setMobileNumber("9880252944");
