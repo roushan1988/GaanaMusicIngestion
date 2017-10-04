@@ -39,6 +39,7 @@ public enum ValidationError {
 	ORDER_NOT_GENERATED(30, "Order not generated", 1, 1),
 	USER_DETAILS_MISSING(31, "Oops! Something went wrong. Please login again.", 1, 2),
 	INVALID_ENCRYPTION(32, "Invalid Encryption", 1, 1),
+	INVALID_TRANSACTION_STATUS(33, "Invalid Transaction Status", 1, 1),
 	;
 
 	public static final Integer maxCategory = 2;

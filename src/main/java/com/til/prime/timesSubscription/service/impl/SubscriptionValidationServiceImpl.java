@@ -103,6 +103,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
             } else {
                 PreConditions.mustBeNull(userSubscriptionModel.getOrderId(), ValidationError.ORDER_ALREADY_GENERATED, validationResponse);
             }
+            PreConditions.mustBeFalse(TransactionStatusEnum.COMPLETED_STATES.contains(userSubscriptionModel.getTransactionStatus()), ValidationError.INVALID_TRANSACTION_STATUS, validationResponse);
         }
         if(variantModel!=null) {
             PreConditions.mustBeEqual(request.getBusiness(), userSubscriptionModel.getBusiness().name(), ValidationError.INVALID_USER_SUBSCRIPTION_DETAILS, validationResponse);

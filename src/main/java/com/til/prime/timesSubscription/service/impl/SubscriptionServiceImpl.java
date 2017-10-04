@@ -121,7 +121,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         if(validationResponse.isValid()){
             planType = PlanTypeEnum.valueOf(request.getPlanType());
             business = BusinessEnum.valueOf(request.getBusiness());
-            userSubscriptionModel = userSubscriptionRepository.findById(request.getUserSubscriptionId());
+            userSubscriptionModel = userSubscriptionRepository.findByIdAndDeleted(request.getUserSubscriptionId(), false);
             if(userSubscriptionModel!=null) {
                 subscriptionVariantModel = userSubscriptionModel.getSubscriptionVariant();
             }
