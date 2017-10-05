@@ -138,7 +138,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
     public ValidationResponse validatePostSubmitPurchasePlan(SubmitPurchaseRequest request, UserSubscriptionModel userSubscriptionModel, ValidationResponse validationResponse) {
         PreConditions.notNull(userSubscriptionModel, ValidationError.INVALID_USER_SUBSCRIPTION_DETAILS, validationResponse);
         if(userSubscriptionModel!=null){
-            PreConditions.mustBeFalse(userSubscriptionModel.isOrderCompleted(), ValidationError.INVALID_USER_SUBSCRIPTION_DETAILS, validationResponse);
+            PreConditions.mustBeFalse(userSubscriptionModel.isOrderCompleted(), ValidationError.ORDER_ALREADY_COMPLETED, validationResponse);
             PreConditions.mustBeEqual(request.getPaymentMethod(), userSubscriptionModel.getPaymentMethod(), ValidationError.INVALID_PAYMENT_METHOD, validationResponse);
             PreConditions.bigDecimalComparisonMustBeEqual(userSubscriptionModel.getSubscriptionVariant().getPrice(), request.getPrice(), ValidationError.INVALID_PRICE, validationResponse);
             if(request.isAutoRenewal()){
