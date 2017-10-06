@@ -20,20 +20,22 @@ public class ResponseInterceptor extends WebContentInterceptor {
 	public Object process(ProceedingJoinPoint joinPoint, final Loggable loggable) throws Throwable {
 		MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
 		Method method = methodSignature.getMethod();
-		if(method != null){
-			LOG.info("ResponseTimeInterceptor controller: "+joinPoint.getTarget().getClass()+" api name: "+method.getName()+", ");
-		}
-		if (null != method.getParameterTypes() && null != joinPoint.getArgs() && joinPoint.getArgs().length > 0) {
-			LOG.info("ResponseInterceptor Request "+ joinPoint.getArgs()[0].toString());
-		}
+		StringBuilder sb = new StringBuilder();
 		Object returnValue = null;
 		Long start = System.currentTimeMillis();
 		returnValue = joinPoint.proceed();
 		Long end = System.currentTimeMillis();
-		if (null != returnValue ) {
-			LOG.info("ResponseInterceptor Response "+ returnValue.toString());
+		if(method != null){
+			sb.append("ResponseTimeInterceptor controller: "+joinPoint.getTarget().getClass()+" api name: "+method.getName()).append(", ");
 		}
-		LOG.info("ResponseInterceptor time taken in millis :"+(end-start));
+		sb.append("Time taken in millis :"+(end-start)).append(", ");
+		if (null != method.getParameterTypes() && null != joinPoint.getArgs() && joinPoint.getArgs().length > 0) {
+			sb.append("Request "+ (joinPoint.getArgs()[0]!=null? joinPoint.getArgs()[0].toString(): "")).append(", ");
+		}
+		if (null != returnValue ) {
+			sb.append(" Response "+ returnValue.toString()).append(", ");
+		}
+		LOG.info(sb);
 		return returnValue;
 	}
 
