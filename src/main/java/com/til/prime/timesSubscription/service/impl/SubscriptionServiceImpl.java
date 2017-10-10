@@ -1,6 +1,7 @@
 package com.til.prime.timesSubscription.service.impl;
 
 import com.til.prime.timesSubscription.constants.GlobalConstants;
+import com.til.prime.timesSubscription.constants.RedisConstants;
 import com.til.prime.timesSubscription.convertor.ModelToDTOConvertorUtil;
 import com.til.prime.timesSubscription.dao.*;
 import com.til.prime.timesSubscription.dto.external.*;
@@ -13,9 +14,12 @@ import com.til.prime.timesSubscription.util.OrderIdGeneratorUtil;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,7 +28,8 @@ import java.util.List;
 
 @Service
 public class SubscriptionServiceImpl implements SubscriptionService {
-
+    @Resource
+    private CacheManager cacheManager;
     @Autowired
     private SubscriptionValidationService subscriptionValidationService;
     @Autowired
@@ -276,16 +281,22 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     public CheckStatusResponse checkStatus(CheckStatusRequest request) {
         ValidationResponse validationResponse = subscriptionValidationService.validatePreCheckStatus(request);
         CheckStatusResponse response = new CheckStatusResponse();
-        UserSubscriptionModel userSubscriptionModel = null;
-        UserSubscriptionDTO userSubscriptionDTO = null;
+        SubscriptionStatusDTO statusDTO = null;
+        if(validationResponse.isValid()) {
+            Cache.ValueWrapper vw = cacheManager.getCache(RedisConstants.PRIME_STATUS_CACHE_KEY).get(request.getUser().getMobile());
+            if(vw!=null){
+                statusDTO = (SubscriptionStatusDTO) vw.get();
+            }
+        }
+        if(statusDTO!=null || !request.isFallback()){
+            response = subscriptionServiceHelper.prepareCheckStatusResponse(response, statusDTO, validationResponse);
+            return response;
+        }
         if(validationResponse.isValid()){
-            userSubscriptionModel = userSubscriptionRepository.findByIdAndOrderIdAndSubscriptionVariantIdAndDeleted(request.getUserSubscriptionId(), request.getOrderId(), request.getVariantId(), false);
+            UserSubscriptionModel userSubscriptionModel = userSubscriptionRepository.findByUserMobileAndStatusAndDeleted(request.getUser().getMobile(), StatusEnum.ACTIVE, false);
             validationResponse = subscriptionValidationService.validatePostCheckStatus(request, userSubscriptionModel, validationResponse);
         }
-        if(validationResponse.isValid()){
-            userSubscriptionDTO = ModelToDTOConvertorUtil.getUserSubscriptionDTO(userSubscriptionModel);
-        }
-        response = subscriptionServiceHelper.prepareCheckStatusResponse(response, userSubscriptionDTO, validationResponse);
+        response = subscriptionServiceHelper.prepareCheckStatusResponse(response, statusDTO, validationResponse);
         return response;
     }
 
@@ -300,6 +311,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
+    @Transactional
     public UserSubscriptionModel saveUserSubscription(UserSubscriptionModel userSubscriptionModel, boolean retryForOrderId, String ssoId, String ticketId, EventEnum event){
         int retryCount = retryForOrderId? GlobalConstants.DB_RETRY_COUNT : GlobalConstants.SINGLE_TRY;
         retryLoop:
@@ -308,6 +320,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 userSubscriptionModel = userSubscriptionRepository.save(userSubscriptionModel);
                 UserSubscriptionAuditModel auditModel = subscriptionServiceHelper.getUserSubscriptionAuditModel(userSubscriptionModel, event);
                 auditModel = userSubscriptionAuditRepository.save(auditModel);
+                updateUserStatus(userSubscriptionModel);
                 break retryLoop;
             } catch (Exception e) {
                 retryCount--;
@@ -319,5 +332,29 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             }
         }
         return userSubscriptionModel;
+    }
+
+    private void updateUserStatus(UserSubscriptionModel userSubscriptionModel){
+        StatusEnum statusEnum = userSubscriptionModel.getStatus();
+        String mobile = userSubscriptionModel.getUser().getMobile();
+        if(statusEnum == StatusEnum.ACTIVE) {
+            if(userSubscriptionModel.isDeleted()){
+                cacheManager.getCache(RedisConstants.PRIME_STATUS_CACHE_KEY).evict(mobile);
+            }else{
+                cacheManager.getCache(RedisConstants.PRIME_STATUS_CACHE_KEY).put(mobile, getSubscriptionStatusDTO(userSubscriptionModel));
+            }
+        }
+        if(statusEnum == StatusEnum.EXPIRED) {
+            cacheManager.getCache(RedisConstants.PRIME_STATUS_CACHE_KEY).evict(mobile);
+        }
+    }
+
+    private SubscriptionStatusDTO getSubscriptionStatusDTO(UserSubscriptionModel userSubscriptionModel){
+        SubscriptionStatusDTO statusDTO = new SubscriptionStatusDTO();
+        statusDTO.setStartDate(userSubscriptionModel.getStartDate());
+        statusDTO.setEndDate(userSubscriptionModel.getEndDate());
+        statusDTO.setPlanStatus(userSubscriptionModel.getPlanStatus().getCode());
+        statusDTO.setAutoRenewal(userSubscriptionModel.isAutoRenewal());
+        return statusDTO;
     }
 }

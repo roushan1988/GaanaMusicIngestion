@@ -27,7 +27,7 @@ public interface SubscriptionServiceHelper {
     UserSubscriptionModel extendTrial(UserSubscriptionModel userSubscriptionModel, Long extensionDays);
     ExtendExpiryResponse prepareExtendExpiryResponse(ExtendExpiryResponse response, UserSubscriptionModel userSubscriptionModel, ValidationResponse validationResponse);
     GenericResponse prepareCheckEligibilityResponse(GenericResponse response, ValidationResponse validationResponse);
-    CheckStatusResponse prepareCheckStatusResponse(CheckStatusResponse response, UserSubscriptionDTO userSubscriptionDTO, ValidationResponse validationResponse);
+    CheckStatusResponse prepareCheckStatusResponse(CheckStatusResponse response, SubscriptionStatusDTO subscriptionStatusDTO, ValidationResponse validationResponse);
     UserModel getUser(GenericRequest request);
     boolean renewSubscription(UserSubscriptionModel userSubscriptionModel);
 }

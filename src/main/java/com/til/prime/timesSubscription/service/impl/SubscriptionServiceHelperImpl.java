@@ -271,9 +271,10 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
     }
 
     @Override
-    public CheckStatusResponse prepareCheckStatusResponse(CheckStatusResponse response, UserSubscriptionDTO userSubscriptionDTO, ValidationResponse validationResponse) {
+    public CheckStatusResponse prepareCheckStatusResponse(CheckStatusResponse response, SubscriptionStatusDTO subscriptionStatusDTO, ValidationResponse validationResponse) {
+        response.setTimesPrimeUser(subscriptionStatusDTO!=null);
+        response.setSubscriptionStatusDTO(subscriptionStatusDTO);
         if(validationResponse.isValid()){
-            response.setUserSubscriptionDTO(userSubscriptionDTO);
             response = (CheckStatusResponse) ResponseUtil.createSuccessResponse(response);
         }else{
             response = (CheckStatusResponse) ResponseUtil.createFailureResponse(response, validationResponse, validationResponse.getMaxCategory());

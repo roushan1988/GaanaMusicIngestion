@@ -222,10 +222,11 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
     @Override
     public ValidationResponse validatePreCheckStatus(CheckStatusRequest request) {
         ValidationResponse validationResponse = new ValidationResponse();
-        validationResponse = validateEncryptionForCheckStatus(request, validationResponse);
-        PreConditions.notNull(request.getVariantId(), ValidationError.INVALID_VARIANT_ID, validationResponse);
-        PreConditions.notNull(request.getUserSubscriptionId(), ValidationError.INVALID_USER_SUBSCRIPTION_ID, validationResponse);
-        PreConditions.notEmpty(request.getOrderId(), ValidationError.INVALID_ORDER_ID, validationResponse);
+        PreConditions.notNull(request.getUser(), ValidationError.INVALID_USER, validationResponse);
+        if(request.getUser()!=null) {
+            PreConditions.validMobile(request.getUser().getMobile(), ValidationError.INVALID_MOBILE, validationResponse);
+            validationResponse = validateEncryptionForCheckStatus(request, validationResponse);
+        }
         return updateValid(validationResponse);
     }
 
@@ -300,7 +301,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
         if(StringUtils.isNotEmpty(request.getChecksum()) && StringUtils.isNotEmpty(request.getSecretKey())) {
             try {
                 StringBuilder sb = new StringBuilder();
-                sb.append(request.getSecretKey()).append(request.getUserSubscriptionId()).append(request.getVariantId()).append(request.getOrderId());
+                sb.append(request.getSecretKey()).append(request.getUser().getMobile());
                 String checksum = checksumService.calculateChecksumHmacSHA256(properties.getProperty(GlobalConstants.PAYMENTS_ENCRYPTION_KEY), sb.toString());
                 PreConditions.mustBeEqual(checksum, request.getChecksum(), ValidationError.INVALID_ENCRYPTION, validationResponse);
             } catch (Exception e) {
