@@ -19,7 +19,8 @@ public interface SubscriptionValidationService {
     ValidationResponse validatePostExtendExpiry(ExtendExpiryRequest request, UserSubscriptionModel userSubscriptionModel, ValidationResponse validationResponse);
     ValidationResponse validatePreCheckEligibility(CheckEligibilityRequest request);
     ValidationResponse validatePostCheckEligibility(CheckEligibilityRequest request, SubscriptionVariantModel variantModel, UserSubscriptionModel lastModel, UserSubscriptionModel restrictedModel, ValidationResponse validationResponse);
-    ValidationResponse validatePreCheckStatus(CheckStatusRequest request);
+    ValidationResponse validatePreCheckStatusViaApp(CheckStatusRequest request);
+    ValidationResponse validatePreCheckStatusViaServer(CheckStatusRequest request);
     ValidationResponse validatePostCheckStatus(CheckStatusRequest request, UserSubscriptionModel userSubscriptionModel, ValidationResponse validationResponse);
     ValidationResponse validateUser(GenericRequest request, ValidationResponse validationResponse);
     ValidationResponse validateCredentials(GenericRequest request, ValidationResponse validationResponse);

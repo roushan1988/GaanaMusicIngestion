@@ -152,6 +152,18 @@ CREATE TABLE `subscription_property` (
   UNIQUE KEY `key_name` (`key_name`)
 );
 
+CREATE TABLE `external_clients` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `client_id` varchar(128) NOT NULL,
+  `secret_key` varchar(256) NOT NULL,
+  `encryption_key` text NOT NULL,
+  `created` datetime NOT NULL,
+  `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `deleted` tinyint(1) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `my_client` (`client_id`)
+);
+
 CREATE TABLE `job` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(128) NOT NULL,

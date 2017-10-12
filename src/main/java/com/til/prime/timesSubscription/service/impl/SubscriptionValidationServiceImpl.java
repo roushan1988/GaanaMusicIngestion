@@ -4,9 +4,11 @@ import com.google.gson.Gson;
 import com.til.prime.timesSubscription.constants.GlobalConstants;
 import com.til.prime.timesSubscription.dto.external.*;
 import com.til.prime.timesSubscription.enums.*;
+import com.til.prime.timesSubscription.model.ExternalClientModel;
 import com.til.prime.timesSubscription.model.SubscriptionVariantModel;
 import com.til.prime.timesSubscription.model.UserSubscriptionModel;
 import com.til.prime.timesSubscription.service.ChecksumService;
+import com.til.prime.timesSubscription.service.PropertyService;
 import com.til.prime.timesSubscription.service.SubscriptionValidationService;
 import com.til.prime.timesSubscription.util.PreConditions;
 import com.til.prime.timesSubscription.util.RestTemplateUtil;
@@ -33,6 +35,8 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
     private ChecksumService checksumService;
     @Resource(name = "config_properties")
     private Properties properties;
+    @Autowired
+    PropertyService propertyService;
 
     @Override
     public ValidationResponse validateAllPlans(PlanListRequest request) {
@@ -220,7 +224,14 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
     }
 
     @Override
-    public ValidationResponse validatePreCheckStatus(CheckStatusRequest request) {
+    public ValidationResponse validatePreCheckStatusViaApp(CheckStatusRequest request) {
+        ValidationResponse validationResponse = new ValidationResponse();
+        validationResponse = validateUser(request, validationResponse);
+        return updateValid(validationResponse);
+    }
+
+    @Override
+    public ValidationResponse validatePreCheckStatusViaServer(CheckStatusRequest request) {
         ValidationResponse validationResponse = new ValidationResponse();
         PreConditions.notNull(request.getUser(), ValidationError.INVALID_USER, validationResponse);
         if(request.getUser()!=null) {
@@ -254,8 +265,8 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
         if(request.getUser()!=null){
             PreConditions.notNull(request.getUser().getSsoId(), ValidationError.INVALID_SSO_ID, validationResponse);
             PreConditions.notNull(request.getUser().getTicketId(), ValidationError.INVALID_TICKET_ID, validationResponse);
-            if(StringUtils.isNotEmpty(request.getUser().getSsoId()) && StringUtils.isNotEmpty(request.getUser().getTicketId())){
-                validateSSOLogin(request.getUser().getSsoId(), request.getUser().getTicketId(), validationResponse);
+            if(StringUtils.isNotEmpty(request.getUser().getSsoId()) && StringUtils.isNotEmpty(request.getUser().getTicketId()) && StringUtils.isNotEmpty(request.getUser().getMobile())){
+                validateSSOLogin(request.getUser().getSsoId(), request.getUser().getTicketId(), request.getUser().getMobile(), validationResponse);
             }
         }
         return updateValid(validationResponse);
@@ -296,13 +307,22 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
 
     @Override
     public ValidationResponse validateEncryptionForCheckStatus(CheckStatusRequest request, ValidationResponse validationResponse) {
-        PreConditions.mustBeEqual(request.getSecretKey(), properties.getProperty(GlobalConstants.PAYMENTS_SECRET_KEY), ValidationError.INVALID_SECRET_KEY, validationResponse);
-        PreConditions.notEmpty(request.getChecksum(), ValidationError.INVALID_ENCRYPTION, validationResponse);
-        if(StringUtils.isNotEmpty(request.getChecksum()) && StringUtils.isNotEmpty(request.getSecretKey())) {
+        PreConditions.notEmpty(request.getClientId(), ValidationError.INVALID_CLIENT_ID, validationResponse);
+        PreConditions.notEmpty(request.getSecretKey(), ValidationError.INVALID_CLIENT_SECRET_KEY, validationResponse);
+        PreConditions.notEmpty(request.getChecksum(), ValidationError.INVALID_CHECKSUM, validationResponse);
+        ExternalClientModel client = null;
+        if(StringUtils.isNotEmpty(request.getClientId()) && StringUtils.isNotEmpty(request.getSecretKey()) && StringUtils.isNotEmpty(request.getChecksum())){
+            client = propertyService.getExternalClient(request.getClientId());
+            PreConditions.notNull(client, ValidationError.INVALID_CLIENT_ID, validationResponse);
+            if(client!=null) {
+                PreConditions.mustBeEqual(request.getSecretKey(), client.getSecretKey(), ValidationError.INVALID_CLIENT_SECRET_KEY, validationResponse);
+            }
+        }
+        if(validationResponse.getValidationErrorSet().isEmpty()) {
             try {
                 StringBuilder sb = new StringBuilder();
                 sb.append(request.getSecretKey()).append(request.getUser().getMobile());
-                String checksum = checksumService.calculateChecksumHmacSHA256(properties.getProperty(GlobalConstants.PAYMENTS_ENCRYPTION_KEY), sb.toString());
+                String checksum = checksumService.calculateChecksumHmacSHA256(client.getEncryptionKey(), sb.toString());
                 PreConditions.mustBeEqual(checksum, request.getChecksum(), ValidationError.INVALID_ENCRYPTION, validationResponse);
             } catch (Exception e) {
                 validationResponse.getValidationErrorSet().add(ValidationError.INVALID_ENCRYPTION);
@@ -322,11 +342,11 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
 
     public void test() {
         ValidationResponse validationResponse = new ValidationResponse();
-        validateSSOLogin("9mh2ty8bdn6kdcxsi90urc2nz", "9464cb4968b745758082ed4c019c41b5", validationResponse);
+        validateSSOLogin("9mh2ty8bdn6kdcxsi90urc2nz", "9464cb4968b745758082ed4c019c41b5", "9880252944", validationResponse);
         System.out.println(validationResponse);
     }
 
-    private void validateSSOLogin(String ssoId, String ticketId, ValidationResponse validationResponse) {
+    private void validateSSOLogin(String ssoId, String ticketId, String mobile, ValidationResponse validationResponse) {
         int retryCount = GlobalConstants.API_RETRY_COUNT;
         LOG.info("In validateLogin with uid "+ssoId+", ticketId "+ticketId);
         RETRY_LOOP:
@@ -343,7 +363,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
                     validationResponse.getValidationErrorSet().add(ValidationError.INVALID_SSO_CREDENTIALS);
                     return;
                 }
-                if (ssoId.equals(ssoValidateResponse.getUserId())) {
+                if (ssoId.equals(ssoValidateResponse.getUserId()) && mobile.equals(ssoValidateResponse.getVerifiedMobile())) {
                     LOG.info("User Validated From SSO Response [validateLogin] with ssoId " + ssoId + ", ticketId " + ticketId + ", response :" + ssoResponse);
                 } else {
                     LOG.info("User Validation Failed From SSO Response [validateLogin] with ssoId " + ssoId + ", ticketId " + ticketId + ", response : " + ssoResponse);

@@ -5,6 +5,7 @@ public class SSOValidateResponse {
     private String gassoid;
     private String emailId;
     private String userId;
+    private String verifiedMobile;
 
     public String getCode() {
         return code;
@@ -38,6 +39,14 @@ public class SSOValidateResponse {
         this.userId = userId;
     }
 
+    public String getVerifiedMobile() {
+        return verifiedMobile;
+    }
+
+    public void setVerifiedMobile(String verifiedMobile) {
+        this.verifiedMobile = verifiedMobile;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("SSOValidateResponse{");
@@ -45,6 +54,7 @@ public class SSOValidateResponse {
         sb.append(", gassoid='").append(gassoid).append('\'');
         sb.append(", emailId='").append(emailId).append('\'');
         sb.append(", userId='").append(userId).append('\'');
+        sb.append(", verifiedMobile='").append(verifiedMobile).append('\'');
         sb.append('}');
         return sb.toString();
     }

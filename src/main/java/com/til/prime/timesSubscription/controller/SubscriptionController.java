@@ -125,11 +125,24 @@ public class SubscriptionController {
     }
 
     @Loggable
-    @RequestMapping(path="/checkStatus", method = RequestMethod.GET)
+    @RequestMapping(path="/app/checkStatus", method = RequestMethod.GET)
     @ResponseBody
-    public CheckStatusResponse checkStatus(@RequestBody CheckStatusRequest request){
+    public CheckStatusResponse checkStatusViaApp(@RequestBody CheckStatusRequest request){
         try {
-            return subscriptionService.checkStatus(request);
+            return subscriptionService.checkStatusViaApp(request);
+        }catch (Exception e){
+            LOG.error("Exception in extendTrial: ", e);
+            CheckStatusResponse response = new CheckStatusResponse();
+            return (CheckStatusResponse) ResponseUtil.createExceptionResponse(response, 10);
+        }
+    }
+
+    @Loggable
+    @RequestMapping(path="/server/checkStatus", method = RequestMethod.GET)
+    @ResponseBody
+    public CheckStatusResponse checkStatusViaServer(@RequestBody CheckStatusRequest request){
+        try {
+            return subscriptionService.checkStatusViaServer(request);
         }catch (Exception e){
             LOG.error("Exception in extendTrial: ", e);
             CheckStatusResponse response = new CheckStatusResponse();

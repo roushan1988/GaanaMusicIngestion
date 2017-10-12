@@ -1,11 +1,9 @@
 package com.til.prime.timesSubscription.service.impl;
 
-import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.til.prime.timesSubscription.constants.GlobalConstants;
 import com.til.prime.timesSubscription.dto.external.EmailTask;
 import com.til.prime.timesSubscription.dto.external.SMSTask;
-import com.til.prime.timesSubscription.enums.TaskPriorityEnum;
 import com.til.prime.timesSubscription.service.QueueService;
 import org.apache.log4j.Logger;
 import org.springframework.amqp.core.AmqpTemplate;
@@ -16,7 +14,6 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.io.UnsupportedEncodingException;
-import java.util.Map;
 import java.util.Properties;
 
 @Service
@@ -37,17 +34,35 @@ public class QueueServiceImpl implements QueueService {
 
 //    @PostConstruct
     public void test() throws Exception{
-        SMSTask smsTask = new SMSTask();
-        smsTask.setMobileNumber("9880252944");
-        smsTask.setPartnerId("smartauth");
-        smsTask.setTemplateKey("otpSmsKey");
-        Map<String, String> map = Maps.newHashMap();
-        map.put("otp", "1234");
-        map.put("appId", "TimesPrime");
-        map.put("timeStamp", "Thu 12:30PM");
-        smsTask.setContext(map);
-        smsTask.setTaskPriority(TaskPriorityEnum.HIGH_PRIORITY);
-        pushToSMSQueue(smsTask);
+        while (true) {
+//            SMSTask smsTask = new SMSTask();
+//            smsTask.setMobileNumber("9880252944");
+//            smsTask.setPartnerId("timesprime");
+//            smsTask.setTemplateKey("testmessage");
+//            Map<String, String> map = Maps.newHashMap();
+//            map.put("otp", "9876");
+//            map.put("appId", "timesprime");
+//            map.put("timeStamp", "Thu 12:30PM");
+//            smsTask.setContext(map);
+//            smsTask.setTaskPriority(TaskPriorityEnum.HIGH_PRIORITY);
+//            pushToSMSQueue(smsTask);
+//            EmailTask emailTask = new EmailTask();
+//            emailTask.setTemplateKey("testemail");
+//            emailTask.setPartnerId("timesprime");
+//            emailTask.setGroup("test");
+//            emailTask.setEmailId("roushan1988@gmail.com");
+//            emailTask.setFromName("TimesPrime");
+//            emailTask.setFromEmail("roushan.singh1@timesinternet.in");
+//            Map<String, String> map2 = Maps.newHashMap();
+//            map2.put("otp", "9876");
+//            map2.put("appId", "timesprime");
+//            map2.put("timeStamp", "Thu 12:30PM");
+//            emailTask.setContext(map2);
+//            emailTask.setCtaKey(null);
+//            emailTask.setTaskPriority(TaskPriorityEnum.HIGH_PRIORITY);
+//            pushToEmailQueue(emailTask);
+//            Thread.sleep(30000);
+        }
     }
 
     @Override

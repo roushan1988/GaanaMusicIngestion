@@ -40,7 +40,10 @@ public enum ValidationError {
 	USER_DETAILS_MISSING(31, "Oops! Something went wrong. Please login again.", 1, 2),
 	INVALID_ENCRYPTION(32, "Invalid Encryption", 1, 1),
 	INVALID_TRANSACTION_STATUS(33, "Invalid Transaction Status", 1, 1),
-	INVALID_USER(33, "Invalid User", 1, 1),
+	INVALID_USER(34, "Invalid User", 1, 1),
+	INVALID_CLIENT_ID(35, "Invalid Client ID", 1, 1),
+	INVALID_CLIENT_SECRET_KEY(36, "Invalid Client Secret Key", 1, 1),
+	INVALID_CHECKSUM(37, "Invalid Checksum", 1, 1),
 	;
 
 	public static final Integer maxCategory = 2;

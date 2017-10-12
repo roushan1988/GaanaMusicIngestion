@@ -278,8 +278,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
-    public CheckStatusResponse checkStatus(CheckStatusRequest request) {
-        ValidationResponse validationResponse = subscriptionValidationService.validatePreCheckStatus(request);
+    public CheckStatusResponse checkStatusViaApp(CheckStatusRequest request) {
+        ValidationResponse validationResponse = subscriptionValidationService.validatePreCheckStatusViaApp(request);
         CheckStatusResponse response = new CheckStatusResponse();
         SubscriptionStatusDTO statusDTO = null;
         if(validationResponse.isValid()) {
@@ -288,13 +288,32 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 statusDTO = (SubscriptionStatusDTO) vw.get();
             }
         }
-        if(statusDTO!=null || !request.isFallback()){
+        if(statusDTO!=null){
             response = subscriptionServiceHelper.prepareCheckStatusResponse(response, statusDTO, validationResponse);
             return response;
         }
+        UserSubscriptionModel userSubscriptionModel = null;
         if(validationResponse.isValid()){
-            UserSubscriptionModel userSubscriptionModel = userSubscriptionRepository.findByUserMobileAndStatusAndDeleted(request.getUser().getMobile(), StatusEnum.ACTIVE, false);
+            userSubscriptionModel = userSubscriptionRepository.findByUserMobileAndStatusAndDeleted(request.getUser().getMobile(), StatusEnum.ACTIVE, false);
             validationResponse = subscriptionValidationService.validatePostCheckStatus(request, userSubscriptionModel, validationResponse);
+        }
+        if(validationResponse.isValid()){
+            updateUserStatus(userSubscriptionModel);
+        }
+        response = subscriptionServiceHelper.prepareCheckStatusResponse(response, statusDTO, validationResponse);
+        return response;
+    }
+
+    @Override
+    public CheckStatusResponse checkStatusViaServer(CheckStatusRequest request) {
+        ValidationResponse validationResponse = subscriptionValidationService.validatePreCheckStatusViaServer(request);
+        CheckStatusResponse response = new CheckStatusResponse();
+        SubscriptionStatusDTO statusDTO = null;
+        if(validationResponse.isValid()) {
+            Cache.ValueWrapper vw = cacheManager.getCache(RedisConstants.PRIME_STATUS_CACHE_KEY).get(request.getUser().getMobile());
+            if(vw!=null){
+                statusDTO = (SubscriptionStatusDTO) vw.get();
+            }
         }
         response = subscriptionServiceHelper.prepareCheckStatusResponse(response, statusDTO, validationResponse);
         return response;
