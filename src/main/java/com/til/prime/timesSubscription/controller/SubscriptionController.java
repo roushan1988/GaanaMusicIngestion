@@ -125,7 +125,7 @@ public class SubscriptionController {
     }
 
     @Loggable
-    @RequestMapping(path="/app/checkStatus", method = RequestMethod.GET)
+    @RequestMapping(path="/app/checkStatus", method = {RequestMethod.GET, RequestMethod.POST})
     @ResponseBody
     public CheckStatusResponse checkStatusViaApp(@RequestBody CheckStatusRequest request){
         try {
@@ -138,7 +138,7 @@ public class SubscriptionController {
     }
 
     @Loggable
-    @RequestMapping(path="/server/checkStatus", method = RequestMethod.GET)
+    @RequestMapping(path="/server/checkStatus", method = {RequestMethod.GET, RequestMethod.POST})
     @ResponseBody
     public CheckStatusResponse checkStatusViaServer(@RequestBody CheckStatusRequest request){
         try {
