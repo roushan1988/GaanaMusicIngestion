@@ -294,7 +294,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         }
         UserSubscriptionModel userSubscriptionModel = null;
         if(validationResponse.isValid()){
-            userSubscriptionModel = userSubscriptionRepository.findByUserMobileAndStatusAndDeleted(request.getUser().getMobile(), StatusEnum.ACTIVE, false);
+            userSubscriptionModel = userSubscriptionRepository.findByUserMobileAndStatusAndDeletedAndOrderCompletedTrue(request.getUser().getMobile(), StatusEnum.ACTIVE, false);
             validationResponse = subscriptionValidationService.validatePostCheckStatus(request, userSubscriptionModel, validationResponse);
         }
         if(validationResponse.isValid()){

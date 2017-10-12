@@ -38,4 +38,5 @@ public interface UserSubscriptionRepository extends GenericJpaRepository<UserSub
     Page<UserSubscriptionModel> findBySsoCommunicatedFalseAndOrderCompletedTrueAndDeletedFalseAndOrderCompletedTrueOrderById(Pageable pageable);
     UserSubscriptionModel findFirstByUserSsoIdAndStatusAndStartDateAfterAndDeletedFalseAndOrderCompletedTrueOrderById(String ssoId, StatusEnum status, Date date1);
     UserSubscriptionModel findByUserMobileAndStatusAndDeleted(String mobile, StatusEnum status, boolean deleted);
+    UserSubscriptionModel findByUserMobileAndStatusAndDeletedAndOrderCompletedTrue(String mobile, StatusEnum status, boolean deleted);
 }
