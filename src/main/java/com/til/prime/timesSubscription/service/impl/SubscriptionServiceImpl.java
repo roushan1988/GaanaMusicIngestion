@@ -101,9 +101,9 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         if(validationResponse.isValid()) {
             UserModel userModel = getOrCreateUser(request);
             userSubscriptionModel = subscriptionServiceHelper.generateInitPurchaseUserSubscription(request, subscriptionVariantModel, lastUserSubscription, userModel, request.getPrice());
-            if (userSubscriptionModel.isOrderCompleted()) {
-                userSubscriptionModel = subscriptionServiceHelper.updateSSOStatus(userSubscriptionModel);
-            }
+//            if (userSubscriptionModel.isOrderCompleted()) {
+//                userSubscriptionModel = subscriptionServiceHelper.updateSSOStatus(userSubscriptionModel);
+//            }
             EventEnum eventEnum = EventEnum.getEventByInitPlanStatus(userSubscriptionModel.getPlanStatus());
             userSubscriptionModel = saveUserSubscription(userSubscriptionModel, true, request.getUser().getSsoId(), request.getUser().getTicketId(), eventEnum);
         }
@@ -354,25 +354,32 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     private void updateUserStatus(UserSubscriptionModel userSubscriptionModel){
-        StatusEnum statusEnum = userSubscriptionModel.getStatus();
+        if(userSubscriptionModel.getStatus()==StatusEnum.FUTURE){
+            return;
+        }
         String mobile = userSubscriptionModel.getUser().getMobile();
-        if(statusEnum == StatusEnum.ACTIVE) {
-            if(userSubscriptionModel.isDeleted()){
-                cacheManager.getCache(RedisConstants.PRIME_STATUS_CACHE_KEY).evict(mobile);
-            }else{
-                cacheManager.getCache(RedisConstants.PRIME_STATUS_CACHE_KEY).put(mobile, getSubscriptionStatusDTO(userSubscriptionModel));
-            }
-        }
-        if(statusEnum == StatusEnum.EXPIRED) {
-            cacheManager.getCache(RedisConstants.PRIME_STATUS_CACHE_KEY).evict(mobile);
-        }
+        cacheManager.getCache(RedisConstants.PRIME_STATUS_CACHE_KEY).put(mobile, getSubscriptionStatusDTO(userSubscriptionModel));
     }
 
     private SubscriptionStatusDTO getSubscriptionStatusDTO(UserSubscriptionModel userSubscriptionModel){
+        StatusEnum status = userSubscriptionModel.getStatus();
         SubscriptionStatusDTO statusDTO = new SubscriptionStatusDTO();
         statusDTO.setStartDate(userSubscriptionModel.getStartDate());
         statusDTO.setEndDate(userSubscriptionModel.getEndDate());
-        statusDTO.setPlanStatus(userSubscriptionModel.getPlanStatus().getCode());
+        if(status==StatusEnum.EXPIRED){
+            if(userSubscriptionModel.getPlanStatus()==PlanStatusEnum.SUBSCRIPTION || userSubscriptionModel.getPlanStatus()==PlanStatusEnum.SUBSCRIPTION_AUTO_RENEWAL){
+                statusDTO.setPlanStatus(PlanStatusEnum.SUBSCRIPTION_EXPIRED.getCode());
+            }else if(userSubscriptionModel.getPlanStatus()==PlanStatusEnum.FREE_TRIAL){
+                statusDTO.setPlanStatus(PlanStatusEnum.FREE_TRAIL_EXPIRED.getCode());
+            }else if(userSubscriptionModel.getPlanStatus()==PlanStatusEnum.FREE_TRIAL_WITH_PAYMENT){
+                statusDTO.setPlanStatus(PlanStatusEnum.FREE_TRIAL_WITH_PAYMENT_EXPIRED.getCode());
+            }
+        }else{
+            statusDTO.setPlanStatus(userSubscriptionModel.getPlanStatus().getCode());
+        }
+        if(userSubscriptionModel.isDeleted()){
+            statusDTO.setPlanStatus(PlanStatusEnum.SUBSCRIPTION_CANCELLED.getCode());
+        }
         statusDTO.setAutoRenewal(userSubscriptionModel.isAutoRenewal());
         return statusDTO;
     }

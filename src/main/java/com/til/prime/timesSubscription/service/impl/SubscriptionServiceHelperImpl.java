@@ -75,14 +75,14 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
     @Override
     public UserSubscriptionModel updateSubmitPurchaseUserSubscription(SubmitPurchaseRequest request, UserSubscriptionModel userSubscriptionModel, UserSubscriptionModel lastUserSubscription) {
         SubscriptionVariantModel variantModel = userSubscriptionModel.getSubscriptionVariant();
-        userSubscriptionModel.setPlanStatus(PlanStatusEnum.getPlanStatus(variantModel.getPlanType(), variantModel.getPrice(), lastUserSubscription,  request.isAutoRenewal()));
+        userSubscriptionModel.setPlanStatus(PlanStatusEnum.getPlanStatus(variantModel.getPlanType(), variantModel.getPrice(), lastUserSubscription,  request.isAutoRenewalJob()));
         userSubscriptionModel.setPaymentReference(request.getPaymentReference());
         userSubscriptionModel.setTransactionStatus(request.isPaymentSuccess()? TransactionStatusEnum.SUBSCRIPTION_TRANS_SUCCESS: TransactionStatusEnum.SUBSCRIPTION_TRANS_FAILED);
         userSubscriptionModel.setOrderCompleted(request.isPaymentSuccess());
         userSubscriptionModel.setAutoRenewal(request.isAutoRenewal());
-        if (userSubscriptionModel.isOrderCompleted()) {
-            userSubscriptionModel = updateSSOStatus(userSubscriptionModel);
-        }
+//        if (userSubscriptionModel.isOrderCompleted()) {
+//            userSubscriptionModel = updateSSOStatus(userSubscriptionModel);
+//        }
         return userSubscriptionModel;
     }
 

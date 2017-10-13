@@ -55,7 +55,7 @@ public enum PlanStatusEnum {
                 return PlanStatusEnum.FREE_TRIAL_WITH_PAYMENT;
             }
         }else if(price.compareTo(BigDecimal.ZERO)>0){
-            if(autoRenewal && lastUserSubscription.getPlanStatus()==PlanStatusEnum.SUBSCRIPTION){
+            if(autoRenewal && (lastUserSubscription.getPlanStatus()==PlanStatusEnum.SUBSCRIPTION || lastUserSubscription.getPlanStatus()==PlanStatusEnum.SUBSCRIPTION_AUTO_RENEWAL)){
                 return PlanStatusEnum.SUBSCRIPTION_AUTO_RENEWAL;
             }else{
                 return PlanStatusEnum.SUBSCRIPTION;
