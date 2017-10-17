@@ -289,7 +289,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             }
         }
         if(statusDTO!=null){
-            response = subscriptionServiceHelper.prepareCheckStatusResponse(response, statusDTO, validationResponse);
+            response = subscriptionServiceHelper.prepareCheckStatusResponse(response, false, statusDTO, validationResponse);
             return response;
         }
         UserSubscriptionModel userSubscriptionModel = null;
@@ -300,12 +300,12 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         if(validationResponse.isValid()){
             updateUserStatus(userSubscriptionModel);
         }
-        response = subscriptionServiceHelper.prepareCheckStatusResponse(response, statusDTO, validationResponse);
+        response = subscriptionServiceHelper.prepareCheckStatusResponse(response, false, statusDTO, validationResponse);
         return response;
     }
 
     @Override
-    public CheckStatusResponse checkStatusViaServer(CheckStatusRequest request) {
+    public CheckStatusResponse checkStatusViaServer(CheckStatusRequest request, boolean external) {
         ValidationResponse validationResponse = subscriptionValidationService.validatePreCheckStatusViaServer(request);
         CheckStatusResponse response = new CheckStatusResponse();
         SubscriptionStatusDTO statusDTO = null;
@@ -315,7 +315,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 statusDTO = (SubscriptionStatusDTO) vw.get();
             }
         }
-        response = subscriptionServiceHelper.prepareCheckStatusResponse(response, statusDTO, validationResponse);
+        response = subscriptionServiceHelper.prepareCheckStatusResponse(response, external, statusDTO, validationResponse);
         return response;
     }
 

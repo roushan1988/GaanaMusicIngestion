@@ -142,7 +142,20 @@ public class SubscriptionController {
     @ResponseBody
     public CheckStatusResponse checkStatusViaServer(@RequestBody CheckStatusRequest request){
         try {
-            return subscriptionService.checkStatusViaServer(request);
+            return subscriptionService.checkStatusViaServer(request, false);
+        }catch (Exception e){
+            LOG.error("Exception in extendTrial: ", e);
+            CheckStatusResponse response = new CheckStatusResponse();
+            return (CheckStatusResponse) ResponseUtil.createExceptionResponse(response, 10);
+        }
+    }
+
+    @Loggable
+    @RequestMapping(path="/external/checkStatus", method = {RequestMethod.GET, RequestMethod.POST})
+    @ResponseBody
+    public CheckStatusResponse checkExternalStatusViaServer(@RequestBody CheckStatusRequest request){
+        try {
+            return subscriptionService.checkStatusViaServer(request, true);
         }catch (Exception e){
             LOG.error("Exception in extendTrial: ", e);
             CheckStatusResponse response = new CheckStatusResponse();

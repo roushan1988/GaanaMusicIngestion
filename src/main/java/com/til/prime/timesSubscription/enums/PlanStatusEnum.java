@@ -16,6 +16,13 @@ public enum PlanStatusEnum {
     SUBSCRIPTION_CANCELLED(7),
     SUBSCRIPTION_AUTO_RENEWAL(8);
 
+    public static final Set<PlanStatusEnum> ACTIVE_STATUS_SET = new HashSet<>(Arrays.asList(FREE_TRIAL, FREE_TRIAL_WITH_PAYMENT, SUBSCRIPTION, SUBSCRIPTION_AUTO_RENEWAL));
+    public static final Set<Integer> ACTIVE_STATUS_CODE_SET = new HashSet<Integer>(){{
+        for(PlanStatusEnum planStatus: ACTIVE_STATUS_SET){
+            add(planStatus.getCode());
+        }
+    }};
+
     PlanStatusEnum(int code) {
         this.code = code;
     }

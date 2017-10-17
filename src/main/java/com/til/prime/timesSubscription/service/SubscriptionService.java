@@ -16,7 +16,7 @@ public interface SubscriptionService {
     ExtendExpiryResponse extendExpiry(ExtendExpiryRequest request);
     GenericResponse checkEligibility(CheckEligibilityRequest request);
     CheckStatusResponse checkStatusViaApp(CheckStatusRequest request);
-    CheckStatusResponse checkStatusViaServer(CheckStatusRequest request);
+    CheckStatusResponse checkStatusViaServer(CheckStatusRequest request, boolean external);
     UserModel getOrCreateUser(GenericRequest request);
     UserSubscriptionModel saveUserSubscription(UserSubscriptionModel userSubscriptionModel, boolean retryForOrderId, String ssoId, String ticketId, EventEnum event);
 }
