@@ -12,7 +12,6 @@ import org.springframework.amqp.core.MessageProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.io.UnsupportedEncodingException;
 import java.util.Properties;
@@ -33,7 +32,7 @@ public class QueueServiceImpl implements QueueService {
     @Autowired
     private AmqpTemplate amqpTemplateEmail;
 
-    @PostConstruct
+//    @PostConstruct
     public void test() throws Exception{
         while (true) {
 //            SMSTask smsTask = new SMSTask();
