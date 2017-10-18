@@ -43,7 +43,9 @@ public class GlobalConstants {
     public static final String EMAIL_USERNAME= "email.username";
     public static final String EMAIL_PASSWORD= "email.password";
     public static final String PAYMENTS_RENEW_SUBSCRIPTION_URL_KEY = "payments.renew.subscription.url";
+    public static final String PAYMENTS_REFUND_URL_KEY = "payments.refund.url";
     public static final int PAYMENTS_SUCCESS_STATUS_CODE = 2000;
     public static final String SMS_ROUTING_KEY = "sms.routing.key";
     public static final String EMAIL_ROUTING_KEY = "email.routing.key";
+    public static final String PAYMENTS_REQ_DELIM = "|";
 }

@@ -228,9 +228,14 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         }
         BigDecimal refundAmount = null;
         if(validationResponse.isValid()){
-            userSubscriptionModel.setIsDelete(true);
-            userSubscriptionModel = saveUserSubscription(userSubscriptionModel, false, request.getUser().getSsoId(), request.getUser().getTicketId(), EventEnum.SUBSCRIPTION_CANCELLATION);
             refundAmount = subscriptionServiceHelper.calculateRefundAmount(userSubscriptionModel);
+            boolean success = subscriptionServiceHelper.refundPayment(userSubscriptionModel.getOrderId(), refundAmount.doubleValue());
+            if(success){
+                userSubscriptionModel.setIsDelete(true);
+                userSubscriptionModel = saveUserSubscription(userSubscriptionModel, false, request.getUser().getSsoId(), request.getUser().getTicketId(), EventEnum.SUBSCRIPTION_CANCELLATION);
+            }else{
+                validationResponse.getValidationErrorSet().add(ValidationError.PAYMENT_REFUND_ERROR);
+            }
         }
         response = subscriptionServiceHelper.prepareCancelSubscriptionResponse(response, refundAmount, validationResponse);
         return response;

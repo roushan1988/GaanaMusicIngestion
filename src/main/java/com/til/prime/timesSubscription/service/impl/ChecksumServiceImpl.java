@@ -24,11 +24,11 @@ public class ChecksumServiceImpl implements ChecksumService {
 
     private String toHex(byte[] bytes) {
         StringBuilder buffer = new StringBuilder(bytes.length * 2);
-        byte[] arg5 = bytes;
-        int arg4 = bytes.length;
+        byte[] byteArray = bytes;
+        int length = bytes.length;
 
-        for (int arg3 = 0; arg3 < arg4; ++arg3) {
-            Byte b = Byte.valueOf(arg5[arg3]);
+        for (int i = 0; i < length; ++i) {
+            Byte b = Byte.valueOf(byteArray[i]);
             String str = Integer.toHexString(b.byteValue());
             int len = str.length();
             if (len == 8) {

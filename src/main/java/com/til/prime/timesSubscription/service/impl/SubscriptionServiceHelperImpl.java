@@ -305,6 +305,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
             renewSubscriptionRequest.setPlatform(PlatformEnum.JOB.name());
             renewSubscriptionRequest.setPrice(userSubscriptionModel.getSubscriptionVariant().getPrice().doubleValue());
             renewSubscriptionRequest.setJob(true);
+            renewSubscriptionRequest.setSecretKey(properties.getProperty(GlobalConstants.PAYMENTS_SECRET_KEY));
             updateSubscriptionChecksumForRenewSubscription(renewSubscriptionRequest);
             PaymentsGenericResponse response = httpConnectionUtils.requestForObject(renewSubscriptionRequest, properties.getProperty(GlobalConstants.PAYMENTS_RENEW_SUBSCRIPTION_URL_KEY), PaymentsGenericResponse.class, GlobalConstants.POST);
             return inferPaymentsResponse(response);
@@ -314,15 +315,44 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
         return false;
     }
 
+    @Override
+    public final boolean refundPayment(String orderId, Double refundAmount){
+        try{
+            PaymentsRefundRequest refundRequest = new PaymentsRefundRequest();
+            refundRequest.setAmount(refundAmount);
+            refundRequest.setOrderId(orderId);
+            refundRequest.setSecretKey(properties.getProperty(GlobalConstants.PAYMENTS_SECRET_KEY));
+            updateChecksumForRefund(refundRequest);
+            PaymentsGenericResponse response = httpConnectionUtils.requestForObject(refundRequest, properties.getProperty(GlobalConstants.PAYMENTS_REFUND_URL_KEY), PaymentsGenericResponse.class, GlobalConstants.POST);
+            return inferPaymentsResponse(response);
+        }catch (Exception e){
+            LOG.error("Exception in api call to payments for refund with orderId: "+orderId+", refundAmount: "+refundAmount, e);
+        }
+        return false;
+    }
+
     private void updateSubscriptionChecksumForRenewSubscription(RenewSubscriptionRequest request) {
         try {
             StringBuilder sb = new StringBuilder();
-            sb.append(request.getSecretKey()).append(request.getUserSubscriptionId()).append(request.getOrderId())
-                    .append(request.getPrice()).append(request.getPlatform()).append(request.isJob());
+            sb.append(request.getSecretKey()).append(GlobalConstants.PAYMENTS_REQ_DELIM).append(request.getUserSubscriptionId())
+                    .append(GlobalConstants.PAYMENTS_REQ_DELIM).append(request.getOrderId()).append(GlobalConstants.PAYMENTS_REQ_DELIM)
+                    .append(request.getPrice()).append(GlobalConstants.PAYMENTS_REQ_DELIM).append(request.getPlatform())
+                    .append(GlobalConstants.PAYMENTS_REQ_DELIM).append(request.isJob());
             String checksum = checksumService.calculateChecksumHmacSHA256(properties.getProperty(GlobalConstants.PAYMENTS_ENCRYPTION_KEY), sb.toString());
             request.setChecksum(checksum);
         } catch (Exception e) {
             LOG.error("error while calculating checksum for subscription call for submit payments: ", e);
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    private void updateChecksumForRefund(PaymentsRefundRequest refundRequest){
+        try{
+            StringBuilder checksumString = new StringBuilder(refundRequest.getOrderId()).append(GlobalConstants.PAYMENTS_REQ_DELIM)
+                    .append(refundRequest.getAmount()).append(GlobalConstants.PAYMENTS_REQ_DELIM).append(refundRequest.getSecretKey());
+            String checksum = checksumService.calculateChecksumHmacSHA256(properties.getProperty(GlobalConstants.PAYMENTS_ENCRYPTION_KEY), checksumString.toString());
+        }catch (Exception e){
+            LOG.error("error while calculating checksum for subscription call for refund payments: ", e);
             throw new RuntimeException(e.getMessage());
         }
     }

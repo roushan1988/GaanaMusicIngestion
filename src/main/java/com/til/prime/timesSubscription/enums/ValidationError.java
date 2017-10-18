@@ -39,6 +39,7 @@ public enum ValidationError {
 	ORDER_NOT_GENERATED(30, "Order not generated", 1, 1),
 	USER_DETAILS_MISSING(31, "Oops! Something went wrong. Please login again.", 1, 2),
 	INVALID_TRANSACTION_STATUS(33, "Invalid Transaction Status", 1, 1),
+	PAYMENT_REFUND_ERROR(34, "Payment Refund error", 1, 1),
 	INVALID_USER(1000, "Invalid User", 1, 1),
 	INVALID_CLIENT_ID(1001, "Invalid Client ID", 1, 1),
 	INVALID_CLIENT_SECRET_KEY(1002, "Invalid Client Secret Key", 1, 1),

@@ -30,4 +30,5 @@ public interface SubscriptionServiceHelper {
     CheckStatusResponse prepareCheckStatusResponse(CheckStatusResponse response, boolean external, SubscriptionStatusDTO subscriptionStatusDTO, ValidationResponse validationResponse);
     UserModel getUser(GenericRequest request);
     boolean renewSubscription(UserSubscriptionModel userSubscriptionModel);
+    boolean refundPayment(String orderId, Double refundAmount);
 }
