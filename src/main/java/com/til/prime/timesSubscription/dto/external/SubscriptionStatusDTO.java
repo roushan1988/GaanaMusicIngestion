@@ -4,10 +4,19 @@ import java.io.Serializable;
 import java.util.Date;
 
 public class SubscriptionStatusDTO implements Serializable {
+    private Long userId;
     private Date startDate;
     private Date endDate;
     private int planStatus;
     private boolean autoRenewal;
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
 
     public Date getStartDate() {
         return startDate;
@@ -44,7 +53,8 @@ public class SubscriptionStatusDTO implements Serializable {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("SubscriptionStatusDTO{");
-        sb.append("startDate=").append(startDate);
+        sb.append("userId=").append(userId);
+        sb.append(", startDate=").append(startDate);
         sb.append(", endDate=").append(endDate);
         sb.append(", planStatus=").append(planStatus);
         sb.append(", autoRenewal=").append(autoRenewal);

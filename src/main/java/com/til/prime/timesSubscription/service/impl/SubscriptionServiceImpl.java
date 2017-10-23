@@ -369,6 +369,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     private SubscriptionStatusDTO getSubscriptionStatusDTO(UserSubscriptionModel userSubscriptionModel){
         StatusEnum status = userSubscriptionModel.getStatus();
         SubscriptionStatusDTO statusDTO = new SubscriptionStatusDTO();
+        statusDTO.setUserId(userSubscriptionModel.getUser().getId());
         statusDTO.setStartDate(userSubscriptionModel.getStartDate());
         statusDTO.setEndDate(userSubscriptionModel.getEndDate());
         if(status==StatusEnum.EXPIRED){
