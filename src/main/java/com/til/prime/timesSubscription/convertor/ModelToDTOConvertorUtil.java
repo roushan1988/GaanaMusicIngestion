@@ -21,7 +21,7 @@ public class ModelToDTOConvertorUtil {
         if(lastUserSubscription!=null){
             restrictedPlanTypes.add(PlanTypeEnum.TRIAL);
             PlanTypeEnum planType = lastUserSubscription.getSubscriptionVariant().getPlanType();
-            if(planType==PlanTypeEnum.TRIAL_WITH_PAYMENT){
+            if(planType==PlanTypeEnum.TRIAL_WITH_PAYMENT || planType==PlanTypeEnum.PAYMENT){
                 restrictedPlanTypes.add(PlanTypeEnum.TRIAL_WITH_PAYMENT);
             }
         }
