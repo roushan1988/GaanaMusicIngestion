@@ -218,8 +218,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
-    public CancelSubscriptionResponse cancelSubscription(CancelSubscriptionRequest request){
-        ValidationResponse validationResponse = subscriptionValidationService.validatePreCancelSubscription(request);
+    public CancelSubscriptionResponse cancelSubscription(CancelSubscriptionRequest request, boolean serverRequest){
+        ValidationResponse validationResponse = subscriptionValidationService.validatePreCancelSubscription(request, serverRequest);
         UserSubscriptionModel userSubscriptionModel = null;
         CancelSubscriptionResponse response = new CancelSubscriptionResponse();
         if(validationResponse.isValid()){
@@ -228,11 +228,22 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         }
         BigDecimal refundAmount = null;
         if(validationResponse.isValid()){
-            refundAmount = subscriptionServiceHelper.calculateRefundAmount(userSubscriptionModel);
-            boolean success = subscriptionServiceHelper.refundPayment(userSubscriptionModel.getOrderId(), refundAmount.doubleValue());
+            if(serverRequest && (((CancelSubscriptionServerRequest) request).isRefund())){
+                if(((CancelSubscriptionServerRequest) request).getRefundAmount()!=null && ((CancelSubscriptionServerRequest) request).getRefundAmount()>0){
+                    refundAmount = new BigDecimal(((CancelSubscriptionServerRequest) request).getRefundAmount());
+                }else{
+                    refundAmount = subscriptionServiceHelper.calculateRefundAmount(userSubscriptionModel);
+                }
+            }else {
+                refundAmount = BigDecimal.ZERO;
+            }
+            boolean success = true;
+            if(refundAmount.compareTo(BigDecimal.ZERO)>0){
+                success = subscriptionServiceHelper.refundPayment(userSubscriptionModel.getOrderId(), refundAmount.doubleValue());
+            }
             if(success){
                 userSubscriptionModel.setIsDelete(true);
-                userSubscriptionModel = saveUserSubscription(userSubscriptionModel, false, request.getUser().getSsoId(), request.getUser().getTicketId(), EventEnum.SUBSCRIPTION_CANCELLATION);
+                userSubscriptionModel = saveUserSubscription(userSubscriptionModel, false, null, null, serverRequest? EventEnum.SUBSCRIPTION_SERVER_CANCELLATION: EventEnum.SUBSCRIPTION_APP_CANCELLATION);
             }else{
                 validationResponse.getValidationErrorSet().add(ValidationError.PAYMENT_REFUND_ERROR);
             }

@@ -13,7 +13,7 @@ public interface SubscriptionValidationService {
     ValidationResponse validatePreSubmitPurchasePlan(SubmitPurchaseRequest request);
     ValidationResponse validatePostSubmitPurchasePlan(SubmitPurchaseRequest request, UserSubscriptionModel userSubscriptionModel, ValidationResponse validationResponse);
     ValidationResponse validatePurchaseHistory(PurchaseHistoryRequest request);
-    ValidationResponse validatePreCancelSubscription(CancelSubscriptionRequest request);
+    ValidationResponse validatePreCancelSubscription(CancelSubscriptionRequest request, boolean serverRequest);
     ValidationResponse validatePostCancelSubscription(CancelSubscriptionRequest request, UserSubscriptionModel userSubscriptionModel, ValidationResponse validationResponse);
     ValidationResponse validatePreExtendExpiry(ExtendExpiryRequest request);
     ValidationResponse validatePostExtendExpiry(ExtendExpiryRequest request, UserSubscriptionModel userSubscriptionModel, ValidationResponse validationResponse);

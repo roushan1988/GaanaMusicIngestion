@@ -163,12 +163,20 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
     }
 
     @Override
-    public ValidationResponse validatePreCancelSubscription(CancelSubscriptionRequest request) {
+    public ValidationResponse validatePreCancelSubscription(CancelSubscriptionRequest request, boolean serverRequest) {
         ValidationResponse validationResponse = new ValidationResponse();
-        PreConditions.mustBeEqual(request.getSecretKey(), properties.getProperty(GlobalConstants.PAYMENTS_SECRET_KEY), ValidationError.INVALID_SECRET_KEY, validationResponse);
-        PreConditions.notNull(request.getUserSubscriptionId(), ValidationError.INVALID_USER_SUBSCRIPTION_ID, validationResponse);
-        PreConditions.notEmpty(request.getOrderId(), ValidationError.INVALID_ORDER_ID, validationResponse);
-        PreConditions.notNull(request.getVariantId(), ValidationError.INVALID_SUBSCRIPTION_VARIANT, validationResponse);
+        if(!serverRequest){
+            validationResponse = validateCredentials(request, validationResponse);
+        }
+        if(validationResponse.isValid()){
+            PreConditions.notNull(request.getUserSubscriptionId(), ValidationError.INVALID_USER_SUBSCRIPTION_ID, validationResponse);
+            PreConditions.notEmpty(request.getOrderId(), ValidationError.INVALID_ORDER_ID, validationResponse);
+            PreConditions.notNull(request.getVariantId(), ValidationError.INVALID_SUBSCRIPTION_VARIANT, validationResponse);
+            validationResponse = updateValid(validationResponse);
+        }
+        if(serverRequest){
+            validationResponse = validateEncryptionForCancelSubscription((CancelSubscriptionServerRequest) request, validationResponse);
+        }
         return updateValid(validationResponse);
     }
 
@@ -183,7 +191,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
 
     @Override
     public ValidationResponse validatePreExtendExpiry(ExtendExpiryRequest request) {
-        ValidationResponse validationResponse = validatePreCancelSubscription(request);
+        ValidationResponse validationResponse = validatePreCancelSubscription(request, true);
         PreConditions.notNullPositiveCheck(request.getExtensionDays(), ValidationError.INVALID_EXTENSION_DAYS, validationResponse);
         if(request.getExtensionDays()!=null){
             PreConditions.notGreater(request.getExtensionDays(), GlobalConstants.MAX_SUBSCRIPTION_EXTENSION_DAYS, ValidationError.INVALID_EXTENSION_DAYS, validationResponse);
@@ -323,6 +331,26 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
                 StringBuilder sb = new StringBuilder();
                 sb.append(request.getSecretKey()).append(request.getUser().getMobile());
                 String checksum = checksumService.calculateChecksumHmacSHA256(client.getEncryptionKey(), sb.toString());
+                PreConditions.mustBeEqual(checksum, request.getChecksum(), ValidationError.INVALID_ENCRYPTION, validationResponse);
+            } catch (Exception e) {
+                validationResponse.getValidationErrorSet().add(ValidationError.INVALID_ENCRYPTION);
+            }
+        }
+        return updateValid(validationResponse);
+    }
+
+    public ValidationResponse validateEncryptionForCancelSubscription(CancelSubscriptionServerRequest request, ValidationResponse validationResponse) {
+        PreConditions.mustBeEqual(request.getSecretKey(), properties.getProperty(GlobalConstants.PAYMENTS_SECRET_KEY), ValidationError.INVALID_SECRET_KEY, validationResponse);
+        PreConditions.notEmpty(request.getChecksum(), ValidationError.INVALID_CHECKSUM, validationResponse);
+        validationResponse = updateValid(validationResponse);
+        if(validationResponse.isValid()){
+            try {
+                StringBuilder sb = new StringBuilder();
+                sb.append(request.getSecretKey()).append(request.getUserSubscriptionId()).append(request.getVariantId()).append(request.getOrderId()).append(request.isRefund());
+                if(request.getRefundAmount()!=null && request.getRefundAmount()>0){
+                    sb.append(request.getRefundAmount());
+                }
+                String checksum = checksumService.calculateChecksumHmacSHA256(properties.getProperty(GlobalConstants.PAYMENTS_ENCRYPTION_KEY), sb.toString());
                 PreConditions.mustBeEqual(checksum, request.getChecksum(), ValidationError.INVALID_ENCRYPTION, validationResponse);
             } catch (Exception e) {
                 validationResponse.getValidationErrorSet().add(ValidationError.INVALID_ENCRYPTION);

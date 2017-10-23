@@ -86,11 +86,11 @@ public class SubscriptionController {
     }
 
     @Loggable
-    @RequestMapping(path="/cancelSubscription", method = RequestMethod.POST)
+    @RequestMapping(path="/server/cancelSubscription", method = RequestMethod.POST)
     @ResponseBody
-    public CancelSubscriptionResponse cancelSubscription(@RequestBody CancelSubscriptionRequest request){
+    public CancelSubscriptionResponse cancelSubscriptionViaServer(@RequestBody CancelSubscriptionServerRequest request){
         try {
-            return subscriptionService.cancelSubscription(request);
+            return subscriptionService.cancelSubscription(request, true);
         }catch (Exception e){
             LOG.error("Exception in cancelSubscription: ", e);
             CancelSubscriptionResponse response = new CancelSubscriptionResponse();
@@ -99,7 +99,20 @@ public class SubscriptionController {
     }
 
     @Loggable
-    @RequestMapping(path="/extendExpiry", method = RequestMethod.POST)
+    @RequestMapping(path="/app/cancelSubscription", method = RequestMethod.POST)
+    @ResponseBody
+    public CancelSubscriptionResponse cancelSubscriptionViaApp(@RequestBody CancelSubscriptionRequest request){
+        try {
+            return subscriptionService.cancelSubscription(request, false);
+        }catch (Exception e){
+            LOG.error("Exception in cancelSubscription: ", e);
+            CancelSubscriptionResponse response = new CancelSubscriptionResponse();
+            return (CancelSubscriptionResponse) ResponseUtil.createExceptionResponse(response, 10);
+        }
+    }
+
+    @Loggable
+    @RequestMapping(path="/server/extendExpiry", method = RequestMethod.POST)
     @ResponseBody
     public ExtendExpiryResponse extendExpiry(@RequestBody ExtendExpiryRequest request){
         try {

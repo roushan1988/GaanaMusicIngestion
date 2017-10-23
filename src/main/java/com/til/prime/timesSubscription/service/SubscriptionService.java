@@ -6,13 +6,12 @@ import com.til.prime.timesSubscription.model.UserModel;
 import com.til.prime.timesSubscription.model.UserSubscriptionModel;
 
 public interface SubscriptionService {
-
     PlanListResponse getAllPlans(PlanListRequest request);
     InitPurchaseResponse initPurchasePlan(InitPurchaseRequest request);
     GenerateOrderResponse generateOrder(GenerateOrderRequest request);
     SubmitPurchaseResponse submitPurchasePlan(SubmitPurchaseRequest request);
     PurchaseHistoryResponse getPurchaseHistory(PurchaseHistoryRequest request);
-    CancelSubscriptionResponse cancelSubscription(CancelSubscriptionRequest request);
+    CancelSubscriptionResponse cancelSubscription(CancelSubscriptionRequest request, boolean serverRequest);
     ExtendExpiryResponse extendExpiry(ExtendExpiryRequest request);
     GenericResponse checkEligibility(CheckEligibilityRequest request);
     CheckStatusResponse checkStatusViaApp(CheckStatusRequest request);
