@@ -322,7 +322,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Override
     public CheckStatusResponse checkStatusViaServer(CheckStatusRequest request, boolean external) {
-        ValidationResponse validationResponse = subscriptionValidationService.validatePreCheckStatusViaServer(request);
+        ValidationResponse validationResponse = subscriptionValidationService.validatePreCheckStatusViaServer(request, external);
         CheckStatusResponse response = new CheckStatusResponse();
         SubscriptionStatusDTO statusDTO = null;
         if(validationResponse.isValid()) {

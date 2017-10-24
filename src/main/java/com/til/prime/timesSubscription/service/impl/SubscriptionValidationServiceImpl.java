@@ -239,12 +239,12 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
     }
 
     @Override
-    public ValidationResponse validatePreCheckStatusViaServer(CheckStatusRequest request) {
+    public ValidationResponse validatePreCheckStatusViaServer(CheckStatusRequest request, boolean external) {
         ValidationResponse validationResponse = new ValidationResponse();
         PreConditions.notNull(request.getUser(), ValidationError.INVALID_USER, validationResponse);
         if(request.getUser()!=null) {
             PreConditions.validMobile(request.getUser().getMobile(), ValidationError.INVALID_MOBILE, validationResponse);
-            validationResponse = validateEncryptionForCheckStatus(request, validationResponse);
+            validationResponse = validateEncryptionForCheckStatus(request, validationResponse, external);
         }
         return updateValid(validationResponse);
     }
@@ -314,23 +314,29 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
     }
 
     @Override
-    public ValidationResponse validateEncryptionForCheckStatus(CheckStatusRequest request, ValidationResponse validationResponse) {
-        PreConditions.notEmpty(request.getClientId(), ValidationError.INVALID_CLIENT_ID, validationResponse);
+    public ValidationResponse validateEncryptionForCheckStatus(CheckStatusRequest request, ValidationResponse validationResponse, boolean external) {
+        if(external) {
+            PreConditions.notEmpty(request.getClientId(), ValidationError.INVALID_CLIENT_ID, validationResponse);
+        }
         PreConditions.notEmpty(request.getSecretKey(), ValidationError.INVALID_CLIENT_SECRET_KEY, validationResponse);
         PreConditions.notEmpty(request.getChecksum(), ValidationError.INVALID_CHECKSUM, validationResponse);
         ExternalClientModel client = null;
         if(StringUtils.isNotEmpty(request.getClientId()) && StringUtils.isNotEmpty(request.getSecretKey()) && StringUtils.isNotEmpty(request.getChecksum())){
-            client = propertyService.getExternalClient(request.getClientId());
-            PreConditions.notNull(client, ValidationError.INVALID_CLIENT_ID, validationResponse);
-            if(client!=null) {
-                PreConditions.mustBeEqual(request.getSecretKey(), client.getSecretKey(), ValidationError.INVALID_CLIENT_SECRET_KEY, validationResponse);
+            if(external) {
+                client = propertyService.getExternalClient(request.getClientId());
+                PreConditions.notNull(client, ValidationError.INVALID_CLIENT_ID, validationResponse);
+                if (client != null) {
+                    PreConditions.mustBeEqual(request.getSecretKey(), client.getSecretKey(), ValidationError.INVALID_CLIENT_SECRET_KEY, validationResponse);
+                }
+            }else{
+                PreConditions.mustBeEqual(request.getSecretKey(), properties.getProperty(GlobalConstants.PAYMENTS_SECRET_KEY), ValidationError.INVALID_CLIENT_SECRET_KEY, validationResponse);
             }
         }
         if(validationResponse.getValidationErrorSet().isEmpty()) {
             try {
                 StringBuilder sb = new StringBuilder();
                 sb.append(request.getSecretKey()).append(request.getUser().getMobile());
-                String checksum = checksumService.calculateChecksumHmacSHA256(client.getEncryptionKey(), sb.toString());
+                String checksum = checksumService.calculateChecksumHmacSHA256(external? client.getEncryptionKey(): properties.getProperty(GlobalConstants.PAYMENTS_ENCRYPTION_KEY), sb.toString());
                 PreConditions.mustBeEqual(checksum, request.getChecksum(), ValidationError.INVALID_ENCRYPTION, validationResponse);
             } catch (Exception e) {
                 validationResponse.getValidationErrorSet().add(ValidationError.INVALID_ENCRYPTION);
@@ -339,7 +345,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
         return updateValid(validationResponse);
     }
 
-    public ValidationResponse validateEncryptionForCancelSubscription(CancelSubscriptionServerRequest request, ValidationResponse validationResponse) {
+    private ValidationResponse validateEncryptionForCancelSubscription(CancelSubscriptionServerRequest request, ValidationResponse validationResponse) {
         PreConditions.mustBeEqual(request.getSecretKey(), properties.getProperty(GlobalConstants.PAYMENTS_SECRET_KEY), ValidationError.INVALID_SECRET_KEY, validationResponse);
         PreConditions.notEmpty(request.getChecksum(), ValidationError.INVALID_CHECKSUM, validationResponse);
         validationResponse = updateValid(validationResponse);

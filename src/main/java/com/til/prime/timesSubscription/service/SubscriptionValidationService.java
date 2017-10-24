@@ -20,11 +20,11 @@ public interface SubscriptionValidationService {
     ValidationResponse validatePreCheckEligibility(CheckEligibilityRequest request);
     ValidationResponse validatePostCheckEligibility(CheckEligibilityRequest request, SubscriptionVariantModel variantModel, UserSubscriptionModel lastModel, UserSubscriptionModel restrictedModel, ValidationResponse validationResponse);
     ValidationResponse validatePreCheckStatusViaApp(CheckStatusRequest request);
-    ValidationResponse validatePreCheckStatusViaServer(CheckStatusRequest request);
+    ValidationResponse validatePreCheckStatusViaServer(CheckStatusRequest request, boolean external);
     ValidationResponse validatePostCheckStatus(CheckStatusRequest request, UserSubscriptionModel userSubscriptionModel, ValidationResponse validationResponse);
     ValidationResponse validateUser(GenericRequest request, ValidationResponse validationResponse);
     ValidationResponse validateCredentials(GenericRequest request, ValidationResponse validationResponse);
     ValidationResponse validateEncryptionForSubmitPurchase(SubmitPurchaseRequest request, ValidationResponse validationResponse);
     ValidationResponse validateEncryptionForOrder(GenerateOrderRequest request, ValidationResponse validationResponse);
-    ValidationResponse validateEncryptionForCheckStatus(CheckStatusRequest request, ValidationResponse validationResponse);
+    ValidationResponse validateEncryptionForCheckStatus(CheckStatusRequest request, ValidationResponse validationResponse, boolean external);
 }
