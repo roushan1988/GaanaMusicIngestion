@@ -47,6 +47,7 @@ CREATE TABLE `subscription_variant`(
   `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `deleted` tinyint(1) NOT NULL,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `UK_name` (`name`),
   INDEX `INDEX_PLAN_TYPE` (`plan_type`),
   INDEX `INDEX_SUBSCRIPTION_PLAN` (`subscription_plan_id`),
   UNIQUE KEY `UK_PLAN_PRICE_DURATION_DAYS` (`subscription_plan_id`, `price`, `duration_days`),
