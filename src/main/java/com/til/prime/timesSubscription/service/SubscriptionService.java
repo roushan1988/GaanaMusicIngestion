@@ -13,7 +13,8 @@ public interface SubscriptionService {
     PurchaseHistoryResponse getPurchaseHistory(PurchaseHistoryRequest request);
     CancelSubscriptionResponse cancelSubscription(CancelSubscriptionRequest request, boolean serverRequest);
     ExtendExpiryResponse extendExpiry(ExtendExpiryRequest request);
-    GenericResponse checkEligibility(CheckEligibilityRequest request);
+    GenericValidationResponse checkEligibility(CheckEligibilityRequest request);
+    GenericValidationResponse checkValidVariant(CheckValidVariantRequest request);
     CheckStatusResponse checkStatusViaApp(CheckStatusRequest request);
     CheckStatusResponse checkStatusViaServer(CheckStatusRequest request, boolean external);
     UserModel getOrCreateUser(GenericRequest request);

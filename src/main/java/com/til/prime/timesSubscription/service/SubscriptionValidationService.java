@@ -19,6 +19,8 @@ public interface SubscriptionValidationService {
     ValidationResponse validatePostExtendExpiry(ExtendExpiryRequest request, UserSubscriptionModel userSubscriptionModel, ValidationResponse validationResponse);
     ValidationResponse validatePreCheckEligibility(CheckEligibilityRequest request);
     ValidationResponse validatePostCheckEligibility(CheckEligibilityRequest request, SubscriptionVariantModel variantModel, UserSubscriptionModel lastModel, UserSubscriptionModel restrictedModel, ValidationResponse validationResponse);
+    ValidationResponse validatePreValidVariant(CheckValidVariantRequest request);
+    ValidationResponse validatePostValidVariant(CheckValidVariantRequest request, SubscriptionVariantModel model, ValidationResponse validationResponse);
     ValidationResponse validatePreCheckStatusViaApp(CheckStatusRequest request);
     ValidationResponse validatePreCheckStatusViaServer(CheckStatusRequest request, boolean external);
     ValidationResponse validatePostCheckStatus(CheckStatusRequest request, UserSubscriptionModel userSubscriptionModel, ValidationResponse validationResponse);
@@ -27,4 +29,5 @@ public interface SubscriptionValidationService {
     ValidationResponse validateEncryptionForSubmitPurchase(SubmitPurchaseRequest request, ValidationResponse validationResponse);
     ValidationResponse validateEncryptionForOrder(GenerateOrderRequest request, ValidationResponse validationResponse);
     ValidationResponse validateEncryptionForCheckStatus(CheckStatusRequest request, ValidationResponse validationResponse, boolean external);
+    ValidationResponse validateEncryptionForValidVariant(CheckValidVariantRequest request, ValidationResponse validationResponse);
 }

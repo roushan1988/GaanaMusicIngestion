@@ -118,7 +118,7 @@ public class SubscriptionController {
         try {
             return subscriptionService.extendExpiry(request);
         }catch (Exception e){
-            LOG.error("Exception in extendTrial: ", e);
+            LOG.error("Exception in extendExpiry: ", e);
             ExtendExpiryResponse response = new ExtendExpiryResponse();
             return (ExtendExpiryResponse) ResponseUtil.createExceptionResponse(response, 10);
         }
@@ -127,13 +127,26 @@ public class SubscriptionController {
     @Loggable
     @RequestMapping(path="/checkEligibility", method = RequestMethod.GET)
     @ResponseBody
-    public GenericResponse checkEligibility(@RequestBody CheckEligibilityRequest request){
+    public GenericValidationResponse checkEligibility(@RequestBody CheckEligibilityRequest request){
         try {
             return subscriptionService.checkEligibility(request);
         }catch (Exception e){
-            LOG.error("Exception in extendTrial: ", e);
-            GenericResponse response = new GenericResponse();
-            return ResponseUtil.createExceptionResponse(response, 10);
+            LOG.error("Exception in checkEligibility: ", e);
+            GenericValidationResponse response = new GenericValidationResponse();
+            return (GenericValidationResponse) ResponseUtil.createExceptionResponse(response, 10);
+        }
+    }
+
+    @Loggable
+    @RequestMapping(path="/server/checkValidVariant", method = {RequestMethod.GET, RequestMethod.POST})
+    @ResponseBody
+    public GenericValidationResponse checkValidVariant(@RequestBody CheckValidVariantRequest request){
+        try {
+            return subscriptionService.checkValidVariant(request);
+        }catch (Exception e){
+            LOG.error("Exception in checkValidVariant: ", e);
+            GenericValidationResponse response = new GenericValidationResponse();
+            return (GenericValidationResponse) ResponseUtil.createExceptionResponse(response, 10);
         }
     }
 
@@ -144,7 +157,7 @@ public class SubscriptionController {
         try {
             return subscriptionService.checkStatusViaApp(request);
         }catch (Exception e){
-            LOG.error("Exception in extendTrial: ", e);
+            LOG.error("Exception in checkStatus: ", e);
             CheckStatusResponse response = new CheckStatusResponse();
             return (CheckStatusResponse) ResponseUtil.createExceptionResponse(response, 10);
         }
@@ -157,7 +170,7 @@ public class SubscriptionController {
         try {
             return subscriptionService.checkStatusViaServer(request, false);
         }catch (Exception e){
-            LOG.error("Exception in extendTrial: ", e);
+            LOG.error("Exception in checkStatus: ", e);
             CheckStatusResponse response = new CheckStatusResponse();
             return (CheckStatusResponse) ResponseUtil.createExceptionResponse(response, 10);
         }
@@ -170,7 +183,7 @@ public class SubscriptionController {
         try {
             return subscriptionService.checkStatusViaServer(request, true);
         }catch (Exception e){
-            LOG.error("Exception in extendTrial: ", e);
+            LOG.error("Exception in checkStatus: ", e);
             CheckStatusResponse response = new CheckStatusResponse();
             return (CheckStatusResponse) ResponseUtil.createExceptionResponse(response, 10);
         }

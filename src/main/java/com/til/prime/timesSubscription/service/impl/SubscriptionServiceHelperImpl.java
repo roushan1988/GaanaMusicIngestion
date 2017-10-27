@@ -261,11 +261,27 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
     }
 
     @Override
-    public GenericResponse prepareCheckEligibilityResponse(GenericResponse response, ValidationResponse validationResponse) {
+    public GenericValidationResponse prepareCheckEligibilityResponse(GenericValidationResponse response, ValidationResponse validationResponse, boolean validExecution) {
         if(validationResponse.isValid()){
-            response = ResponseUtil.createSuccessResponse(response);
+            response.setValid(true);
+        }
+        if(validExecution){
+            response = (GenericValidationResponse) ResponseUtil.createSuccessResponse(response);
         }else{
-            response = ResponseUtil.createFailureResponse(response, validationResponse, validationResponse.getMaxCategory());
+            response = (GenericValidationResponse) ResponseUtil.createFailureResponse(response, validationResponse, validationResponse.getMaxCategory());
+        }
+        return response;
+    }
+
+    @Override
+    public GenericValidationResponse prepareValidVariantResponse(GenericValidationResponse response, ValidationResponse validationResponse, boolean validExecution) {
+        if(validationResponse.isValid()){
+            response.setValid(true);
+        }
+        if(validExecution){
+            response = (GenericValidationResponse) ResponseUtil.createSuccessResponse(response);
+        }else{
+            response = (GenericValidationResponse) ResponseUtil.createFailureResponse(response, validationResponse, validationResponse.getMaxCategory());
         }
         return response;
     }

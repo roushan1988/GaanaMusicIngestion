@@ -270,12 +270,13 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
-    public GenericResponse checkEligibility(CheckEligibilityRequest request) {
+    public GenericValidationResponse checkEligibility(CheckEligibilityRequest request) {
         ValidationResponse validationResponse = subscriptionValidationService.validatePreCheckEligibility(request);
+        boolean validExecution = false;
         UserSubscriptionModel restrictedUserSubscription = null;
         UserSubscriptionModel lastUserSubscription = null;
         SubscriptionVariantModel subscriptionVariantModel = null;
-        GenericResponse response = new GenericResponse();
+        GenericValidationResponse response = new GenericValidationResponse();
         PlanTypeEnum planType = null;
         BusinessEnum business = null;
         if(validationResponse.isValid()){
@@ -288,8 +289,24 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             }
             lastUserSubscription = userSubscriptionRepository.findFirstByUserSsoIdAndBusinessAndOrderCompletedAndDeletedOrderByIdDesc(request.getUser().getSsoId(), business, true, false);
             validationResponse = subscriptionValidationService.validatePostCheckEligibility(request, subscriptionVariantModel, lastUserSubscription, restrictedUserSubscription, validationResponse);
+            validExecution = true;
         }
-        response = subscriptionServiceHelper.prepareCheckEligibilityResponse(response, validationResponse);
+        response = subscriptionServiceHelper.prepareCheckEligibilityResponse(response, validationResponse, validExecution);
+        return response;
+    }
+
+    @Override
+    public GenericValidationResponse checkValidVariant(CheckValidVariantRequest request) {
+        ValidationResponse validationResponse = subscriptionValidationService.validatePreValidVariant(request);
+        boolean validExecution = false;
+        SubscriptionVariantModel subscriptionVariantModel = null;
+        GenericValidationResponse response = new GenericValidationResponse();
+        if(validationResponse.isValid()){
+            subscriptionVariantModel = subscriptionVariantRepository.findByIdAndNameAndSubscriptionPlanIdAndDeleted(request.getVariantId(), request.getVariantName(), request.getPlanId(), false);
+            validationResponse = subscriptionValidationService.validatePostValidVariant(request, subscriptionVariantModel, validationResponse);
+            validExecution = true;
+        }
+        response = subscriptionServiceHelper.prepareValidVariantResponse(response, validationResponse, validExecution);
         return response;
     }
 

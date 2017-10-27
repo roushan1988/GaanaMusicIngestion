@@ -232,6 +232,27 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
     }
 
     @Override
+    public ValidationResponse validatePreValidVariant(CheckValidVariantRequest request) {
+        ValidationResponse validationResponse = new ValidationResponse();
+        PreConditions.notNullPositiveCheck(request.getVariantId(), ValidationError.INVALID_VARIANT_ID, validationResponse);
+        PreConditions.notNullPositiveCheck(request.getPlanId(), ValidationError.INVALID_PLAN_ID, validationResponse);
+        PreConditions.notEmpty(request.getVariantName(), ValidationError.INVALID_VARIANT_NAME, validationResponse);
+        PreConditions.mustBeEqual(request.getSecretKey(), properties.getProperty(GlobalConstants.PAYMENTS_SECRET_KEY), ValidationError.INVALID_SECRET_KEY, validationResponse);
+        PreConditions.notEmpty(request.getChecksum(), ValidationError.INVALID_CHECKSUM, validationResponse);
+        updateValid(validationResponse);
+        if(validationResponse.isValid()){
+            validationResponse = validateEncryptionForValidVariant(request, validationResponse);
+        }
+        return updateValid(validationResponse);
+    }
+
+    @Override
+    public ValidationResponse validatePostValidVariant(CheckValidVariantRequest request, SubscriptionVariantModel model, ValidationResponse validationResponse) {
+        PreConditions.notNull(model, ValidationError.INVALID_SUBSCRIPTION_VARIANT, validationResponse);
+        return updateValid(validationResponse);
+    }
+
+    @Override
     public ValidationResponse validatePreCheckStatusViaApp(CheckStatusRequest request) {
         ValidationResponse validationResponse = new ValidationResponse();
         validationResponse = validateUser(request, validationResponse);
@@ -341,6 +362,19 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
             } catch (Exception e) {
                 validationResponse.getValidationErrorSet().add(ValidationError.INVALID_ENCRYPTION);
             }
+        }
+        return updateValid(validationResponse);
+    }
+
+    @Override
+    public ValidationResponse validateEncryptionForValidVariant(CheckValidVariantRequest request, ValidationResponse validationResponse) {
+        try {
+            StringBuilder sb = new StringBuilder();
+            sb.append(request.getSecretKey()).append(request.getPlanId()).append(request.getVariantId()).append(request.getVariantName());
+            String checksum = checksumService.calculateChecksumHmacSHA256(properties.getProperty(GlobalConstants.PAYMENTS_ENCRYPTION_KEY), sb.toString());
+            PreConditions.mustBeEqual(checksum, request.getChecksum(), ValidationError.INVALID_ENCRYPTION, validationResponse);
+        } catch (Exception e) {
+            validationResponse.getValidationErrorSet().add(ValidationError.INVALID_ENCRYPTION);
         }
         return updateValid(validationResponse);
     }

@@ -26,7 +26,8 @@ public interface SubscriptionServiceHelper {
     BigDecimal calculateRefundAmount(UserSubscriptionModel userSubscriptionModel);
     UserSubscriptionModel extendTrial(UserSubscriptionModel userSubscriptionModel, Long extensionDays);
     ExtendExpiryResponse prepareExtendExpiryResponse(ExtendExpiryResponse response, UserSubscriptionModel userSubscriptionModel, ValidationResponse validationResponse);
-    GenericResponse prepareCheckEligibilityResponse(GenericResponse response, ValidationResponse validationResponse);
+    GenericValidationResponse prepareCheckEligibilityResponse(GenericValidationResponse response, ValidationResponse validationResponse, boolean validExecution);
+    GenericValidationResponse prepareValidVariantResponse(GenericValidationResponse response, ValidationResponse validationResponse, boolean validExecution);
     CheckStatusResponse prepareCheckStatusResponse(CheckStatusResponse response, boolean external, SubscriptionStatusDTO subscriptionStatusDTO, ValidationResponse validationResponse);
     UserModel getUser(GenericRequest request);
     boolean renewSubscription(UserSubscriptionModel userSubscriptionModel);

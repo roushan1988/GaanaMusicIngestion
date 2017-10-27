@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,7 @@ public class PropertyServiceImpl implements PropertyService {
     private ExternalClientRepository clientRepository;
 
     @Override
+    @PostConstruct
     @Scheduled(cron = "0 */30 * * * ?")
     public void reload(){
         LOG.info("Property reload start");
@@ -60,7 +62,7 @@ public class PropertyServiceImpl implements PropertyService {
             }
             propertyMap.put(subscriptionProperty.getKey(), parseValue(subscriptionProperty.getValue(), propertyEnum.getType()));
         }
-        return propertyMap.get(propertyEnum.name());
+        return propertyMap.get(propertyEnum);
     }
 
     @Override
@@ -90,6 +92,7 @@ public class PropertyServiceImpl implements PropertyService {
             case "Float": return Float.parseFloat(value);
             case "Double": return Double.parseDouble(value);
             case "String": return value;
+            case "List<Long>": return Arrays.stream(value.split(",")).map(Long::parseLong).collect(Collectors.toList());
             default: return value;
         }
     }
