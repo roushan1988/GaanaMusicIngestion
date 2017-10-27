@@ -4,7 +4,7 @@
   <groupId>com.til.prime</groupId>
   <artifactId>timesSubscription</artifactId>
   <packaging>war</packaging>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>1.0.0-SNAPSHOT</version>
   <name>timesSubscription Maven Webapp</name>
   <url>http://maven.apache.org</url>
   <properties>
