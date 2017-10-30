@@ -222,3 +222,7 @@ insert into job values (null, "SUBSCRIPTION_RENEWAL_REMINDER_JOB", "SUBSCRIPTION
 insert into job values (null, "SUBSCRIPTION_EXPIRY_JOB", "SUBSCRIPTION_EXPIRY", null, now(), now(), false);
 insert into job values (null, "SUBSCRIPTION_EXPIRY_REMINDER_JOB", "SUBSCRIPTION_EXPIRY_REMINDER", null, now(), now(), false);
 insert into job values (null, "EXPIRED_SUBSCRIPTION_RENEWAL_REMINDER_JOB", "EXPIRED_SUBSCRIPTION_RENEWAL_REMINDER", null, now(), now(), false);
+
+insert into external_clients values (1, "1MG", "eoDpCkjF2tAYiWr5Ftbz8UFN3POpcvEf", "sNQjFGNiHEluTewYpuhrq8lbJAYJ0qclKNfReWIVrpDtneeB32aXpCqoMa3Fh6Go", now(), now(), false);
+insert into external_clients values (2, "HOUSEJOY", "tSh0IKWhyrBDs7xh7UkeO8xHAIrRvKFD", "077GIvqN7cZDm5xoY4g3O8optpjPxb0yGmPXrHmwkoVAx7pnF9FnhL6FJqhkD8Xq", now(), now(), false);
+insert into external_clients values (3, "DINEOUT", "UgWSecqXdgjvKPJxNqImcLBjBLlfGVEV", "lq8yhrjjnNEGPxsa2njWEXRGCrkodbxrPLzjFyR6ySg3HAGUZ07LgMx4mGWqP2iG", now(), now(), false);
