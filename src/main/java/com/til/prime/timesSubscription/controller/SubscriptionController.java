@@ -188,4 +188,10 @@ public class SubscriptionController {
             return (CheckStatusResponse) ResponseUtil.createExceptionResponse(response, 10);
         }
     }
+
+    @RequestMapping(value = "/getServerStatus", method = RequestMethod.GET)
+    @ResponseBody
+    public String getServerStatus(){
+        return "OK";
+    }
 }
