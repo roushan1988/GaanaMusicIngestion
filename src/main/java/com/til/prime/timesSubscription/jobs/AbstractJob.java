@@ -1,17 +1,21 @@
 package com.til.prime.timesSubscription.jobs;
 
+import com.til.prime.timesSubscription.constants.GlobalConstants;
 import com.til.prime.timesSubscription.dao.JobAuditRepository;
 import com.til.prime.timesSubscription.dao.JobRepository;
 import com.til.prime.timesSubscription.dto.internal.JobDetails;
 import com.til.prime.timesSubscription.model.JobAuditModel;
 import com.til.prime.timesSubscription.model.JobModel;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PreDestroy;
+import javax.annotation.Resource;
 import java.net.InetAddress;
 import java.util.Date;
+import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class AbstractJob implements Job {
@@ -21,6 +25,8 @@ public abstract class AbstractJob implements Job {
     protected JobRepository jobRepository;
     @Autowired
     protected JobAuditRepository jobAuditRepository;
+    @Resource(name = "config_properties")
+    private Properties properties;
 
     public String getCurrentSystemIP() throws Exception{
         return InetAddress.getLocalHost().getHostAddress();
@@ -63,21 +69,26 @@ public abstract class AbstractJob implements Job {
     @Override
     @Transactional
     public void runJob(){
-        LOG.info("Starting job execution with key: "+getJobKey());
-        boolean lock = false;
-        try{
-            if(acquireLock()){
-                lock = true;
-                JobDetails jobDetails = execute();
-                jobAuditRepository.save(getJobAudit(jobDetails));
+        String cronEnabled = properties.getProperty(GlobalConstants.CRON_ENABLED);
+        LOG.info("Starting job execution with key: " + getJobKey());
+        if(StringUtils.isNotEmpty(cronEnabled) && Boolean.valueOf(cronEnabled)) {
+            boolean lock = false;
+            try {
+                if (acquireLock()) {
+                    lock = true;
+                    JobDetails jobDetails = execute();
+                    jobAuditRepository.save(getJobAudit(jobDetails));
+                }
+            } catch (Exception e) {
+                LOG.error("Exception while running job with key: " + getJobKey(), e);
+            } finally {
+                if (lock) {
+                    releaseLock();
+                    LOG.info("Released lock after execution with key: " + getJobKey());
+                }
             }
-        }catch (Exception e){
-            LOG.error("Exception while running job with key: "+getJobKey(), e);
-        }finally {
-            if(lock){
-                releaseLock();
-                LOG.info("Released lock after execution with key: "+getJobKey());
-            }
+        }else{
+            LOG.info("Cron not enabled on this server for job key: "+getJobKey());
         }
     }
 

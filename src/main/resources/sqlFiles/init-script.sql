@@ -1,4 +1,3 @@
-CREATE DATABASE `times_subscription`;
 USE `times_subscription`;
 
 CREATE TABLE `user`(

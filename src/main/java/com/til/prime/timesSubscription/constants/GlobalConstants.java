@@ -48,4 +48,5 @@ public class GlobalConstants {
     public static final String SMS_ROUTING_KEY = "sms.routing.key";
     public static final String EMAIL_ROUTING_KEY = "email.routing.key";
     public static final String PAYMENTS_REQ_DELIM = "|";
+    public static final String CRON_ENABLED = "cron.enabled";
 }
