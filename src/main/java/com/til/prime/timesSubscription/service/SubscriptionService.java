@@ -8,6 +8,7 @@ import com.til.prime.timesSubscription.model.UserSubscriptionModel;
 public interface SubscriptionService {
     PlanListResponse getAllPlans(PlanListRequest request);
     InitPurchaseResponse initPurchasePlan(InitPurchaseRequest request);
+    InitPurchaseResponse initPurchasePlan(InitPurchaseRequest request, boolean crmRequest);
     GenerateOrderResponse generateOrder(GenerateOrderRequest request);
     SubmitPurchaseResponse submitPurchasePlan(SubmitPurchaseRequest request);
     PurchaseHistoryResponse getPurchaseHistory(PurchaseHistoryRequest request);

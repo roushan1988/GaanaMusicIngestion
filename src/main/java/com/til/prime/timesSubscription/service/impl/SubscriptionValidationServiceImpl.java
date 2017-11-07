@@ -50,9 +50,11 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
     }
 
     @Override
-    public ValidationResponse validatePreInitPurchasePlan(InitPurchaseRequest request) {
+    public ValidationResponse validatePreInitPurchasePlan(InitPurchaseRequest request, boolean crmRequest) {
         ValidationResponse validationResponse = new ValidationResponse();
-        validationResponse = validateUser(request, validationResponse);
+        if(!crmRequest){
+            validationResponse = validateUser(request, validationResponse);
+        }
         PreConditions.notNull(request.getPlanId(), ValidationError.INVALID_PLAN_ID, validationResponse);
         PreConditions.notNull(request.getVariantId(), ValidationError.INVALID_VARIANT_ID, validationResponse);
         PreConditions.notNull(request.getPrice(), ValidationError.INVALID_PRICE, validationResponse);
@@ -61,11 +63,15 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
         PreConditions.notNullEnumCheck(request.getBusiness(), BusinessEnum.names(), ValidationError.INVALID_BUSINESS, validationResponse);
         PreConditions.notNullEnumCheck(request.getChannel(), ChannelEnum.names(), ValidationError.INVALID_CHANNEL, validationResponse);
         PreConditions.notNullEnumCheck(request.getPlatform(), PlatformEnum.names(), ValidationError.INVALID_PLATFORM, validationResponse);
+        validationResponse = updateValid(validationResponse);
+        if(validationResponse.isValid() && crmRequest){
+            validationResponse = validateEncryptionForInitPurchaseSubscription(request, validationResponse);
+        }
         return updateValid(validationResponse);
     }
 
     @Override
-    public ValidationResponse validatePostInitPurchasePlan(InitPurchaseRequest request, SubscriptionVariantModel variantModel, UserSubscriptionModel restrictedModel, UserSubscriptionModel lastUserSubscription, ValidationResponse validationResponse) {
+    public ValidationResponse validatePostInitPurchasePlan(InitPurchaseRequest request, SubscriptionVariantModel variantModel, UserSubscriptionModel restrictedModel, UserSubscriptionModel lastUserSubscription, boolean crmRequest, ValidationResponse validationResponse) {
         PreConditions.notNull(variantModel, ValidationError.INVALID_SUBSCRIPTION_VARIANT, validationResponse);
         PreConditions.mustBeNull(restrictedModel, ValidationError.USER_PLAN_DOES_NOT_QUALIFY, validationResponse);
         if(variantModel!=null) {
@@ -74,6 +80,9 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
         if(lastUserSubscription!=null){
             PreConditions.notGreater(lastUserSubscription.getSubscriptionVariant().getPlanType().getOrder(), PlanTypeEnum.valueOf(request.getPlanType()).getOrder(), ValidationError.INVALID_PLAN_TYPE, validationResponse);
             PreConditions.notAfter(lastUserSubscription.getEndDate(), TimeUtils.addDaysInDate(new Date(), GlobalConstants.MAX_DAYS_DIFF_FOR_NEW_SUBSCRIPTION_PURCHASE), ValidationError.USER_PLAN_DOES_NOT_QUALIFY, validationResponse);
+        }
+        if(crmRequest){
+            PreConditions.mustBeFalse(lastUserSubscription.getStatus().equals(StatusEnum.FUTURE), ValidationError.USER_PLAN_DOES_NOT_QUALIFY, validationResponse);
         }
         return updateValid(validationResponse);
     }
@@ -390,6 +399,28 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
                 if(request.getRefundAmount()!=null && request.getRefundAmount()>0){
                     sb.append(request.getRefundAmount());
                 }
+                String checksum = checksumService.calculateChecksumHmacSHA256(properties.getProperty(GlobalConstants.PAYMENTS_ENCRYPTION_KEY), sb.toString());
+                PreConditions.mustBeEqual(checksum, request.getChecksum(), ValidationError.INVALID_ENCRYPTION, validationResponse);
+            } catch (Exception e) {
+                validationResponse.getValidationErrorSet().add(ValidationError.INVALID_ENCRYPTION);
+            }
+        }
+        return updateValid(validationResponse);
+    }
+
+    private ValidationResponse validateEncryptionForInitPurchaseSubscription(InitPurchaseRequest request, ValidationResponse validationResponse) {
+        PreConditions.mustBeEqual(request.getSecretKey(), properties.getProperty(GlobalConstants.PAYMENTS_SECRET_KEY), ValidationError.INVALID_SECRET_KEY, validationResponse);
+        PreConditions.notEmpty(request.getChecksum(), ValidationError.INVALID_CHECKSUM, validationResponse);
+        PreConditions.notNull(request.getUser(), ValidationError.INVALID_USER, validationResponse);
+        if(request.getUser()!=null){
+            PreConditions.notEmpty(request.getUser().getMobile(), ValidationError.INVALID_MOBILE, validationResponse);
+        }
+        validationResponse = updateValid(validationResponse);
+        if(validationResponse.isValid()){
+            try {
+                StringBuilder sb = new StringBuilder();
+                sb.append(request.getSecretKey()).append(request.getUser().getMobile()).append(request.getPlanId()).append(request.getVariantId()).append(request.getPrice())
+                        .append(request.getDurationDays()).append(request.getPlanType()).append(request.getBusiness()).append(request.getChannel()).append(request.getPlatform());
                 String checksum = checksumService.calculateChecksumHmacSHA256(properties.getProperty(GlobalConstants.PAYMENTS_ENCRYPTION_KEY), sb.toString());
                 PreConditions.mustBeEqual(checksum, request.getChecksum(), ValidationError.INVALID_ENCRYPTION, validationResponse);
             } catch (Exception e) {

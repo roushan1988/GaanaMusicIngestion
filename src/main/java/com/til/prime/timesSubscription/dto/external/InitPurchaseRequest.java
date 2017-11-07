@@ -11,6 +11,7 @@ public class InitPurchaseRequest extends GenericRequest {
     private String business;
     private String channel;
     private String platform;
+    private String checksum;
 
     public Long getPlanId() {
         return planId;
@@ -76,6 +77,14 @@ public class InitPurchaseRequest extends GenericRequest {
         this.platform = platform;
     }
 
+    public String getChecksum() {
+        return checksum;
+    }
+
+    public void setChecksum(String checksum) {
+        this.checksum = checksum;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("InitPurchaseRequest{");
@@ -87,6 +96,7 @@ public class InitPurchaseRequest extends GenericRequest {
         sb.append(", business='").append(business).append('\'');
         sb.append(", channel='").append(channel).append('\'');
         sb.append(", platform='").append(platform).append('\'');
+        sb.append(", checksum='").append(checksum).append('\'');
         sb.append(", user=").append(user);
         sb.append(", secretKey='").append(secretKey).append('\'');
         sb.append('}');

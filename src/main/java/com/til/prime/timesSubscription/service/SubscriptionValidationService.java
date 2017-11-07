@@ -6,8 +6,8 @@ import com.til.prime.timesSubscription.model.UserSubscriptionModel;
 
 public interface SubscriptionValidationService {
     ValidationResponse validateAllPlans(PlanListRequest request);
-    ValidationResponse validatePreInitPurchasePlan(InitPurchaseRequest request);
-    ValidationResponse validatePostInitPurchasePlan(InitPurchaseRequest request, SubscriptionVariantModel variantModel, UserSubscriptionModel restrictedModel, UserSubscriptionModel lastUserSubscription, ValidationResponse validationResponse);
+    ValidationResponse validatePreInitPurchasePlan(InitPurchaseRequest request, boolean crmRequest);
+    ValidationResponse validatePostInitPurchasePlan(InitPurchaseRequest request, SubscriptionVariantModel variantModel, UserSubscriptionModel restrictedModel, UserSubscriptionModel lastUserSubscription, boolean crmRequest, ValidationResponse validationResponse);
     ValidationResponse validatePreGenerateOrder(GenerateOrderRequest request);
     ValidationResponse validatePostGenerateOrder(GenerateOrderRequest request, SubscriptionVariantModel variantModel, UserSubscriptionModel userSubscriptionModel, UserSubscriptionModel restrictedModel, ValidationResponse validationResponse);
     ValidationResponse validatePreSubmitPurchasePlan(SubmitPurchaseRequest request);

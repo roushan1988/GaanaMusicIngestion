@@ -99,6 +99,19 @@ public class SubscriptionController {
     }
 
     @Loggable
+    @RequestMapping(path="/server/offerSubscription", method = RequestMethod.POST)
+    @ResponseBody
+    public InitPurchaseResponse offerSubscriptionViaServer(@RequestBody InitPurchaseRequest request){
+        try {
+            return subscriptionService.initPurchasePlan(request);
+        }catch (Exception e){
+            LOG.error("Exception in offerSubscriptionViaServer: ", e);
+            InitPurchaseResponse response = new InitPurchaseResponse();
+            return (InitPurchaseResponse) ResponseUtil.createExceptionResponse(response, 10);
+        }
+    }
+
+    @Loggable
     @RequestMapping(path="/app/cancelSubscription", method = RequestMethod.POST)
     @ResponseBody
     public CancelSubscriptionResponse cancelSubscriptionViaApp(@RequestBody CancelSubscriptionRequest request){

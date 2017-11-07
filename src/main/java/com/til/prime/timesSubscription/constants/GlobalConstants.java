@@ -28,7 +28,7 @@ public class GlobalConstants {
     public static final String EXCEPTION = "EXCEPTION";
     public static final int MAX_DAYS_DIFF_FOR_NEW_SUBSCRIPTION_PURCHASE = (365*2)+90;
     public static final String PAYMENTS_SECRET_KEY = "payments.secret.key";
-    public static final long MAX_SUBSCRIPTION_EXTENSION_DAYS = 180l;
+    public static final long MAX_SUBSCRIPTION_EXTENSION_DAYS = 365l;
     public static final String CONTENT_TYPE_JSON = "application/json";
     public static final String CONTENT_TYPE = "Content-Type";
     public static final String GET = "GET";

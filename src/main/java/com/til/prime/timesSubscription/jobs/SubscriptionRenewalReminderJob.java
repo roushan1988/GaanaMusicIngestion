@@ -86,7 +86,7 @@ public class SubscriptionRenewalReminderJob extends AbstractJob {
             Page<UserSubscriptionModel> userSubscriptionModels = userSubscriptionRepository.findByStatusAndEndDateBetweenAndDeletedFalseAndOrderCompletedTrueAndAutoRenewalTrue(StatusEnum.ACTIVE, startDate, endDate, new PageRequest(x.intValue(), GlobalConstants.CRON_BATCH_PROCESSING_COUNT.intValue()));
             List<UserSubscriptionModel> userSubscriptionModelList = userSubscriptionModels.getContent();
             for (UserSubscriptionModel userSubscriptionModel : userSubscriptionModelList) {
-                Long futureCount = userSubscriptionRepository.countByUserSsoIdAndStatusAndStartDateAfterAndDeletedFalseAndOrderCompletedTrue(userSubscriptionModel.getUser().getSsoId(), StatusEnum.FUTURE, TimeUtils.addMillisInDate(userSubscriptionModel.getEndDate(), -1000));
+                Long futureCount = userSubscriptionRepository.countByUserMobileAndStatusAndStartDateAfterAndDeletedFalseAndOrderCompletedTrue(userSubscriptionModel.getUser().getMobile(), StatusEnum.FUTURE, TimeUtils.addMillisInDate(userSubscriptionModel.getEndDate(), -1000));
                 if (futureCount <= 0) {
                     boolean reminderSent = reminderService.sendReminder(userSubscriptionModel, EventEnum.SUBSCRIPTION_RENEWAL_REMINDER);
                     if (reminderSent) {
