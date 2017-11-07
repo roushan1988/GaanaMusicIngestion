@@ -7,6 +7,7 @@ CREATE TABLE `user`(
   `email` varchar(32) NOT NULL,
   `sso_id` varchar(64) NOT NULL,
   `city` varchar(32) NOT NULL,
+  `blocked` tinyint(1) NOT NULL,
   `created` datetime NOT NULL,
   `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `deleted` tinyint(1) NOT NULL,

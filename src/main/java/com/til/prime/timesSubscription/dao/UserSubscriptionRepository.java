@@ -18,8 +18,7 @@ public interface UserSubscriptionRepository extends GenericJpaRepository<UserSub
     UserSubscriptionModel findByIdAndOrderIdAndSubscriptionVariantIdAndDeleted(Long id, String orderId, Long variantId, boolean deleted);
     UserSubscriptionModel findByOrderIdAndSubscriptionVariantIdAndDeleted(String orderId, Long variantId, boolean deleted);
     UserSubscriptionModel findFirstByUserMobileAndBusinessAndSubscriptionVariantPlanTypeAndOrderCompletedAndDeletedOrderByIdDesc(String mobile, BusinessEnum business, PlanTypeEnum planType, boolean orderCompleted, boolean deleted);
-    List<UserSubscriptionModel> findByUserMobileAndOrderCompletedTrueAndDeletedFalse(String mobile);
-    List<UserSubscriptionModel> findByUserMobileAndStatusInAndOrderCompletedTrueAndDeletedFalse(String mobile, Collection<StatusEnum> statusEnums);
+    List<UserSubscriptionModel> findByUserMobileAndStatusInAndOrderCompletedTrueAndAutoRenewalFalseAndDeletedFalse(String mobile, Collection<StatusEnum> statusEnums);
     List<UserSubscriptionModel> findByUserMobileAndBusinessAndOrderCompletedAndDeleted(String mobile, BusinessEnum business, boolean orderCompleted, boolean deleted);
     List<UserSubscriptionModel> findByUserMobileAndBusinessAndOrderCompleted(String mobile, BusinessEnum business, boolean orderCompleted);
     List<UserSubscriptionModel> findByUserMobileAndOrderCompletedAndDeleted(String mobile, boolean orderCompleted, boolean deleted);
@@ -40,4 +39,5 @@ public interface UserSubscriptionRepository extends GenericJpaRepository<UserSub
     UserSubscriptionModel findFirstByUserMobileAndStatusAndStartDateAfterAndDeletedFalseAndOrderCompletedTrueOrderById(String mobile, StatusEnum status, Date date1);
     UserSubscriptionModel findByUserMobileAndStatusAndDeleted(String mobile, StatusEnum status, boolean deleted);
     UserSubscriptionModel findByUserMobileAndStatusAndDeletedAndOrderCompletedTrue(String mobile, StatusEnum status, boolean deleted);
+    UserSubscriptionModel findByUserMobileAndStatusAndOrderCompletedTrue(String mobile, StatusEnum statusEnum);
 }

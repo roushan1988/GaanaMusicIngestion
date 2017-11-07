@@ -16,6 +16,8 @@ public class UserModel extends BaseModel {
     private String ssoId;
     @Column
     private String city;
+    @Column
+    private boolean blocked;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<UserSubscriptionModel> userSubscriptions;
 
@@ -57,5 +59,21 @@ public class UserModel extends BaseModel {
 
     public void setCity(String city) {
         this.city = city;
+    }
+
+    public boolean isBlocked() {
+        return blocked;
+    }
+
+    public void setBlocked(boolean blocked) {
+        this.blocked = blocked;
+    }
+
+    public List<UserSubscriptionModel> getUserSubscriptions() {
+        return userSubscriptions;
+    }
+
+    public void setUserSubscriptions(List<UserSubscriptionModel> userSubscriptions) {
+        this.userSubscriptions = userSubscriptions;
     }
 }

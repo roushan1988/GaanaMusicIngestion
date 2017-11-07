@@ -42,11 +42,14 @@ public enum ValidationError {
 	PAYMENT_REFUND_ERROR(34, "Payment Refund error", 1, 1),
 	INVALID_VARIANT_NAME(35, "Invalid Variant Name", 1, 1),
 	NO_SUBSCRIPTIONS_FOUND(36, "No subscriptions found", 1, 1),
+	ALREADY_BLOCKED_USER(37, "User already blocked", 1, 3),
+	ALREADY_UNBLOCKED_USER(38, "User already unblocked", 1, 3),
 	INVALID_USER(1000, "Invalid User", 1, 1),
 	INVALID_CLIENT_ID(1001, "Invalid Client ID", 1, 1),
 	INVALID_CLIENT_SECRET_KEY(1002, "Invalid Client Secret Key", 1, 1),
 	INVALID_CHECKSUM(1003, "Invalid Checksum", 1, 1),
 	INVALID_ENCRYPTION(1004, "Invalid Encryption", 1, 1),
+	BLOCKED_USER(1005, "Oops! Your account is temporarily suspended.", 1, 3),
 	;
 
 	public static final Integer maxCategory = 2;

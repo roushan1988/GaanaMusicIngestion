@@ -5,6 +5,7 @@ import java.util.Date;
 
 public class SubscriptionStatusDTO implements Serializable {
     private Long userId;
+    private boolean blocked;
     private Date startDate;
     private Date endDate;
     private int planStatus;
@@ -16,6 +17,14 @@ public class SubscriptionStatusDTO implements Serializable {
 
     public void setUserId(Long userId) {
         this.userId = userId;
+    }
+
+    public boolean isBlocked() {
+        return blocked;
+    }
+
+    public void setBlocked(boolean blocked) {
+        this.blocked = blocked;
     }
 
     public Date getStartDate() {
@@ -54,6 +63,7 @@ public class SubscriptionStatusDTO implements Serializable {
     public String toString() {
         final StringBuilder sb = new StringBuilder("SubscriptionStatusDTO{");
         sb.append("userId=").append(userId);
+        sb.append(", blocked=").append(blocked);
         sb.append(", startDate=").append(startDate);
         sb.append(", endDate=").append(endDate);
         sb.append(", planStatus=").append(planStatus);

@@ -14,11 +14,12 @@ public interface SubscriptionService {
     PurchaseHistoryResponse getPurchaseHistory(PurchaseHistoryRequest request);
     CancelSubscriptionResponse cancelSubscription(CancelSubscriptionRequest request, boolean serverRequest);
     GenericResponse turnOffAutoDebit(TurnOffAutoDebitRequest request);
+    GenericResponse blockUnblockUser(BlockUnblockRequest request);
     ExtendExpiryResponse extendExpiry(ExtendExpiryRequest request);
     GenericValidationResponse checkEligibility(CheckEligibilityRequest request);
     GenericValidationResponse checkValidVariant(CheckValidVariantRequest request);
     CheckStatusResponse checkStatusViaApp(CheckStatusRequest request);
     CheckStatusResponse checkStatusViaServer(CheckStatusRequest request, boolean external);
-    UserModel getOrCreateUser(GenericRequest request);
+    UserModel getOrCreateUser(GenericRequest request, ValidationResponse validationResponse);
     UserSubscriptionModel saveUserSubscription(UserSubscriptionModel userSubscriptionModel, boolean retryForOrderId, String ssoId, String ticketId, EventEnum event);
 }

@@ -6,6 +6,7 @@ import com.til.prime.timesSubscription.dto.external.*;
 import com.til.prime.timesSubscription.enums.*;
 import com.til.prime.timesSubscription.model.ExternalClientModel;
 import com.til.prime.timesSubscription.model.SubscriptionVariantModel;
+import com.til.prime.timesSubscription.model.UserModel;
 import com.til.prime.timesSubscription.model.UserSubscriptionModel;
 import com.til.prime.timesSubscription.service.ChecksumService;
 import com.til.prime.timesSubscription.service.PropertyService;
@@ -36,13 +37,21 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
     PropertyService propertyService;
 
     @Override
-    public ValidationResponse validateAllPlans(PlanListRequest request) {
+    public ValidationResponse validatePreAllPlans(PlanListRequest request) {
         ValidationResponse validationResponse = new ValidationResponse();
         if(request.getUser()!=null){
             validationResponse = validateUser(request, validationResponse);
         }
         PreConditions.notNullEnumCheck(request.getBusiness(), BusinessEnum.names(), ValidationError.INVALID_BUSINESS, validationResponse);
         PreConditions.notNullEnumCheck(request.getCountry(), CountryEnum.names(), ValidationError.INVALID_COUNTRY, validationResponse);
+        return updateValid(validationResponse);
+    }
+
+    @Override
+    public ValidationResponse validatePostAllPlans(UserModel userModel, ValidationResponse validationResponse) {
+        if(userModel!=null){
+            PreConditions.mustBeFalse(userModel.isBlocked(), ValidationError.BLOCKED_USER, validationResponse);
+        }
         return updateValid(validationResponse);
     }
 
@@ -77,6 +86,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
         if(lastUserSubscription!=null){
             PreConditions.notGreater(lastUserSubscription.getSubscriptionVariant().getPlanType().getOrder(), PlanTypeEnum.valueOf(request.getPlanType()).getOrder(), ValidationError.INVALID_PLAN_TYPE, validationResponse);
             PreConditions.notAfter(lastUserSubscription.getEndDate(), TimeUtils.addDaysInDate(new Date(), GlobalConstants.MAX_DAYS_DIFF_FOR_NEW_SUBSCRIPTION_PURCHASE), ValidationError.USER_PLAN_DOES_NOT_QUALIFY, validationResponse);
+            PreConditions.mustBeFalse(lastUserSubscription.getUser().isBlocked(), ValidationError.BLOCKED_USER, validationResponse);
         }
         if(crmRequest){
             PreConditions.mustBeFalse(lastUserSubscription.getStatus().equals(StatusEnum.FUTURE), ValidationError.USER_PLAN_DOES_NOT_QUALIFY, validationResponse);
@@ -108,6 +118,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
         PreConditions.notNull(userSubscriptionModel, ValidationError.INVALID_USER_SUBSCRIPTION_ID, validationResponse);
         PreConditions.notNull(variantModel, ValidationError.INVALID_SUBSCRIPTION_VARIANT, validationResponse);
         if(userSubscriptionModel!=null) {
+            PreConditions.mustBeFalse(userSubscriptionModel.getUser().isBlocked(), ValidationError.BLOCKED_USER, validationResponse);
             if (request.isRetryOnFailure()) {
                 PreConditions.notNull(userSubscriptionModel.getOrderId(), ValidationError.ORDER_NOT_GENERATED, validationResponse);
             } else {
@@ -148,6 +159,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
     public ValidationResponse validatePostSubmitPurchasePlan(SubmitPurchaseRequest request, UserSubscriptionModel userSubscriptionModel, ValidationResponse validationResponse) {
         PreConditions.notNull(userSubscriptionModel, ValidationError.INVALID_USER_SUBSCRIPTION_DETAILS, validationResponse);
         if(userSubscriptionModel!=null){
+            PreConditions.mustBeFalse(userSubscriptionModel.getUser().isBlocked(), ValidationError.BLOCKED_USER, validationResponse);
             PreConditions.mustBeFalse(userSubscriptionModel.isOrderCompleted(), ValidationError.ORDER_ALREADY_COMPLETED, validationResponse);
             PreConditions.mustBeEqual(request.getPaymentMethod(), userSubscriptionModel.getPaymentMethod(), ValidationError.INVALID_PAYMENT_METHOD, validationResponse);
             PreConditions.bigDecimalComparisonMustBeEqual(userSubscriptionModel.getSubscriptionVariant().getPrice(), request.getPrice(), ValidationError.INVALID_PRICE, validationResponse);
@@ -191,6 +203,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
         PreConditions.notNull(userSubscriptionModel, ValidationError.INVALID_USER_SUBSCRIPTION_ID, validationResponse);
         if(userSubscriptionModel!=null){
             PreConditions.notAfter(new Date(), userSubscriptionModel.getEndDate(), ValidationError.ALREADY_EXPIRED, validationResponse);
+            PreConditions.mustBeFalse(userSubscriptionModel.getUser().isBlocked(), ValidationError.BLOCKED_USER, validationResponse);
         }
         return updateValid(validationResponse);
     }
@@ -213,8 +226,30 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
     }
 
     @Override
+    public ValidationResponse validatePreBlockUnblockUser(BlockUnblockRequest request) {
+        ValidationResponse validationResponse = new ValidationResponse();
+        PreConditions.notNull(request.getUser(), ValidationError.INVALID_USER, validationResponse);
+        if(request.getUser()!=null){
+            PreConditions.validMobile(request.getUser().getMobile(), ValidationError.INVALID_MOBILE, validationResponse);
+        }
+        return updateValid(validationResponse);
+    }
+
+    @Override
+    public ValidationResponse validatePostBlockUnblockUser(BlockUnblockRequest request, UserModel userModel, ValidationResponse validationResponse) {
+        PreConditions.notNull(userModel, ValidationError.INVALID_USER, validationResponse);
+        if(userModel!=null){
+            PreConditions.mustBeFalse(request.isBlockUser()==userModel.isBlocked(), request.isBlockUser()? ValidationError.ALREADY_BLOCKED_USER: ValidationError.ALREADY_UNBLOCKED_USER, validationResponse);
+        }
+        return updateValid(validationResponse);
+    }
+
+    @Override
     public ValidationResponse validatePostTurnOffAutoDebit(TurnOffAutoDebitRequest request, List<UserSubscriptionModel> userSubscriptionModelList, ValidationResponse validationResponse) {
         PreConditions.notEmpty(userSubscriptionModelList, ValidationError.NO_SUBSCRIPTIONS_FOUND, validationResponse);
+        if(CollectionUtils.isNotEmpty(userSubscriptionModelList)){
+            PreConditions.mustBeFalse(userSubscriptionModelList.get(0).getUser().isBlocked(), ValidationError.BLOCKED_USER, validationResponse);
+        }
         return updateValid(validationResponse);
     }
 
@@ -233,6 +268,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
         PreConditions.notNull(userSubscriptionModel, ValidationError.INVALID_USER_SUBSCRIPTION_ID, validationResponse);
         if(userSubscriptionModel!=null){
             PreConditions.notAfter(new Date(), TimeUtils.addDaysInDate(userSubscriptionModel.getEndDate(), request.getExtensionDays().intValue()), ValidationError.ALREADY_EXPIRED, validationResponse);
+            PreConditions.mustBeFalse(userSubscriptionModel.getUser().isBlocked(), ValidationError.BLOCKED_USER, validationResponse);
         }
         return updateValid(validationResponse);
     }
@@ -254,6 +290,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
         PreConditions.mustBeNull(restrictedModel, ValidationError.USER_PLAN_DOES_NOT_QUALIFY, validationResponse);
         PreConditions.mustBeEqual(request.getPlanType(), variantModel.getPlanType().name(), ValidationError.INVALID_PLAN_TYPE, validationResponse);
         if(lastModel!=null){
+            PreConditions.mustBeFalse(lastModel.getUser().isBlocked(), ValidationError.BLOCKED_USER, validationResponse);
             PreConditions.notGreater(lastModel.getSubscriptionVariant().getPlanType().getOrder(), PlanTypeEnum.valueOf(request.getPlanType()).getOrder(), ValidationError.INVALID_PLAN_TYPE, validationResponse);
             PreConditions.notAfter(lastModel.getEndDate(), TimeUtils.addDaysInDate(new Date(), GlobalConstants.MAX_DAYS_DIFF_FOR_NEW_SUBSCRIPTION_PURCHASE), ValidationError.USER_PLAN_DOES_NOT_QUALIFY, validationResponse);
         }
@@ -404,6 +441,15 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
             PreConditions.mustBeEqual(checksum, request.getChecksum(), ValidationError.INVALID_ENCRYPTION, validationResponse);
         } catch (Exception e) {
             validationResponse.getValidationErrorSet().add(ValidationError.INVALID_ENCRYPTION);
+        }
+        return updateValid(validationResponse);
+    }
+
+    @Override
+    public ValidationResponse validateBlockedUser(UserModel userModel, ValidationResponse validationResponse) {
+        PreConditions.notNull(userModel, ValidationError.INVALID_USER, validationResponse);
+        if(userModel!=null){
+            PreConditions.mustBeFalse(userModel.isBlocked(), ValidationError.BLOCKED_USER, validationResponse);
         }
         return updateValid(validationResponse);
     }

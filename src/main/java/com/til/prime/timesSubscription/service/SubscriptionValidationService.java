@@ -2,12 +2,14 @@ package com.til.prime.timesSubscription.service;
 
 import com.til.prime.timesSubscription.dto.external.*;
 import com.til.prime.timesSubscription.model.SubscriptionVariantModel;
+import com.til.prime.timesSubscription.model.UserModel;
 import com.til.prime.timesSubscription.model.UserSubscriptionModel;
 
 import java.util.List;
 
 public interface SubscriptionValidationService {
-    ValidationResponse validateAllPlans(PlanListRequest request);
+    ValidationResponse validatePreAllPlans(PlanListRequest request);
+    ValidationResponse validatePostAllPlans(UserModel userModel, ValidationResponse validationResponse);
     ValidationResponse validatePreInitPurchasePlan(InitPurchaseRequest request, boolean crmRequest);
     ValidationResponse validatePostInitPurchasePlan(InitPurchaseRequest request, SubscriptionVariantModel variantModel, UserSubscriptionModel restrictedModel, UserSubscriptionModel lastUserSubscription, boolean crmRequest, ValidationResponse validationResponse);
     ValidationResponse validatePreGenerateOrder(GenerateOrderRequest request);
@@ -18,6 +20,8 @@ public interface SubscriptionValidationService {
     ValidationResponse validatePreCancelSubscription(CancelSubscriptionRequest request, boolean serverRequest);
     ValidationResponse validatePostCancelSubscription(CancelSubscriptionRequest request, UserSubscriptionModel userSubscriptionModel, ValidationResponse validationResponse);
     ValidationResponse validatePreTurnOffAutoDebit(TurnOffAutoDebitRequest request);
+    ValidationResponse validatePreBlockUnblockUser(BlockUnblockRequest request);
+    ValidationResponse validatePostBlockUnblockUser(BlockUnblockRequest request, UserModel userModel, ValidationResponse validationResponse);
     ValidationResponse validatePostTurnOffAutoDebit(TurnOffAutoDebitRequest request, List<UserSubscriptionModel> userSubscriptionModelList, ValidationResponse validationResponse);
     ValidationResponse validatePreExtendExpiry(ExtendExpiryRequest request);
     ValidationResponse validatePostExtendExpiry(ExtendExpiryRequest request, UserSubscriptionModel userSubscriptionModel, ValidationResponse validationResponse);
@@ -34,4 +38,5 @@ public interface SubscriptionValidationService {
     ValidationResponse validateEncryptionForOrder(GenerateOrderRequest request, ValidationResponse validationResponse);
     ValidationResponse validateEncryptionForCheckStatus(CheckStatusRequest request, ValidationResponse validationResponse, boolean external);
     ValidationResponse validateEncryptionForValidVariant(CheckValidVariantRequest request, ValidationResponse validationResponse);
+    ValidationResponse validateBlockedUser(UserModel userModel, ValidationResponse validationResponse);
 }

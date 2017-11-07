@@ -21,12 +21,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Service
+@Transactional
 public class SubscriptionServiceImpl implements SubscriptionService {
     @Resource
     private CacheManager cacheManager;
@@ -47,9 +45,13 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Override
     public PlanListResponse getAllPlans(PlanListRequest request) {
-        ValidationResponse validationResponse = subscriptionValidationService.validateAllPlans(request);
+        ValidationResponse validationResponse = subscriptionValidationService.validatePreAllPlans(request);
         PlanListResponse response = new PlanListResponse();
         List<SubscriptionPlanDTO> subscriptionPlans = null;
+        if(validationResponse.isValid() && request.getUser()!=null){
+            UserModel userModel = userRepository.findByMobile(request.getUser().getMobile());
+            validationResponse = subscriptionValidationService.validatePostAllPlans(userModel, validationResponse);
+        }
         if(validationResponse.isValid()){
             BusinessEnum businessEnum = BusinessEnum.valueOf(request.getBusiness());
             List<SubscriptionPlanModel> subscriptionPlanModels = null;
@@ -104,13 +106,12 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             validationResponse = subscriptionValidationService.validatePostInitPurchasePlan(request, subscriptionVariantModel, restrictedUsageUserSubscription, lastUserSubscription, crmRequest, validationResponse);
         }
         if(validationResponse.isValid()) {
-            UserModel userModel = getOrCreateUser(request);
-            userSubscriptionModel = subscriptionServiceHelper.generateInitPurchaseUserSubscription(request, subscriptionVariantModel, lastUserSubscription, userModel, request.getPrice(), crmRequest);
-//            if (userSubscriptionModel.isOrderCompleted()) {
-//                userSubscriptionModel = subscriptionServiceHelper.updateSSOStatus(userSubscriptionModel);
-//            }
-            EventEnum eventEnum = EventEnum.getEventByInitPlanStatus(userSubscriptionModel.getPlanStatus());
-            userSubscriptionModel = saveUserSubscription(userSubscriptionModel, true, request.getUser().getSsoId(), request.getUser().getTicketId(), eventEnum);
+            UserModel userModel = getOrCreateUser(request, validationResponse);
+            if(validationResponse.isValid()){
+                userSubscriptionModel = subscriptionServiceHelper.generateInitPurchaseUserSubscription(request, subscriptionVariantModel, lastUserSubscription, userModel, request.getPrice(), crmRequest);
+                EventEnum eventEnum = EventEnum.getEventByInitPlanStatus(userSubscriptionModel.getPlanStatus());
+                userSubscriptionModel = saveUserSubscription(userSubscriptionModel, true, request.getUser().getSsoId(), request.getUser().getTicketId(), eventEnum);
+            }
         }
         response = subscriptionServiceHelper.prepareInitPurchaseResponse(response, userSubscriptionModel, lastUserSubscription, validationResponse);
         return response;
@@ -263,10 +264,35 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         List<UserSubscriptionModel> userSubscriptionModelList = null;
         GenericResponse response = new GenericResponse();
         if(validationResponse.isValid()){
-            userSubscriptionModelList = userSubscriptionRepository.findByUserMobileAndStatusInAndOrderCompletedTrueAndDeletedFalse(request.getUser().getMobile(), StatusEnum.VALID_TURN_OFF_DEBIT_STATUS_SET);
+            userSubscriptionModelList = userSubscriptionRepository.findByUserMobileAndStatusInAndOrderCompletedTrueAndAutoRenewalFalseAndDeletedFalse(request.getUser().getMobile(), StatusEnum.VALID_TURN_OFF_DEBIT_STATUS_SET);
             validationResponse = subscriptionValidationService.validatePostTurnOffAutoDebit(request, userSubscriptionModelList, validationResponse);
         }
+        if(validationResponse.isValid()){
+            for(UserSubscriptionModel userSubscriptionModel: userSubscriptionModelList){
+                userSubscriptionModel.setAutoRenewal(false);
+                userSubscriptionModel = saveUserSubscription(userSubscriptionModel, false, null, null, EventEnum.SUBSCRIPTION_TURN_OFF_AUTO_DEBIT);
+            }
+        }
         response = subscriptionServiceHelper.prepareTurnOffAutoDebitResponse(response, validationResponse);
+        return response;
+    }
+
+    @Override
+    public GenericResponse blockUnblockUser(BlockUnblockRequest request) {
+        ValidationResponse validationResponse = subscriptionValidationService.validatePreBlockUnblockUser(request);
+        UserModel userModel = null;
+        GenericResponse response = new GenericResponse();
+        if(validationResponse.isValid()){
+            userModel = userRepository.findByMobile(request.getUser().getMobile());
+            validationResponse = subscriptionValidationService.validatePostBlockUnblockUser(request, userModel, validationResponse);
+        }
+        if(validationResponse.isValid()){
+            userModel.setBlocked(request.isBlockUser());
+            userRepository.save(userModel);
+            UserSubscriptionModel userSubscriptionModel = userSubscriptionRepository.findByUserMobileAndStatusAndOrderCompletedTrue(request.getUser().getMobile(), StatusEnum.ACTIVE);
+            updateUserStatus(userSubscriptionModel, userModel);
+        }
+        response = subscriptionServiceHelper.prepareBlockUnblockResponse(response, validationResponse);
         return response;
     }
 
@@ -372,11 +398,13 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Override
     @Transactional
-    public UserModel getOrCreateUser(GenericRequest request) {
+    public UserModel getOrCreateUser(GenericRequest request, ValidationResponse validationResponse) {
         UserModel userModel = userRepository.findByMobile(request.getUser().getSsoId());
         if(userModel==null){
             userModel = subscriptionServiceHelper.getUser(request);
             userRepository.save(userModel);
+        }else{
+            subscriptionValidationService.validateBlockedUser(userModel, validationResponse);
         }
         return userModel;
     }
@@ -406,32 +434,50 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     private void updateUserStatus(UserSubscriptionModel userSubscriptionModel){
+        updateUserStatus(userSubscriptionModel, null);
+    }
+
+    private void updateUserStatus(UserSubscriptionModel userSubscriptionModel, UserModel userModel){
+        SubscriptionStatusDTO statusDTO = getSubscriptionStatusDTO(userSubscriptionModel, userModel);
         if(userSubscriptionModel.getStatus()==StatusEnum.FUTURE){
             return;
         }
         String mobile = userSubscriptionModel.getUser().getMobile();
-        cacheManager.getCache(RedisConstants.PRIME_STATUS_CACHE_KEY).put(mobile, getSubscriptionStatusDTO(userSubscriptionModel));
+        cacheManager.getCache(RedisConstants.PRIME_STATUS_CACHE_KEY).put(mobile, statusDTO);
     }
 
-    private SubscriptionStatusDTO getSubscriptionStatusDTO(UserSubscriptionModel userSubscriptionModel){
-        StatusEnum status = userSubscriptionModel.getStatus();
+    private SubscriptionStatusDTO getSubscriptionStatusDTO(UserSubscriptionModel userSubscriptionModel, UserModel userModel){
         SubscriptionStatusDTO statusDTO = new SubscriptionStatusDTO();
+        if(userSubscriptionModel==null){
+            if(userModel==null){
+                throw new RuntimeException("User must be present");
+            }
+            statusDTO.setUserId(userModel.getId());
+            statusDTO.setBlocked(userModel.isBlocked());
+            statusDTO.setPlanStatus(userModel.isBlocked()? PlanStatusEnum.BLOCKED.getCode(): PlanStatusEnum.INIT.getCode());
+            return statusDTO;
+        }
+        StatusEnum status = userSubscriptionModel.getStatus();
         statusDTO.setUserId(userSubscriptionModel.getUser().getId());
         statusDTO.setStartDate(userSubscriptionModel.getStartDate());
         statusDTO.setEndDate(userSubscriptionModel.getEndDate());
-        if(status==StatusEnum.EXPIRED){
-            if(userSubscriptionModel.getPlanStatus()==PlanStatusEnum.SUBSCRIPTION || userSubscriptionModel.getPlanStatus()==PlanStatusEnum.SUBSCRIPTION_AUTO_RENEWAL){
+        statusDTO.setBlocked(userSubscriptionModel.getUser().isBlocked());
+        if (status == StatusEnum.EXPIRED) {
+            if (userSubscriptionModel.getPlanStatus() == PlanStatusEnum.SUBSCRIPTION || userSubscriptionModel.getPlanStatus() == PlanStatusEnum.SUBSCRIPTION_AUTO_RENEWAL) {
                 statusDTO.setPlanStatus(PlanStatusEnum.SUBSCRIPTION_EXPIRED.getCode());
-            }else if(userSubscriptionModel.getPlanStatus()==PlanStatusEnum.FREE_TRIAL){
+            } else if (userSubscriptionModel.getPlanStatus() == PlanStatusEnum.FREE_TRIAL) {
                 statusDTO.setPlanStatus(PlanStatusEnum.FREE_TRAIL_EXPIRED.getCode());
-            }else if(userSubscriptionModel.getPlanStatus()==PlanStatusEnum.FREE_TRIAL_WITH_PAYMENT){
+            } else if (userSubscriptionModel.getPlanStatus() == PlanStatusEnum.FREE_TRIAL_WITH_PAYMENT) {
                 statusDTO.setPlanStatus(PlanStatusEnum.FREE_TRIAL_WITH_PAYMENT_EXPIRED.getCode());
             }
-        }else{
+        } else {
             statusDTO.setPlanStatus(userSubscriptionModel.getPlanStatus().getCode());
         }
         if(userSubscriptionModel.isDeleted()){
             statusDTO.setPlanStatus(PlanStatusEnum.SUBSCRIPTION_CANCELLED.getCode());
+        }
+        if(statusDTO.isBlocked()){
+            statusDTO.setPlanStatus(PlanStatusEnum.BLOCKED.getCode());
         }
         statusDTO.setAutoRenewal(userSubscriptionModel.isAutoRenewal());
         return statusDTO;

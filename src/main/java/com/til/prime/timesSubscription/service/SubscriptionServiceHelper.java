@@ -23,6 +23,7 @@ public interface SubscriptionServiceHelper {
     PurchaseHistoryResponse preparePurchaseHistoryResponse(PurchaseHistoryResponse response, List<UserSubscriptionDTO> userSubscriptionDTOList, ValidationResponse validationResponse);
     CancelSubscriptionResponse prepareCancelSubscriptionResponse(CancelSubscriptionResponse response, BigDecimal refundAmount, ValidationResponse validationResponse);
     GenericResponse prepareTurnOffAutoDebitResponse(GenericResponse response, ValidationResponse validationResponse);
+    GenericResponse prepareBlockUnblockResponse(GenericResponse response, ValidationResponse validationResponse);
     UserSubscriptionAuditModel getUserSubscriptionAuditModel(UserSubscriptionModel userSubscriptionModel, EventEnum event);
     BigDecimal calculateRefundAmount(UserSubscriptionModel userSubscriptionModel);
     UserSubscriptionModel extendTrial(UserSubscriptionModel userSubscriptionModel, Long extensionDays);

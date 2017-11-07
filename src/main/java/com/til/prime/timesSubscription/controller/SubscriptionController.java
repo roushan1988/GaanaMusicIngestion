@@ -131,7 +131,20 @@ public class SubscriptionController {
         try {
             return subscriptionService.turnOffAutoDebit(request);
         }catch (Exception e){
-            LOG.error("Exception in cancelSubscription: ", e);
+            LOG.error("Exception in turnOffAutoDebitViaServer: ", e);
+            GenericResponse response = new GenericResponse();
+            return ResponseUtil.createExceptionResponse(response, 10);
+        }
+    }
+
+    @Loggable
+    @RequestMapping(path="/server/blockUnblockUser", method = RequestMethod.POST)
+    @ResponseBody
+    public GenericResponse blockUnblockUser(@RequestBody BlockUnblockRequest request){
+        try {
+            return subscriptionService.blockUnblockUser(request);
+        }catch (Exception e){
+            LOG.error("Exception in blockUser: ", e);
             GenericResponse response = new GenericResponse();
             return ResponseUtil.createExceptionResponse(response, 10);
         }
