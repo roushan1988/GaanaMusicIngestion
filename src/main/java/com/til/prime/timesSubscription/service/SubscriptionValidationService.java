@@ -4,6 +4,8 @@ import com.til.prime.timesSubscription.dto.external.*;
 import com.til.prime.timesSubscription.model.SubscriptionVariantModel;
 import com.til.prime.timesSubscription.model.UserSubscriptionModel;
 
+import java.util.List;
+
 public interface SubscriptionValidationService {
     ValidationResponse validateAllPlans(PlanListRequest request);
     ValidationResponse validatePreInitPurchasePlan(InitPurchaseRequest request, boolean crmRequest);
@@ -15,6 +17,8 @@ public interface SubscriptionValidationService {
     ValidationResponse validatePurchaseHistory(PurchaseHistoryRequest request);
     ValidationResponse validatePreCancelSubscription(CancelSubscriptionRequest request, boolean serverRequest);
     ValidationResponse validatePostCancelSubscription(CancelSubscriptionRequest request, UserSubscriptionModel userSubscriptionModel, ValidationResponse validationResponse);
+    ValidationResponse validatePreTurnOffAutoDebit(TurnOffAutoDebitRequest request);
+    ValidationResponse validatePostTurnOffAutoDebit(TurnOffAutoDebitRequest request, List<UserSubscriptionModel> userSubscriptionModelList, ValidationResponse validationResponse);
     ValidationResponse validatePreExtendExpiry(ExtendExpiryRequest request);
     ValidationResponse validatePostExtendExpiry(ExtendExpiryRequest request, UserSubscriptionModel userSubscriptionModel, ValidationResponse validationResponse);
     ValidationResponse validatePreCheckEligibility(CheckEligibilityRequest request);

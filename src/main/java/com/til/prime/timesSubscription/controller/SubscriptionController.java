@@ -125,6 +125,19 @@ public class SubscriptionController {
     }
 
     @Loggable
+    @RequestMapping(path="/server/turnOffAutoDebit", method = RequestMethod.POST)
+    @ResponseBody
+    public GenericResponse turnOffAutoDebitViaServer(@RequestBody TurnOffAutoDebitRequest request){
+        try {
+            return subscriptionService.turnOffAutoDebit(request);
+        }catch (Exception e){
+            LOG.error("Exception in cancelSubscription: ", e);
+            GenericResponse response = new GenericResponse();
+            return ResponseUtil.createExceptionResponse(response, 10);
+        }
+    }
+
+    @Loggable
     @RequestMapping(path="/server/extendExpiry", method = RequestMethod.POST)
     @ResponseBody
     public ExtendExpiryResponse extendExpiry(@RequestBody ExtendExpiryRequest request){

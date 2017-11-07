@@ -13,6 +13,7 @@ public interface SubscriptionService {
     SubmitPurchaseResponse submitPurchasePlan(SubmitPurchaseRequest request);
     PurchaseHistoryResponse getPurchaseHistory(PurchaseHistoryRequest request);
     CancelSubscriptionResponse cancelSubscription(CancelSubscriptionRequest request, boolean serverRequest);
+    GenericResponse turnOffAutoDebit(TurnOffAutoDebitRequest request);
     ExtendExpiryResponse extendExpiry(ExtendExpiryRequest request);
     GenericValidationResponse checkEligibility(CheckEligibilityRequest request);
     GenericValidationResponse checkValidVariant(CheckValidVariantRequest request);

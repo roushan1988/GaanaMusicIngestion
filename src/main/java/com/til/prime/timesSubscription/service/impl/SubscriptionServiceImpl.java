@@ -258,6 +258,19 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
+    public GenericResponse turnOffAutoDebit(TurnOffAutoDebitRequest request) {
+        ValidationResponse validationResponse = subscriptionValidationService.validatePreTurnOffAutoDebit(request);
+        List<UserSubscriptionModel> userSubscriptionModelList = null;
+        GenericResponse response = new GenericResponse();
+        if(validationResponse.isValid()){
+            userSubscriptionModelList = userSubscriptionRepository.findByUserMobileAndStatusInAndOrderCompletedTrueAndDeletedFalse(request.getUser().getMobile(), StatusEnum.VALID_TURN_OFF_DEBIT_STATUS_SET);
+            validationResponse = subscriptionValidationService.validatePostTurnOffAutoDebit(request, userSubscriptionModelList, validationResponse);
+        }
+        response = subscriptionServiceHelper.prepareTurnOffAutoDebitResponse(response, validationResponse);
+        return response;
+    }
+
+    @Override
     public ExtendExpiryResponse extendExpiry(ExtendExpiryRequest request) {
         ValidationResponse validationResponse = subscriptionValidationService.validatePreExtendExpiry(request);
         UserSubscriptionModel userSubscriptionModel = null;

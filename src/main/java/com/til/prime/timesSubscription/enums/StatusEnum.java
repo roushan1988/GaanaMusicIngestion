@@ -1,11 +1,15 @@
 package com.til.prime.timesSubscription.enums;
 
+import com.google.common.collect.Sets;
 import com.til.prime.timesSubscription.model.UserSubscriptionModel;
 
 import java.util.Date;
+import java.util.Set;
 
 public enum StatusEnum {
     EXPIRED, ACTIVE, FUTURE;
+
+    public static Set<StatusEnum> VALID_TURN_OFF_DEBIT_STATUS_SET = Sets.newHashSet(StatusEnum.ACTIVE, StatusEnum.FUTURE);
 
     public static StatusEnum getStatusForUserSubscription(UserSubscriptionModel userSubscriptionModel, Date currentDate){
         return getStatusForUserSubscription(userSubscriptionModel.getStartDate(), userSubscriptionModel.getEndDate(), currentDate);

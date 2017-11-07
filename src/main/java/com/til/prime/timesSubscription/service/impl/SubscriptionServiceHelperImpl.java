@@ -196,6 +196,16 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
     }
 
     @Override
+    public GenericResponse prepareTurnOffAutoDebitResponse(GenericResponse response, ValidationResponse validationResponse) {
+        if(validationResponse.isValid()){
+            response = ResponseUtil.createSuccessResponse(response);
+        }else{
+            response = ResponseUtil.createFailureResponse(response, validationResponse, validationResponse.getMaxCategory());
+        }
+        return response;
+    }
+
+    @Override
     public UserSubscriptionAuditModel getUserSubscriptionAuditModel(UserSubscriptionModel userSubscriptionModel, EventEnum event) {
         UserSubscriptionAuditModel auditModel = new UserSubscriptionAuditModel();
         auditModel.setUserSubscriptionId(userSubscriptionModel.getId());

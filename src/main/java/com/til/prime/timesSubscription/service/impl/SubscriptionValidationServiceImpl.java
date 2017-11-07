@@ -20,10 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 @Service
 public class SubscriptionValidationServiceImpl implements SubscriptionValidationService {
@@ -195,6 +192,29 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
         if(userSubscriptionModel!=null){
             PreConditions.notAfter(new Date(), userSubscriptionModel.getEndDate(), ValidationError.ALREADY_EXPIRED, validationResponse);
         }
+        return updateValid(validationResponse);
+    }
+
+    @Override
+    public ValidationResponse validatePreTurnOffAutoDebit(TurnOffAutoDebitRequest request) {
+        ValidationResponse validationResponse = new ValidationResponse();
+        if(validationResponse.isValid()){
+            PreConditions.notEmpty(request.getSecretKey(), ValidationError.INVALID_SECRET_KEY, validationResponse);
+            PreConditions.notNull(request.getUser(), ValidationError.INVALID_USER, validationResponse);
+            if(request.getUser()!=null){
+                PreConditions.notEmpty(request.getUser().getMobile(), ValidationError.INVALID_MOBILE, validationResponse);
+            }
+            validationResponse = updateValid(validationResponse);
+        }
+        if(validationResponse.isValid()){
+            validationResponse = validateEncryptionForTurnOffAutoDebit(request, validationResponse);
+        }
+        return updateValid(validationResponse);
+    }
+
+    @Override
+    public ValidationResponse validatePostTurnOffAutoDebit(TurnOffAutoDebitRequest request, List<UserSubscriptionModel> userSubscriptionModelList, ValidationResponse validationResponse) {
+        PreConditions.notEmpty(userSubscriptionModelList, ValidationError.NO_SUBSCRIPTIONS_FOUND, validationResponse);
         return updateValid(validationResponse);
     }
 
@@ -399,6 +419,23 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
                 if(request.getRefundAmount()!=null && request.getRefundAmount()>0){
                     sb.append(request.getRefundAmount());
                 }
+                String checksum = checksumService.calculateChecksumHmacSHA256(properties.getProperty(GlobalConstants.PAYMENTS_ENCRYPTION_KEY), sb.toString());
+                PreConditions.mustBeEqual(checksum, request.getChecksum(), ValidationError.INVALID_ENCRYPTION, validationResponse);
+            } catch (Exception e) {
+                validationResponse.getValidationErrorSet().add(ValidationError.INVALID_ENCRYPTION);
+            }
+        }
+        return updateValid(validationResponse);
+    }
+
+    private ValidationResponse validateEncryptionForTurnOffAutoDebit(TurnOffAutoDebitRequest request, ValidationResponse validationResponse) {
+        PreConditions.mustBeEqual(request.getSecretKey(), properties.getProperty(GlobalConstants.PAYMENTS_SECRET_KEY), ValidationError.INVALID_SECRET_KEY, validationResponse);
+        PreConditions.notEmpty(request.getChecksum(), ValidationError.INVALID_CHECKSUM, validationResponse);
+        validationResponse = updateValid(validationResponse);
+        if(validationResponse.isValid()){
+            try {
+                StringBuilder sb = new StringBuilder();
+                sb.append(request.getSecretKey()).append(request.getUser().getMobile());
                 String checksum = checksumService.calculateChecksumHmacSHA256(properties.getProperty(GlobalConstants.PAYMENTS_ENCRYPTION_KEY), sb.toString());
                 PreConditions.mustBeEqual(checksum, request.getChecksum(), ValidationError.INVALID_ENCRYPTION, validationResponse);
             } catch (Exception e) {

@@ -8,6 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -17,6 +18,8 @@ public interface UserSubscriptionRepository extends GenericJpaRepository<UserSub
     UserSubscriptionModel findByIdAndOrderIdAndSubscriptionVariantIdAndDeleted(Long id, String orderId, Long variantId, boolean deleted);
     UserSubscriptionModel findByOrderIdAndSubscriptionVariantIdAndDeleted(String orderId, Long variantId, boolean deleted);
     UserSubscriptionModel findFirstByUserMobileAndBusinessAndSubscriptionVariantPlanTypeAndOrderCompletedAndDeletedOrderByIdDesc(String mobile, BusinessEnum business, PlanTypeEnum planType, boolean orderCompleted, boolean deleted);
+    List<UserSubscriptionModel> findByUserMobileAndOrderCompletedTrueAndDeletedFalse(String mobile);
+    List<UserSubscriptionModel> findByUserMobileAndStatusInAndOrderCompletedTrueAndDeletedFalse(String mobile, Collection<StatusEnum> statusEnums);
     List<UserSubscriptionModel> findByUserMobileAndBusinessAndOrderCompletedAndDeleted(String mobile, BusinessEnum business, boolean orderCompleted, boolean deleted);
     List<UserSubscriptionModel> findByUserMobileAndBusinessAndOrderCompleted(String mobile, BusinessEnum business, boolean orderCompleted);
     List<UserSubscriptionModel> findByUserMobileAndOrderCompletedAndDeleted(String mobile, boolean orderCompleted, boolean deleted);
