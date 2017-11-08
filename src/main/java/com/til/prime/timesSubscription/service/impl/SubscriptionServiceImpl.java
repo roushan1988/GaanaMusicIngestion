@@ -399,7 +399,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     @Override
     @Transactional
     public UserModel getOrCreateUser(GenericRequest request, ValidationResponse validationResponse) {
-        UserModel userModel = userRepository.findByMobile(request.getUser().getSsoId());
+        UserModel userModel = userRepository.findByMobile(request.getUser().getMobile());
         if(userModel==null){
             userModel = subscriptionServiceHelper.getUser(request);
             userRepository.save(userModel);
