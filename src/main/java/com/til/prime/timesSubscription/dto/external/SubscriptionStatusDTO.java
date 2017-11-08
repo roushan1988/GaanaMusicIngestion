@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 public class SubscriptionStatusDTO implements Serializable {
+    private static final long serialVersionUID = 1l;
     private Long userId;
     private boolean blocked;
     private Date startDate;
