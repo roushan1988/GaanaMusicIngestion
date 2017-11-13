@@ -20,6 +20,6 @@ public interface SubscriptionService {
     GenericValidationResponse checkValidVariant(CheckValidVariantRequest request);
     CheckStatusResponse checkStatusViaApp(CheckStatusRequest request);
     CheckStatusResponse checkStatusViaServer(CheckStatusRequest request, boolean external);
-    UserModel getOrCreateUser(GenericRequest request, ValidationResponse validationResponse);
     UserSubscriptionModel saveUserSubscription(UserSubscriptionModel userSubscriptionModel, boolean retryForOrderId, String ssoId, String ticketId, EventEnum event);
+    UserModel saveUserModel(UserModel userModel, EventEnum eventEnum);
 }

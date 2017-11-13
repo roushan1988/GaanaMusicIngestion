@@ -2,10 +2,7 @@ package com.til.prime.timesSubscription.service;
 
 import com.til.prime.timesSubscription.dto.external.*;
 import com.til.prime.timesSubscription.enums.EventEnum;
-import com.til.prime.timesSubscription.model.SubscriptionVariantModel;
-import com.til.prime.timesSubscription.model.UserModel;
-import com.til.prime.timesSubscription.model.UserSubscriptionAuditModel;
-import com.til.prime.timesSubscription.model.UserSubscriptionModel;
+import com.til.prime.timesSubscription.model.*;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -32,6 +29,8 @@ public interface SubscriptionServiceHelper {
     GenericValidationResponse prepareValidVariantResponse(GenericValidationResponse response, ValidationResponse validationResponse, boolean validExecution);
     CheckStatusResponse prepareCheckStatusResponse(CheckStatusResponse response, boolean external, SubscriptionStatusDTO subscriptionStatusDTO, ValidationResponse validationResponse);
     UserModel getUser(GenericRequest request);
+    UserAuditModel getUserAudit(UserModel userModel, EventEnum eventEnum);
     boolean renewSubscription(UserSubscriptionModel userSubscriptionModel);
     boolean refundPayment(String orderId, Double refundAmount);
+    EmailTask getUserMobileUpdateEmailTask(UserModel userModel, List<UserSubscriptionModel> userSubscriptionModels);
 }

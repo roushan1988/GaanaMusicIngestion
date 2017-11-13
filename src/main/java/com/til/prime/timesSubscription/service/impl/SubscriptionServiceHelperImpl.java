@@ -5,10 +5,7 @@ import com.til.prime.timesSubscription.constants.GlobalConstants;
 import com.til.prime.timesSubscription.convertor.ModelToDTOConvertorUtil;
 import com.til.prime.timesSubscription.dto.external.*;
 import com.til.prime.timesSubscription.enums.*;
-import com.til.prime.timesSubscription.model.SubscriptionVariantModel;
-import com.til.prime.timesSubscription.model.UserModel;
-import com.til.prime.timesSubscription.model.UserSubscriptionAuditModel;
-import com.til.prime.timesSubscription.model.UserSubscriptionModel;
+import com.til.prime.timesSubscription.model.*;
 import com.til.prime.timesSubscription.service.ChecksumService;
 import com.til.prime.timesSubscription.service.SubscriptionServiceHelper;
 import com.til.prime.timesSubscription.util.HttpConnectionUtils;
@@ -22,12 +19,13 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Service
 public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper {
     private static final Logger LOG = Logger.getLogger(SubscriptionServiceHelperImpl.class);
-
+    private static final SimpleDateFormat SDF = new SimpleDateFormat("dd-MM-yyyy");
     @Autowired
     private HttpConnectionUtils httpConnectionUtils;
     @Resource(name = "config_properties")
@@ -331,6 +329,21 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
     }
 
     @Override
+    public UserAuditModel getUserAudit(UserModel userModel, EventEnum eventEnum) {
+        UserAuditModel userAuditModel = new UserAuditModel();
+        userAuditModel.setUserId(userModel.getId());
+        userAuditModel.setSsoId(userModel.getSsoId());
+        userAuditModel.setName(userModel.getName());
+        userAuditModel.setMobile(userModel.getMobile());
+        userAuditModel.setEmail(userModel.getEmail());
+        userAuditModel.setCity(userModel.getCity());
+        userAuditModel.setEvent(eventEnum);
+        userAuditModel.setBlocked(userModel.isBlocked());
+        userAuditModel.setCreated(new Date());
+        return userAuditModel;
+    }
+
+    @Override
     public final boolean renewSubscription(UserSubscriptionModel userSubscriptionModel){
         try{
             RenewSubscriptionRequest renewSubscriptionRequest = new RenewSubscriptionRequest();
@@ -363,6 +376,25 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
             LOG.error("Exception in api call to payments for refund with orderId: "+orderId+", refundAmount: "+refundAmount, e);
         }
         return false;
+    }
+
+    @Override
+    public EmailTask getUserMobileUpdateEmailTask(UserModel userModel, List<UserSubscriptionModel> userSubscriptionModels) {
+        EmailTask emailTask = new EmailTask();
+        emailTask.setTemplateKey(properties.getProperty(GlobalConstants.MOBILE_UPDATE_TEMPLATE_KEY));
+        emailTask.setPartnerId(GlobalConstants.PARTNER_ID_FOR_COMMUNICATION);
+        emailTask.setGroup(properties.getProperty(GlobalConstants.MOBILE_UPDATE_TEMPLATE_GROUP));
+        emailTask.setEmailId(userModel.getEmail());
+        emailTask.setFromName(GlobalConstants.EMAIL_NAME_FOR_COMMUNICATION);
+        emailTask.setFromEmail(GlobalConstants.EMAIL_FOR_COMMUNICATION);
+        Map<String, String> map = Maps.newHashMap();
+        map.put("startDate", SDF.format(userSubscriptionModels.get(0).getStartDate()));
+        map.put("endDate", SDF.format(userSubscriptionModels.get(userSubscriptionModels.size()-1).getEndDate()));
+        map.put("mobile", userModel.getMobile());
+        emailTask.setContext(map);
+        emailTask.setCtaKey(properties.getProperty(GlobalConstants.MOBILE_UPDATE_TEMPLATE_CTA_KEY));
+        emailTask.setTaskPriority(TaskPriorityEnum.HIGH_PRIORITY);
+        return emailTask;
     }
 
     private void updateSubscriptionChecksumForRenewSubscription(RenewSubscriptionRequest request) {

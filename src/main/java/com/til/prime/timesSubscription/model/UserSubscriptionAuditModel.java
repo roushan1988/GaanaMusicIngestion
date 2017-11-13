@@ -15,6 +15,7 @@ public class UserSubscriptionAuditModel extends BaseModel {
     @Column(name="subscription_plan_id")
     private Long subscriptionPlanId;
     @Column
+    @Enumerated(EnumType.STRING)
     private EventEnum event;
     @Column(name="user_id")
     private Long userId;

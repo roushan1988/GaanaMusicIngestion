@@ -5,5 +5,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface UserRepository extends GenericJpaRepository<UserModel, Long> {
-    UserModel findByMobile(String mobile);
+    UserModel findByMobileAndDeletedFalse(String mobile);
+    UserModel findBySsoIdAndDeletedFalse(String ssoId);
 }

@@ -7,6 +7,7 @@ import com.til.prime.timesSubscription.dao.*;
 import com.til.prime.timesSubscription.dto.external.*;
 import com.til.prime.timesSubscription.enums.*;
 import com.til.prime.timesSubscription.model.*;
+import com.til.prime.timesSubscription.service.QueueService;
 import com.til.prime.timesSubscription.service.SubscriptionService;
 import com.til.prime.timesSubscription.service.SubscriptionServiceHelper;
 import com.til.prime.timesSubscription.service.SubscriptionValidationService;
@@ -33,6 +34,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     @Autowired
     private UserRepository userRepository;
     @Autowired
+    private UserAuditRepository userAuditRepository;
+    @Autowired
     private SubscriptionPlanRepository subscriptionPlanRepository;
     @Autowired
     private SubscriptionVariantRepository subscriptionVariantRepository;
@@ -42,6 +45,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     private UserSubscriptionAuditRepository userSubscriptionAuditRepository;
     @Autowired
     private SubscriptionServiceHelper subscriptionServiceHelper;
+    @Autowired
+    private QueueService queueService;
 
     @Override
     public PlanListResponse getAllPlans(PlanListRequest request) {
@@ -49,7 +54,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         PlanListResponse response = new PlanListResponse();
         List<SubscriptionPlanDTO> subscriptionPlans = null;
         if(validationResponse.isValid() && request.getUser()!=null){
-            UserModel userModel = userRepository.findByMobile(request.getUser().getMobile());
+            UserModel userModel = userRepository.findByMobileAndDeletedFalse(request.getUser().getMobile());
             validationResponse = subscriptionValidationService.validatePostAllPlans(userModel, validationResponse);
         }
         if(validationResponse.isValid()){
@@ -106,7 +111,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             validationResponse = subscriptionValidationService.validatePostInitPurchasePlan(request, subscriptionVariantModel, restrictedUsageUserSubscription, lastUserSubscription, crmRequest, validationResponse);
         }
         if(validationResponse.isValid()) {
-            UserModel userModel = getOrCreateUser(request, validationResponse);
+            UserModel userModel = getOrCreateUserWithMobileCheck(request, validationResponse);
             if(validationResponse.isValid()){
                 userSubscriptionModel = subscriptionServiceHelper.generateInitPurchaseUserSubscription(request, subscriptionVariantModel, lastUserSubscription, userModel, request.getPrice(), crmRequest);
                 EventEnum eventEnum = EventEnum.getEventByInitPlanStatus(userSubscriptionModel.getPlanStatus());
@@ -283,12 +288,12 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         UserModel userModel = null;
         GenericResponse response = new GenericResponse();
         if(validationResponse.isValid()){
-            userModel = userRepository.findByMobile(request.getUser().getMobile());
+            userModel = userRepository.findByMobileAndDeletedFalse(request.getUser().getMobile());
             validationResponse = subscriptionValidationService.validatePostBlockUnblockUser(request, userModel, validationResponse);
         }
         if(validationResponse.isValid()){
             userModel.setBlocked(request.isBlockUser());
-            userRepository.save(userModel);
+            userModel = saveUserModel(userModel, request.isBlockUser()? EventEnum.USER_BLOCK: EventEnum.USER_UNBLOCK);
             UserSubscriptionModel userSubscriptionModel = userSubscriptionRepository.findByUserMobileAndStatusAndOrderCompletedTrue(request.getUser().getMobile(), StatusEnum.ACTIVE);
             updateUserStatus(userSubscriptionModel, userModel);
         }
@@ -396,15 +401,27 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         return response;
     }
 
-    @Override
-    @Transactional
-    public UserModel getOrCreateUser(GenericRequest request, ValidationResponse validationResponse) {
-        UserModel userModel = userRepository.findByMobile(request.getUser().getMobile());
+    private UserModel getOrCreateUserWithMobileCheck(GenericRequest request, ValidationResponse validationResponse) {
+        UserModel userModel = userRepository.findByMobileAndDeletedFalse(request.getUser().getMobile());
         if(userModel==null){
             userModel = subscriptionServiceHelper.getUser(request);
-            userRepository.save(userModel);
+            userModel = saveUserModel(userModel, EventEnum.NORMAL_USER_CREATION);
         }else{
-            subscriptionValidationService.validateBlockedUser(userModel, validationResponse);
+            if(request.getUser().getSsoId().equals(userModel.getSsoId())){
+                subscriptionValidationService.validateBlockedUser(userModel, validationResponse);
+            }else {
+                userModel.setIsDelete(true);
+                userModel = saveUserModel(userModel, EventEnum.USER_SUSPENSION);
+                if(StringUtils.isNotEmpty(userModel.getEmail())) {
+                    List<UserSubscriptionModel> relevantUserSubscriptions = userSubscriptionRepository.findByUserMobileAndStatusInAndOrderCompletedTrueAndDeletedFalse(userModel.getMobile(), Arrays.asList(StatusEnum.ACTIVE, StatusEnum.FUTURE));
+                    if(CollectionUtils.isNotEmpty(relevantUserSubscriptions)) {
+                        EmailTask emailTask = subscriptionServiceHelper.getUserMobileUpdateEmailTask(userModel, relevantUserSubscriptions);
+                        queueService.pushToEmailQueue(emailTask);
+                    }
+                }
+                userModel = subscriptionServiceHelper.getUser(request);
+                userModel = saveUserModel(userModel, EventEnum.USER_CREATION_WITH_EXISTING_MOBILE);
+            }
         }
         return userModel;
     }
@@ -481,5 +498,14 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         }
         statusDTO.setAutoRenewal(userSubscriptionModel.isAutoRenewal());
         return statusDTO;
+    }
+
+    @Override
+    @Transactional
+    public UserModel saveUserModel(UserModel userModel, EventEnum eventEnum){
+        userModel = userRepository.save(userModel);
+        UserAuditModel userAuditModel = subscriptionServiceHelper.getUserAudit(userModel, eventEnum);
+        userAuditRepository.save(userAuditModel);
+        return userModel;
     }
 }

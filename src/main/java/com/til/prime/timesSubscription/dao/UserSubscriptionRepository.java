@@ -37,7 +37,7 @@ public interface UserSubscriptionRepository extends GenericJpaRepository<UserSub
     Long countByStatusAndEndDateBetweenAndDeletedFalseAndOrderCompletedTrueAndAutoRenewalTrue(StatusEnum status, Date date1, Date date2);
     Long countByUserMobileAndStatusAndStartDateAfterAndDeletedFalseAndOrderCompletedTrue(String mobile, StatusEnum status, Date date1);
     UserSubscriptionModel findFirstByUserMobileAndStatusAndStartDateAfterAndDeletedFalseAndOrderCompletedTrueOrderById(String mobile, StatusEnum status, Date date1);
-    UserSubscriptionModel findByUserMobileAndStatusAndDeleted(String mobile, StatusEnum status, boolean deleted);
+    List<UserSubscriptionModel> findByUserMobileAndStatusInAndOrderCompletedTrueAndDeletedFalse(String mobile, Collection<StatusEnum> statusCollection);
     UserSubscriptionModel findByUserMobileAndStatusAndDeletedAndOrderCompletedTrue(String mobile, StatusEnum status, boolean deleted);
     UserSubscriptionModel findByUserMobileAndStatusAndOrderCompletedTrue(String mobile, StatusEnum statusEnum);
 }

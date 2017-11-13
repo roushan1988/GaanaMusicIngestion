@@ -37,11 +37,6 @@ public class GlobalConstants {
     public static final String OK = "OK";
     public static final Gson gson = new Gson();
     public static final Long CRON_BATCH_PROCESSING_COUNT= 500L;
-    public static final String EMAIL_PROTOCOL= "email.protocol";
-    public static final String EMAIL_HOST= "email.host";
-    public static final String EMAIL_PORT= "email.port";
-    public static final String EMAIL_USERNAME= "email.username";
-    public static final String EMAIL_PASSWORD= "email.password";
     public static final String PAYMENTS_RENEW_SUBSCRIPTION_URL_KEY = "payments.renew.subscription.url";
     public static final String PAYMENTS_REFUND_URL_KEY = "payments.refund.url";
     public static final int PAYMENTS_SUCCESS_STATUS_CODE = 2000;
@@ -49,4 +44,10 @@ public class GlobalConstants {
     public static final String EMAIL_ROUTING_KEY = "email.routing.key";
     public static final String PAYMENTS_REQ_DELIM = "|";
     public static final String CRON_ENABLED = "cron.enabled";
+    public static final String PARTNER_ID_FOR_COMMUNICATION = "TimesSubscription";
+    public static final String MOBILE_UPDATE_TEMPLATE_KEY = "mobile.update.template.key";
+    public static final String MOBILE_UPDATE_TEMPLATE_GROUP = "mobile.update.template.group";
+    public static final String MOBILE_UPDATE_TEMPLATE_CTA_KEY = "mobile.update.template.cta.key";
+    public static final String EMAIL_FOR_COMMUNICATION = "help@timesprime.com";
+    public static final String EMAIL_NAME_FOR_COMMUNICATION = "Times Prime";
 }

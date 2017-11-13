@@ -12,11 +12,32 @@ CREATE TABLE `user`(
   `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `deleted` tinyint(1) NOT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `UK_SSO_ID` (`sso_id`),
-  UNIQUE KEY `UK_MOBILE` (`mobile`),
+  INDEX `INDEX_SSO_ID` (`sso_id`),
+  INDEX `INDEX_MOBILE` (`mobile`),
   INDEX `INDEX_EMAIL` (`email`)
 );
 
+CREATE TABLE `user_audit`(
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `event` varchar(128) NOT NULL,
+  `name` varchar(64) NOT NULL,
+  `mobile` varchar(32) NOT NULL,
+  `email` varchar(32) NOT NULL,
+  `sso_id` varchar(64) NOT NULL,
+  `city` varchar(32) NOT NULL,
+  `blocked` tinyint(1) NOT NULL,
+  `created` datetime NOT NULL,
+  `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `deleted` tinyint(1) NOT NULL,
+  PRIMARY KEY (`id`),
+  INDEX `INDEX_UA_USER_ID` (`user_id`),
+  INDEX `INDEX_UA_EVENT` (`event`),
+  INDEX `INDEX_UA_SSO_ID` (`sso_id`),
+  INDEX `INDEX_UA_MOBILE` (`mobile`),
+  INDEX `INDEX_UA_EMAIL` (`email`),
+  CONSTRAINT `FK_UA_USER` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`)
+);
 
 CREATE TABLE `subscription_plan`(
   `id` int(11) NOT NULL AUTO_INCREMENT,
