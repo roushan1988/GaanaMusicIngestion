@@ -4,7 +4,7 @@ import com.til.prime.timesSubscription.enums.PlanTypeEnum;
 
 import java.math.BigDecimal;
 
-public class SubscriptionVariantDTO {
+public class SubscriptionVariantDTO implements Comparable<SubscriptionVariantDTO> {
     private Long variantId;
     private String name;
     private PlanTypeEnum planType;
@@ -80,5 +80,16 @@ public class SubscriptionVariantDTO {
         sb.append(", recurring=").append(recurring);
         sb.append('}');
         return sb.toString();
+    }
+
+    @Override
+    public int compareTo(SubscriptionVariantDTO o) {
+        if(this.planType.getOrder()<o.planType.getOrder()){
+            return -1;
+        }
+        if(this.planType.getOrder()>o.planType.getOrder()){
+            return 1;
+        }
+        return 0;
     }
 }

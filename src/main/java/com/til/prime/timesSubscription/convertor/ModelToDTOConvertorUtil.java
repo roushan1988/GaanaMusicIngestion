@@ -11,6 +11,7 @@ import com.til.prime.timesSubscription.model.SubscriptionVariantModel;
 import com.til.prime.timesSubscription.model.UserSubscriptionModel;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -40,6 +41,7 @@ public class ModelToDTOConvertorUtil {
                     dto.getVariants().add(new SubscriptionVariantDTO(variantModel.getId(), variantModel.getName(), variantModel.getPlanType(), variantModel.getPrice(), variantModel.getDurationDays(), variantModel.isRecurring()));
                 }
             }
+            Collections.sort(dto.getVariants());
         }
         if(model.getOffers()!=null){
             dto.setOffers(new ArrayList<>());
