@@ -49,7 +49,6 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
 
     @Override
     public ValidationResponse validatePostAllPlans(UserModel userModel, ValidationResponse validationResponse) {
-        PreConditions.notNull(userModel, ValidationError.INVALID_USER, validationResponse);
         if(userModel!=null){
             PreConditions.mustBeFalse(userModel.isBlocked(), ValidationError.BLOCKED_USER, validationResponse);
         }
