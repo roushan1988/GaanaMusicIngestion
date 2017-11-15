@@ -426,6 +426,9 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
         if(validationResponse.getValidationErrorSet().isEmpty()) {
             try {
                 StringBuilder sb = new StringBuilder();
+                if(external){
+                    sb.append(request.getClientId());
+                }
                 sb.append(request.getSecretKey()).append(request.getUser().getMobile());
                 String checksum = checksumService.calculateChecksumHmacSHA256(external? client.getEncryptionKey(): properties.getProperty(GlobalConstants.PAYMENTS_ENCRYPTION_KEY), sb.toString());
                 PreConditions.mustBeEqual(checksum, request.getChecksum(), ValidationError.INVALID_ENCRYPTION, validationResponse);
