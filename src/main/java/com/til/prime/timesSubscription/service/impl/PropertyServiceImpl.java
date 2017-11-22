@@ -82,6 +82,14 @@ public class PropertyServiceImpl implements PropertyService {
 
     @Override
     public ExternalClientModel getExternalClient(String clientId) {
+        if(getProperty(PropertyEnum.EXTERNAL_CLIENTS)==null){
+            List<ExternalClientModel> clients = clientRepository.findAll();
+            propertyMap.putIfAbsent(PropertyEnum.EXTERNAL_CLIENTS, new ConcurrentHashMap<String, ExternalClientModel>());
+            ConcurrentMap<String, ExternalClientModel> clientMap = (ConcurrentMap<String, ExternalClientModel>) propertyMap.get(PropertyEnum.EXTERNAL_CLIENTS);
+            for(ExternalClientModel client: clients){
+                clientMap.put(client.getClientId(), client);
+            }
+        }
         return ((Map<String, ExternalClientModel>)getProperty(PropertyEnum.EXTERNAL_CLIENTS)).get(clientId);
     }
 
