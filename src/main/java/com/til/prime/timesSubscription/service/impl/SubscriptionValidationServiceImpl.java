@@ -382,7 +382,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
                 String checksum = checksumService.calculateChecksumHmacSHA256(properties.getProperty(GlobalConstants.PAYMENTS_ENCRYPTION_KEY), sb.toString());
                 PreConditions.mustBeEqual(checksum, request.getChecksum(), ValidationError.INVALID_ENCRYPTION, validationResponse);
             } catch (Exception e) {
-                validationResponse.getValidationErrorSet().add(ValidationError.INVALID_ENCRYPTION);
+                validationResponse.addValidationError(ValidationError.INVALID_ENCRYPTION);
             }
         }
         return updateValid(validationResponse);
@@ -398,7 +398,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
                 String checksum = checksumService.calculateChecksumHmacSHA256(properties.getProperty(GlobalConstants.PAYMENTS_ENCRYPTION_KEY), sb.toString());
                 PreConditions.mustBeEqual(checksum, request.getChecksum(), ValidationError.INVALID_ENCRYPTION, validationResponse);
             } catch (Exception e) {
-                validationResponse.getValidationErrorSet().add(ValidationError.INVALID_ENCRYPTION);
+                validationResponse.addValidationError(ValidationError.INVALID_ENCRYPTION);
             }
         }
         return updateValid(validationResponse);
@@ -433,7 +433,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
                 String checksum = checksumService.calculateChecksumHmacSHA256(external? client.getEncryptionKey(): properties.getProperty(GlobalConstants.PAYMENTS_ENCRYPTION_KEY), sb.toString());
                 PreConditions.mustBeEqual(checksum, request.getChecksum(), ValidationError.INVALID_ENCRYPTION, validationResponse);
             } catch (Exception e) {
-                validationResponse.getValidationErrorSet().add(ValidationError.INVALID_ENCRYPTION);
+                validationResponse.addValidationError(ValidationError.INVALID_ENCRYPTION);
             }
         }
         return updateValid(validationResponse);
@@ -447,7 +447,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
             String checksum = checksumService.calculateChecksumHmacSHA256(properties.getProperty(GlobalConstants.PAYMENTS_ENCRYPTION_KEY), sb.toString());
             PreConditions.mustBeEqual(checksum, request.getChecksum(), ValidationError.INVALID_ENCRYPTION, validationResponse);
         } catch (Exception e) {
-            validationResponse.getValidationErrorSet().add(ValidationError.INVALID_ENCRYPTION);
+            validationResponse.addValidationError(ValidationError.INVALID_ENCRYPTION);
         }
         return updateValid(validationResponse);
     }
@@ -475,7 +475,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
                 String checksum = checksumService.calculateChecksumHmacSHA256(properties.getProperty(GlobalConstants.PAYMENTS_ENCRYPTION_KEY), sb.toString());
                 PreConditions.mustBeEqual(checksum, request.getChecksum(), ValidationError.INVALID_ENCRYPTION, validationResponse);
             } catch (Exception e) {
-                validationResponse.getValidationErrorSet().add(ValidationError.INVALID_ENCRYPTION);
+                validationResponse.addValidationError(ValidationError.INVALID_ENCRYPTION);
             }
         }
         return updateValid(validationResponse);
@@ -492,7 +492,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
                 String checksum = checksumService.calculateChecksumHmacSHA256(properties.getProperty(GlobalConstants.PAYMENTS_ENCRYPTION_KEY), sb.toString());
                 PreConditions.mustBeEqual(checksum, request.getChecksum(), ValidationError.INVALID_ENCRYPTION, validationResponse);
             } catch (Exception e) {
-                validationResponse.getValidationErrorSet().add(ValidationError.INVALID_ENCRYPTION);
+                validationResponse.addValidationError(ValidationError.INVALID_ENCRYPTION);
             }
         }
         return updateValid(validationResponse);
@@ -509,7 +509,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
                 String checksum = checksumService.calculateChecksumHmacSHA256(properties.getProperty(GlobalConstants.PAYMENTS_ENCRYPTION_KEY), sb.toString());
                 PreConditions.mustBeEqual(checksum, request.getChecksum(), ValidationError.INVALID_ENCRYPTION, validationResponse);
             } catch (Exception e) {
-                validationResponse.getValidationErrorSet().add(ValidationError.INVALID_ENCRYPTION);
+                validationResponse.addValidationError(ValidationError.INVALID_ENCRYPTION);
             }
         }
         return updateValid(validationResponse);
@@ -531,7 +531,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
                 String checksum = checksumService.calculateChecksumHmacSHA256(properties.getProperty(GlobalConstants.PAYMENTS_ENCRYPTION_KEY), sb.toString());
                 PreConditions.mustBeEqual(checksum, request.getChecksum(), ValidationError.INVALID_ENCRYPTION, validationResponse);
             } catch (Exception e) {
-                validationResponse.getValidationErrorSet().add(ValidationError.INVALID_ENCRYPTION);
+                validationResponse.addValidationError(ValidationError.INVALID_ENCRYPTION);
             }
         }
         return updateValid(validationResponse);
@@ -566,14 +566,14 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
                      ssoValidateResponse = gson.fromJson(ssoResponse, SSOValidateResponse.class);
                 }catch (Exception e){
                     LOG.info("User Validation Failed From SSO Response [validateLogin] with ssoId " + ssoId + ", ticketId " + ticketId + ", response : " + ssoResponse);
-                    validationResponse.getValidationErrorSet().add(ValidationError.INVALID_SSO_CREDENTIALS);
+                    validationResponse.addValidationError(ValidationError.INVALID_SSO_CREDENTIALS);
                     return;
                 }
                 if (ssoId.equals(ssoValidateResponse.getUserId()) && mobile.equals(ssoValidateResponse.getVerifiedMobile())) {
                     LOG.info("User Validated From SSO Response [validateLogin] with ssoId " + ssoId + ", ticketId " + ticketId + ", response :" + ssoResponse);
                 } else {
                     LOG.info("User Validation Failed From SSO Response [validateLogin] with ssoId " + ssoId + ", ticketId " + ticketId + ", response : " + ssoResponse);
-                    validationResponse.getValidationErrorSet().add(ValidationError.INVALID_SSO_CREDENTIALS);
+                    validationResponse.addValidationError(ValidationError.INVALID_SSO_CREDENTIALS);
                 }
             } catch (Exception e) {
                 retryCount--;
@@ -583,7 +583,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
                 }
                 LOG.error("User Validation Failed From SSO Response [validateLogin] with ssoId " + ssoId + ", ticketId " + ticketId
                         + ", exception: ", e);
-                validationResponse.getValidationErrorSet().add(ValidationError.INVALID_SSO_CREDENTIALS);
+                validationResponse.addValidationError(ValidationError.INVALID_SSO_CREDENTIALS);
             }
             updateValid(validationResponse);
             return;

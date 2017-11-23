@@ -256,7 +256,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 userSubscriptionModel.setIsDelete(true);
                 userSubscriptionModel = saveUserSubscription(userSubscriptionModel, false, null, null, serverRequest? EventEnum.SUBSCRIPTION_SERVER_CANCELLATION: EventEnum.SUBSCRIPTION_APP_CANCELLATION);
             }else{
-                validationResponse.getValidationErrorSet().add(ValidationError.PAYMENT_REFUND_ERROR);
+                validationResponse.addValidationError(ValidationError.PAYMENT_REFUND_ERROR);
             }
         }
         response = subscriptionServiceHelper.prepareCancelSubscriptionResponse(response, refundAmount, validationResponse);
