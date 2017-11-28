@@ -21,5 +21,6 @@ public interface SubscriptionService {
     CheckStatusResponse checkStatusViaApp(CheckStatusRequest request);
     CheckStatusResponse checkStatusViaServer(CheckStatusRequest request, boolean external);
     UserSubscriptionModel saveUserSubscription(UserSubscriptionModel userSubscriptionModel, boolean retryForOrderId, String ssoId, String ticketId, EventEnum event);
+    void updateUserStatus(UserSubscriptionModel userSubscriptionModel, UserModel userModel);
     UserModel saveUserModel(UserModel userModel, EventEnum eventEnum);
 }

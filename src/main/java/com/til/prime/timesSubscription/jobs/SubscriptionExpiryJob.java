@@ -59,11 +59,13 @@ public class SubscriptionExpiryJob extends AbstractJob {
                     for (UserSubscriptionModel userSubscriptionModel : userSubscriptionModelList) {
                         userSubscriptionModel.setStatus(StatusEnum.EXPIRED);
                         userSubscriptionModel = subscriptionService.saveUserSubscription(userSubscriptionModel, false, null, null, EventEnum.USER_SUBSCRIPTION_EXPIRY);
+                        subscriptionService.updateUserStatus(userSubscriptionModel, userSubscriptionModel.getUser());
                         UserSubscriptionModel userSubscriptionModel1 = userSubscriptionRepository.findFirstByUserMobileAndStatusAndStartDateAfterAndDeletedFalseAndOrderCompletedTrueOrderById(
                                 userSubscriptionModel.getUser().getMobile(), StatusEnum.FUTURE, TimeUtils.addMillisInDate(userSubscriptionModel.getEndDate(), -2000));
                         if(userSubscriptionModel1!=null){
                             userSubscriptionModel1.setStatus(StatusEnum.ACTIVE);
                             subscriptionService.saveUserSubscription(userSubscriptionModel1, false, userSubscriptionModel1.getUser().getSsoId(), userSubscriptionModel1.getTicketId(), EventEnum.USER_SUBSCRIPTION_ACTIVE);
+                            subscriptionService.updateUserStatus(userSubscriptionModel1, userSubscriptionModel1.getUser());
                             recordsAffected++;
                             affectedModels.add(userSubscriptionModel1.getId());
                         }else if(userSubscriptionModel.getSubscriptionVariant().isRecurring() && userSubscriptionModel.isAutoRenewal()){

@@ -10,8 +10,6 @@ import javax.crypto.spec.SecretKeySpec;
 public class ChecksumServiceImpl implements ChecksumService {
     @Override
     public  String calculateChecksumHmacSHA256(String secretKey, String allParamValue) throws Exception {
-        System.out.println("this is secret key :" + secretKey);
-        System.out.println("all param is :" + allParamValue);
         byte[] dataToEncryptByte = allParamValue.getBytes();
         byte[] keyBytes = secretKey.getBytes();
         SecretKeySpec secretKeySpec = new SecretKeySpec(keyBytes, "HmacSHA256");

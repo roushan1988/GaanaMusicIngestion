@@ -35,6 +35,7 @@ public class RedisConfig extends CachingConfigurerSupport {
     static {
         cacheMap.put(RedisConstants.SSO_AUTH_CACHE_KEY, RedisConstants.SSO_AUTH_CACHE_EXPIRY_SECS);
         cacheMap.put(RedisConstants.PRIME_STATUS_CACHE_KEY, RedisConstants.PRIME_STATUS_CACHE_EXPIRY_SECS);
+        cacheMap.put(RedisConstants.USER_DETAILS_CACHE_KEY, RedisConstants.USER_DETAILS_CACHE_EXPIRY_SECS);
     }
 
     @Bean

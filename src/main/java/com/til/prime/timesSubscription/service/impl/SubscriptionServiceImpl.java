@@ -184,6 +184,9 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             UserSubscriptionModel lastUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndBusinessAndOrderCompletedAndDeletedOrderByIdDesc(userSubscriptionModel.getUser().getMobile(), userSubscriptionModel.getBusiness(), true, false);
             userSubscriptionModel = subscriptionServiceHelper.updateSubmitPurchaseUserSubscription(request, userSubscriptionModel, lastUserSubscription);
             userSubscriptionModel = saveUserSubscription(userSubscriptionModel, false, userSubscriptionModel.getUser().getSsoId(), userSubscriptionModel.getTicketId(), userSubscriptionModel.isOrderCompleted()? EventEnum.PAYMENT_SUCCESS: EventEnum.PAYMENT_FAILURE);
+            if(userSubscriptionModel.getStatus()==StatusEnum.ACTIVE){
+                updateUserStatus(userSubscriptionModel, userSubscriptionModel.getUser());
+            }
         }
         response = subscriptionServiceHelper.prepareSubmitPurchaseResponse(response, userSubscriptionModel, validationResponse);
         return response;
@@ -254,7 +257,12 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             }
             if(success){
                 userSubscriptionModel.setIsDelete(true);
+                StatusEnum statusEnum = userSubscriptionModel.getStatus();
+                userSubscriptionModel.setStatus(StatusEnum.EXPIRED);
                 userSubscriptionModel = saveUserSubscription(userSubscriptionModel, false, null, null, serverRequest? EventEnum.SUBSCRIPTION_SERVER_CANCELLATION: EventEnum.SUBSCRIPTION_APP_CANCELLATION);
+                if(statusEnum==StatusEnum.ACTIVE){
+                    updateUserStatus(userSubscriptionModel, userSubscriptionModel.getUser());
+                }
             }else{
                 validationResponse.addValidationError(ValidationError.PAYMENT_REFUND_ERROR);
             }
@@ -276,6 +284,9 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             for(UserSubscriptionModel userSubscriptionModel: userSubscriptionModelList){
                 userSubscriptionModel.setAutoRenewal(false);
                 userSubscriptionModel = saveUserSubscription(userSubscriptionModel, false, null, null, EventEnum.SUBSCRIPTION_TURN_OFF_AUTO_DEBIT);
+                if(userSubscriptionModel.getStatus()==StatusEnum.ACTIVE){
+                    updateUserStatus(userSubscriptionModel, userSubscriptionModel.getUser());
+                }
             }
         }
         response = subscriptionServiceHelper.prepareTurnOffAutoDebitResponse(response, validationResponse);
@@ -313,6 +324,9 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         if(validationResponse.isValid()){
             userSubscriptionModel = subscriptionServiceHelper.extendTrial(userSubscriptionModel, request.getExtensionDays());
             userSubscriptionModel = saveUserSubscription(userSubscriptionModel, false, request.getUser().getSsoId(), request.getUser().getTicketId(), EventEnum.SUBSCRIPTION_TRIAL_EXTENSION);
+            if(userSubscriptionModel.getStatus()==StatusEnum.ACTIVE){
+                updateUserStatus(userSubscriptionModel, userSubscriptionModel.getUser());
+            }
         }
         response = subscriptionServiceHelper.prepareExtendExpiryResponse(response, userSubscriptionModel, validationResponse);
         return response;
@@ -412,6 +426,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             }else {
                 userModel.setIsDelete(true);
                 userModel = saveUserModel(userModel, EventEnum.USER_SUSPENSION);
+                updateUserDetailsInCache(userModel);
                 if(StringUtils.isNotEmpty(userModel.getEmail())) {
                     List<UserSubscriptionModel> relevantUserSubscriptions = userSubscriptionRepository.findByUserMobileAndStatusInAndOrderCompletedTrueAndDeletedFalse(userModel.getMobile(), Arrays.asList(StatusEnum.ACTIVE, StatusEnum.FUTURE));
                     if(CollectionUtils.isNotEmpty(relevantUserSubscriptions)) {
@@ -421,6 +436,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 }
                 userModel = subscriptionServiceHelper.getUser(request);
                 userModel = saveUserModel(userModel, EventEnum.USER_CREATION_WITH_EXISTING_MOBILE);
+                updateUserDetailsInCache(userModel);
             }
         }
         return userModel;
@@ -450,17 +466,33 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         return userSubscriptionModel;
     }
 
-    private void updateUserStatus(UserSubscriptionModel userSubscriptionModel){
-        updateUserStatus(userSubscriptionModel, null);
-    }
-
-    private void updateUserStatus(UserSubscriptionModel userSubscriptionModel, UserModel userModel){
+    @Override
+    @Transactional
+    public void updateUserStatus(UserSubscriptionModel userSubscriptionModel, UserModel userModel){
         SubscriptionStatusDTO statusDTO = getSubscriptionStatusDTO(userSubscriptionModel, userModel);
         if(userSubscriptionModel.getStatus()==StatusEnum.FUTURE){
             return;
         }
         String mobile = userSubscriptionModel.getUser().getMobile();
         cacheManager.getCache(RedisConstants.PRIME_STATUS_CACHE_KEY).put(mobile, statusDTO);
+    }
+
+    private void updateUserStatus(UserSubscriptionModel userSubscriptionModel){
+        updateUserStatus(userSubscriptionModel, null);
+    }
+
+    private void updateUserDetailsInCache(UserModel userModel){
+        Cache.ValueWrapper vw = cacheManager.getCache(RedisConstants.PRIME_STATUS_CACHE_KEY).get(userModel.getMobile());
+        SubscriptionStatusDTO statusDTO = null;
+        if(vw!=null){
+            statusDTO = (SubscriptionStatusDTO) vw.get();
+        }
+        if(statusDTO!=null){
+            statusDTO.setUserId(userModel.getId());
+            statusDTO.setBlocked(userModel.isBlocked());
+            statusDTO.setEmail(userModel.getEmail());
+            cacheManager.getCache(RedisConstants.PRIME_STATUS_CACHE_KEY).put(userModel.getMobile(), statusDTO);
+        }
     }
 
     private SubscriptionStatusDTO getSubscriptionStatusDTO(UserSubscriptionModel userSubscriptionModel, UserModel userModel){

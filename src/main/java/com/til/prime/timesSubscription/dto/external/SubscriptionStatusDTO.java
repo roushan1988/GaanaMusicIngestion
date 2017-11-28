@@ -11,6 +11,7 @@ public class SubscriptionStatusDTO implements Serializable {
     private Date endDate;
     private int planStatus;
     private boolean autoRenewal;
+    private String email;
 
     public Long getUserId() {
         return userId;
@@ -60,6 +61,14 @@ public class SubscriptionStatusDTO implements Serializable {
         this.autoRenewal = autoRenewal;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("SubscriptionStatusDTO{");
@@ -69,6 +78,7 @@ public class SubscriptionStatusDTO implements Serializable {
         sb.append(", endDate=").append(endDate);
         sb.append(", planStatus=").append(planStatus);
         sb.append(", autoRenewal=").append(autoRenewal);
+        sb.append(", email='").append(email).append('\'');
         sb.append('}');
         return sb.toString();
     }
