@@ -68,7 +68,7 @@ public class SubscriptionExpiryJob extends AbstractJob {
                             subscriptionService.updateUserStatus(userSubscriptionModel1, userSubscriptionModel1.getUser());
                             recordsAffected++;
                             affectedModels.add(userSubscriptionModel1.getId());
-                        }else if(userSubscriptionModel.getSubscriptionVariant().isRecurring() && userSubscriptionModel.isAutoRenewal()){
+                        }else if(userSubscriptionModel.getSubscriptionVariant().isRecurring() && userSubscriptionModel.isAutoRenewal() && !userSubscriptionModel.getUser().isBlocked()){
                             LOG.info("Initiating SUBSCRIPTION RENEWAL for userSubscriptionId: "+userSubscriptionModel.getId()+", orderId: "+userSubscriptionModel.getOrderId());
                             boolean success = subscriptionServiceHelper.renewSubscription(userSubscriptionModel);
                             if(success){
