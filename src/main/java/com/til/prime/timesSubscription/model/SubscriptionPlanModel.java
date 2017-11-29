@@ -8,8 +8,6 @@ import java.util.List;
 @Entity
 @Table(name="subscription_plan")
 public class SubscriptionPlanModel extends BaseModel {
-//    @Column(name="plan_id")
-//    private String planId;
     @Column
     private String name;
     @Column
@@ -28,16 +26,6 @@ public class SubscriptionPlanModel extends BaseModel {
     private PlanFamilyEnum family;
     @OneToMany(mappedBy = "subscriptionPlan", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<SubscriptionVariantModel> variants;
-    @OneToMany(mappedBy = "subscriptionPlan", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private List<OfferModel> offers;
-
-//    public String getPlanId() {
-//        return planId;
-//    }
-//
-//    public void setPlanId(String planId) {
-//        this.planId = planId;
-//    }
 
     public String getName() {
         return name;
@@ -93,13 +81,5 @@ public class SubscriptionPlanModel extends BaseModel {
 
     public void setVariants(List<SubscriptionVariantModel> variants) {
         this.variants = variants;
-    }
-
-    public List<OfferModel> getOffers() {
-        return offers;
-    }
-
-    public void setOffers(List<OfferModel> offers) {
-        this.offers = offers;
     }
 }

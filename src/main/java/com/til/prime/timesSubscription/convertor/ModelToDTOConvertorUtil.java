@@ -1,11 +1,9 @@
 package com.til.prime.timesSubscription.convertor;
 
-import com.til.prime.timesSubscription.dto.external.SubscriptionOfferDTO;
 import com.til.prime.timesSubscription.dto.external.SubscriptionPlanDTO;
 import com.til.prime.timesSubscription.dto.external.SubscriptionVariantDTO;
 import com.til.prime.timesSubscription.dto.external.UserSubscriptionDTO;
 import com.til.prime.timesSubscription.enums.PlanTypeEnum;
-import com.til.prime.timesSubscription.model.OfferModel;
 import com.til.prime.timesSubscription.model.SubscriptionPlanModel;
 import com.til.prime.timesSubscription.model.SubscriptionVariantModel;
 import com.til.prime.timesSubscription.model.UserSubscriptionModel;
@@ -42,12 +40,6 @@ public class ModelToDTOConvertorUtil {
                 }
             }
             Collections.sort(dto.getVariants());
-        }
-        if(model.getOffers()!=null){
-            dto.setOffers(new ArrayList<>());
-            for(OfferModel offerModel: model.getOffers()){
-                dto.getOffers().add(new SubscriptionOfferDTO(offerModel.getChannel().name(), offerModel.isThirdParty(), offerModel.getOffering(), offerModel.getQuantity()));
-            }
         }
         return dto;
     }
