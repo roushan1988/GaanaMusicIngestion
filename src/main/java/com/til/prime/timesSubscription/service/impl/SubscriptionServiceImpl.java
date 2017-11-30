@@ -410,6 +410,18 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             if(vw!=null){
                 statusDTO = (SubscriptionStatusDTO) vw.get();
             }
+            if(statusDTO == null && !external){ //cache update step
+                UserSubscriptionModel userSubscriptionModel = null;
+                userSubscriptionModel = userSubscriptionRepository.findByUserMobileAndStatusAndDeletedAndOrderCompletedTrue(request.getUser().getMobile(), StatusEnum.ACTIVE, false);
+                validationResponse = subscriptionValidationService.validatePostCheckStatus(request, userSubscriptionModel, validationResponse);
+                if(validationResponse.isValid()){
+                    updateUserStatus(userSubscriptionModel);
+                    vw = cacheManager.getCache(RedisConstants.PRIME_STATUS_CACHE_KEY).get(request.getUser().getMobile());
+                    if(vw!=null){
+                        statusDTO = (SubscriptionStatusDTO) vw.get();
+                    }
+                }
+            }
         }
         response = subscriptionServiceHelper.prepareCheckStatusResponse(response, external, statusDTO, validationResponse);
         return response;
