@@ -52,7 +52,8 @@ public class PropertyServiceImpl implements PropertyService {
         LOG.info("Properties reloaded");
     }
 
-    private Object getProperty(PropertyEnum propertyEnum){
+    @Override
+    public Object getProperty(PropertyEnum propertyEnum){
         Object value = propertyMap.get(propertyEnum);
         if(value==null){
             LOG.info("Find property - " + propertyEnum.name());
