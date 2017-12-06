@@ -42,8 +42,8 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
         if(request.getUser()!=null){
             validationResponse = validateUser(request, validationResponse);
         }
-        PreConditions.notNullEnumCheck(request.getBusiness(), BusinessEnum.names(), ValidationError.INVALID_BUSINESS, validationResponse);
-        PreConditions.notNullEnumCheck(request.getCountry(), CountryEnum.names(), ValidationError.INVALID_COUNTRY, validationResponse);
+        PreConditions.notNull(request.getBusiness(), ValidationError.INVALID_BUSINESS, validationResponse);
+        PreConditions.notNull(request.getCountry(), ValidationError.INVALID_COUNTRY, validationResponse);
         return updateValid(validationResponse);
     }
 
@@ -560,19 +560,19 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
             try {
                 Gson gson = GlobalConstants.gson;
                 String ssoResponse = getSSOIdForTicketId(ticketId);
-                LOG.info("got sso response for [validateLogin] with ssoId" + ssoId + ", ticketId " + ticketId + ", response " + ssoResponse);
+                LOG.info("got sso response for [validateLogin] with ssoId: " + ssoId + ", ticketId: " + ticketId + ", response: " + ssoResponse);
                 SSOValidateResponse ssoValidateResponse = null;
                 try {
                      ssoValidateResponse = gson.fromJson(ssoResponse, SSOValidateResponse.class);
                 }catch (Exception e){
-                    LOG.info("User Validation Failed From SSO Response [validateLogin] with ssoId " + ssoId + ", ticketId " + ticketId + ", response : " + ssoResponse);
+                    LOG.info("User Validation Failed From SSO Response [validateLogin] with ssoId: " + ssoId + ", ticketId: " + ticketId + ", response : " + ssoResponse);
                     validationResponse.addValidationError(ValidationError.INVALID_SSO_CREDENTIALS);
                     return;
                 }
                 if (ssoId.equals(ssoValidateResponse.getUserId()) && mobile.equals(ssoValidateResponse.getVerifiedMobile())) {
-                    LOG.info("User Validated From SSO Response [validateLogin] with ssoId " + ssoId + ", ticketId " + ticketId + ", response :" + ssoResponse);
+                    LOG.info("User Validated From SSO Response [validateLogin] with ssoId: " + ssoId + ", ticketId: " + ticketId + ", response:" + ssoResponse);
                 } else {
-                    LOG.info("User Validation Failed From SSO Response [validateLogin] with ssoId " + ssoId + ", ticketId " + ticketId + ", response : " + ssoResponse);
+                    LOG.info("User Validation Failed From SSO Response [validateLogin] with ssoId: " + ssoId + ", ticketId: " + ticketId + ", response: " + ssoResponse);
                     validationResponse.addValidationError(ValidationError.INVALID_SSO_CREDENTIALS);
                 }
             } catch (Exception e) {
@@ -581,7 +581,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
                     retryCount--;
                     continue RETRY_LOOP;
                 }
-                LOG.error("User Validation Failed From SSO Response [validateLogin] with ssoId " + ssoId + ", ticketId " + ticketId
+                LOG.error("User Validation Failed From SSO Response [validateLogin] with ssoId: " + ssoId + ", ticketId: " + ticketId
                         + ", exception: ", e);
                 validationResponse.addValidationError(ValidationError.INVALID_SSO_CREDENTIALS);
             }

@@ -1,24 +1,26 @@
 package com.til.prime.timesSubscription.dto.external;
 
+import com.til.prime.timesSubscription.enums.BusinessEnum;
+import com.til.prime.timesSubscription.enums.CountryEnum;
+
 public class PlanListRequest extends GenericRequest {
-    private String business;
-    private String country;
+    private BusinessEnum business;
+    private CountryEnum country;
     private Long planId;
 
-    public String getBusiness() {
+    public BusinessEnum getBusiness() {
         return business;
     }
 
-    public void setBusiness(String business) {
+    public void setBusiness(BusinessEnum business) {
         this.business = business;
     }
 
-
-    public String getCountry() {
+    public CountryEnum getCountry() {
         return country;
     }
 
-    public void setCountry(String country) {
+    public void setCountry(CountryEnum country) {
         this.country = country;
     }
 
@@ -33,8 +35,8 @@ public class PlanListRequest extends GenericRequest {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("PlanListRequest{");
-        sb.append("business='").append(business).append('\'');
-        sb.append(", country='").append(country).append('\'');
+        sb.append("business=").append(business);
+        sb.append(", country=").append(country);
         sb.append(", planId=").append(planId);
         sb.append(", user=").append(user);
         sb.append(", secretKey='").append(secretKey).append('\'');

@@ -1,10 +1,16 @@
 package com.til.prime.timesSubscription.service.impl;
 
 import com.google.common.cache.CacheBuilder;
+import com.til.prime.timesSubscription.convertor.ModelToDTOConvertorUtil;
 import com.til.prime.timesSubscription.dao.ExternalClientRepository;
+import com.til.prime.timesSubscription.dao.SubscriptionPlanRepository;
 import com.til.prime.timesSubscription.dao.SubscriptionPropertyRepository;
+import com.til.prime.timesSubscription.dto.external.SubscriptionPlanDTO;
+import com.til.prime.timesSubscription.enums.BusinessEnum;
+import com.til.prime.timesSubscription.enums.CountryEnum;
 import com.til.prime.timesSubscription.enums.PropertyEnum;
 import com.til.prime.timesSubscription.model.ExternalClientModel;
+import com.til.prime.timesSubscription.model.SubscriptionPlanModel;
 import com.til.prime.timesSubscription.model.SubscriptionPropertyModel;
 import com.til.prime.timesSubscription.service.PropertyService;
 import org.apache.log4j.Logger;
@@ -13,9 +19,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
@@ -30,6 +34,8 @@ public class PropertyServiceImpl implements PropertyService {
     private SubscriptionPropertyRepository subscriptionPropertyRepository;
     @Autowired
     private ExternalClientRepository clientRepository;
+    @Autowired
+    private SubscriptionPlanRepository planRepository;
 
     @Override
     @PostConstruct
@@ -49,6 +55,7 @@ public class PropertyServiceImpl implements PropertyService {
         for(ExternalClientModel client: clients){
             clientMap.put(client.getClientId(), client);
         }
+        reloadAllPlans();
         LOG.info("Properties reloaded");
     }
 
@@ -94,6 +101,42 @@ public class PropertyServiceImpl implements PropertyService {
         return ((Map<String, ExternalClientModel>)getProperty(PropertyEnum.EXTERNAL_CLIENTS)).get(clientId);
     }
 
+    @Override
+    public List<SubscriptionPlanDTO> getAllPlans(BusinessEnum business, CountryEnum country) {
+        if(getProperty(PropertyEnum.SUBSCRIPTION_PLAN_DTOS)==null){
+            reloadAllPlans();
+        }
+        return ((ConcurrentMap<BusinessCountry, List<SubscriptionPlanDTO>>) getProperty(PropertyEnum.SUBSCRIPTION_PLAN_DTOS)).get(new BusinessCountry(business, country));
+    }
+
+    @Override
+    public List<SubscriptionPlanModel> getAllPlanModels(BusinessEnum business, CountryEnum country) {
+        if(getProperty(PropertyEnum.SUBSCRIPTION_PLAN_MODELS)==null){
+            reloadAllPlans();
+        }
+        return ((ConcurrentMap<BusinessCountry, List<SubscriptionPlanModel>>) getProperty(PropertyEnum.SUBSCRIPTION_PLAN_MODELS)).get(new BusinessCountry(business, country));
+    }
+
+    private void reloadAllPlans(){
+        List<SubscriptionPlanModel> plans = planRepository.findByDeletedFalse();
+        propertyMap.putIfAbsent(PropertyEnum.SUBSCRIPTION_PLAN_DTOS, new ConcurrentHashMap<BusinessCountry, List<SubscriptionPlanDTO>>());
+        propertyMap.putIfAbsent(PropertyEnum.SUBSCRIPTION_PLAN_MODELS, new ConcurrentHashMap<BusinessCountry, List<SubscriptionPlanModel>>());
+        ConcurrentMap<BusinessCountry, List<SubscriptionPlanDTO>> planDTOMap = (ConcurrentMap<BusinessCountry, List<SubscriptionPlanDTO>>) propertyMap.get(PropertyEnum.SUBSCRIPTION_PLAN_DTOS);
+        ConcurrentMap<BusinessCountry, List<SubscriptionPlanModel>> planModelMap = (ConcurrentMap<BusinessCountry, List<SubscriptionPlanModel>>) propertyMap.get(PropertyEnum.SUBSCRIPTION_PLAN_MODELS);
+        Map<BusinessCountry, List<SubscriptionPlanDTO>> dtoMap = new HashMap<>();
+        Map<BusinessCountry, List<SubscriptionPlanModel>> modelMap = new HashMap<>();
+        for(SubscriptionPlanModel plan: plans){
+            Collections.sort(plan.getVariants());
+            BusinessCountry businessCountry = new BusinessCountry(plan.getBusiness(), plan.getCountry());
+            modelMap.putIfAbsent(businessCountry, new ArrayList<>());
+            dtoMap.putIfAbsent(businessCountry, new ArrayList<>());
+            modelMap.get(businessCountry).add(plan);
+            dtoMap.get(businessCountry).add(ModelToDTOConvertorUtil.getSubscriptionPlanDTO(plan, null));
+        }
+        planDTOMap.putAll(dtoMap);
+        planModelMap.putAll(modelMap);
+    }
+
     private Object parseValue(String value, String type){
         switch(type){
             case "Integer": return Integer.parseInt(value);
@@ -103,6 +146,34 @@ public class PropertyServiceImpl implements PropertyService {
             case "String": return value;
             case "List<Long>": return Arrays.stream(value.split(",")).map(Long::parseLong).collect(Collectors.toList());
             default: return value;
+        }
+    }
+
+    private class BusinessCountry{
+        BusinessEnum business;
+        CountryEnum country;
+
+        public BusinessCountry(BusinessEnum business, CountryEnum country) {
+            this.business = business;
+            this.country = country;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            BusinessCountry that = (BusinessCountry) o;
+
+            if (business != that.business) return false;
+            return country == that.country;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = business.hashCode();
+            result = 31 * result + country.hashCode();
+            return result;
         }
     }
 }

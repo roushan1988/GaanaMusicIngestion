@@ -7,10 +7,7 @@ import com.til.prime.timesSubscription.dao.*;
 import com.til.prime.timesSubscription.dto.external.*;
 import com.til.prime.timesSubscription.enums.*;
 import com.til.prime.timesSubscription.model.*;
-import com.til.prime.timesSubscription.service.QueueService;
-import com.til.prime.timesSubscription.service.SubscriptionService;
-import com.til.prime.timesSubscription.service.SubscriptionServiceHelper;
-import com.til.prime.timesSubscription.service.SubscriptionValidationService;
+import com.til.prime.timesSubscription.service.*;
 import com.til.prime.timesSubscription.util.OrderIdGeneratorUtil;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -47,6 +44,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     private SubscriptionServiceHelper subscriptionServiceHelper;
     @Autowired
     private QueueService queueService;
+    @Autowired
+    private PropertyService propertyService;
 
     @Override
     public PlanListResponse getAllPlans(PlanListRequest request) {
@@ -58,23 +57,37 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             validationResponse = subscriptionValidationService.validatePostAllPlans(userModel, validationResponse);
         }
         if(validationResponse.isValid()){
-            BusinessEnum businessEnum = BusinessEnum.valueOf(request.getBusiness());
-            List<SubscriptionPlanModel> subscriptionPlanModels = null;
-            if(request.getPlanId()!=null) {
-                subscriptionPlanModels = subscriptionPlanRepository.findByIdAndBusinessAndCountryAndDeleted(request.getPlanId(), BusinessEnum.valueOf(request.getBusiness()), CountryEnum.valueOf(request.getCountry()), false);
-            }else{
-                subscriptionPlanModels = subscriptionPlanRepository.findByBusinessAndCountryAndDeleted(BusinessEnum.valueOf(request.getBusiness()), CountryEnum.valueOf(request.getCountry()), false);
-            }
-            subscriptionPlans = new ArrayList<>();
-            if(CollectionUtils.isNotEmpty(subscriptionPlanModels)) {
-                for (SubscriptionPlanModel subscriptionPlanModel : subscriptionPlanModels) {
-                    Collections.sort(subscriptionPlanModel.getVariants());
-                    if(request.getUser()!=null){
-                        UserSubscriptionModel lastUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndBusinessAndOrderCompletedAndDeletedOrderByIdDesc(request.getUser().getMobile(), businessEnum, true, false);
+            if(request.getUser()!=null) {
+                List<SubscriptionPlanModel> subscriptionPlanModels = null;
+                boolean flag = false;
+                if (request.getPlanId() != null) {
+                    subscriptionPlanModels = subscriptionPlanRepository.findByIdAndBusinessAndCountryAndDeleted(request.getPlanId(), request.getBusiness(), request.getCountry(), false);
+                    flag = true;
+                } else {
+                    subscriptionPlanModels = propertyService.getAllPlanModels(request.getBusiness(), request.getCountry());
+                }
+                subscriptionPlans = new ArrayList<>();
+                if (CollectionUtils.isNotEmpty(subscriptionPlanModels)) {
+                    for (SubscriptionPlanModel subscriptionPlanModel : subscriptionPlanModels) {
+                        if(flag){
+                            Collections.sort(subscriptionPlanModel.getVariants());
+                        }
+                        UserSubscriptionModel lastUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndBusinessAndOrderCompletedAndDeletedOrderByIdDesc(request.getUser().getMobile(), request.getBusiness(), true, false);
                         subscriptionPlans.add(ModelToDTOConvertorUtil.getSubscriptionPlanDTO(subscriptionPlanModel, lastUserSubscription));
-                    }else{
-                        subscriptionPlans.add(ModelToDTOConvertorUtil.getSubscriptionPlanDTO(subscriptionPlanModel, null));
                     }
+                }
+            }else{
+                if (request.getPlanId() != null) {
+                    List<SubscriptionPlanModel> subscriptionPlanModels = subscriptionPlanRepository.findByIdAndBusinessAndCountryAndDeleted(request.getPlanId(), request.getBusiness(), request.getCountry(), false);
+                    subscriptionPlans = new ArrayList<>();
+                    if (CollectionUtils.isNotEmpty(subscriptionPlanModels)) {
+                        for (SubscriptionPlanModel subscriptionPlanModel : subscriptionPlanModels) {
+                            Collections.sort(subscriptionPlanModel.getVariants());
+                            subscriptionPlans.add(ModelToDTOConvertorUtil.getSubscriptionPlanDTO(subscriptionPlanModel, null));
+                        }
+                    }
+                } else {
+                    subscriptionPlans = propertyService.getAllPlans(request.getBusiness(), request.getCountry());
                 }
             }
         }
