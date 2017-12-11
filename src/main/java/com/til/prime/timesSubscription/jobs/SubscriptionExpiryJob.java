@@ -60,7 +60,7 @@ public class SubscriptionExpiryJob extends AbstractJob {
                         userSubscriptionModel.setStatus(StatusEnum.EXPIRED);
                         userSubscriptionModel = subscriptionService.saveUserSubscription(userSubscriptionModel, false, null, null, EventEnum.USER_SUBSCRIPTION_EXPIRY);
                         subscriptionService.updateUserStatus(userSubscriptionModel, userSubscriptionModel.getUser());
-                        UserSubscriptionModel userSubscriptionModel1 = userSubscriptionRepository.findFirstByUserMobileAndStatusAndStartDateAfterAndDeletedFalseAndOrderCompletedTrueOrderById(
+                        UserSubscriptionModel userSubscriptionModel1 = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndStatusAndStartDateAfterAndDeletedFalseAndOrderCompletedTrueOrderById(
                                 userSubscriptionModel.getUser().getMobile(), StatusEnum.FUTURE, TimeUtils.addMillisInDate(userSubscriptionModel.getEndDate(), -2000));
                         if(userSubscriptionModel1!=null){
                             userSubscriptionModel1.setStatus(StatusEnum.ACTIVE);
@@ -72,7 +72,7 @@ public class SubscriptionExpiryJob extends AbstractJob {
                             LOG.info("Initiating SUBSCRIPTION RENEWAL for userSubscriptionId: "+userSubscriptionModel.getId()+", orderId: "+userSubscriptionModel.getOrderId());
                             boolean success = subscriptionServiceHelper.renewSubscription(userSubscriptionModel);
                             if(success){
-                                UserSubscriptionModel userSubscriptionModel2 = userSubscriptionRepository.findFirstByUserMobileAndStatusAndStartDateAfterAndDeletedFalseAndOrderCompletedTrueOrderById(
+                                UserSubscriptionModel userSubscriptionModel2 = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndStatusAndStartDateAfterAndDeletedFalseAndOrderCompletedTrueOrderById(
                                         userSubscriptionModel.getUser().getMobile(), StatusEnum.ACTIVE, TimeUtils.addMillisInDate(userSubscriptionModel.getEndDate(), -2000));
                                 if(userSubscriptionModel2!=null){
                                     UserSubscriptionAuditModel auditModel = subscriptionServiceHelper.getUserSubscriptionAuditModel(userSubscriptionModel2, EventEnum.SUBSCRIPTION_AUTO_RENEWAL);

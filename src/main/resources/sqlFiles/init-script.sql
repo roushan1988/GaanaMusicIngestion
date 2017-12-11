@@ -14,7 +14,9 @@ CREATE TABLE `user`(
   PRIMARY KEY (`id`),
   INDEX `INDEX_SSO_ID` (`sso_id`),
   INDEX `INDEX_MOBILE` (`mobile`),
-  INDEX `INDEX_EMAIL` (`email`)
+  INDEX `INDEX_EMAIL` (`email`),
+  INDEX `INDEX_USER_BLOCKED` (`blocked`),
+  INDEX `INDEX_USER_DELETED` (`deleted`)
 );
 
 CREATE TABLE `user_audit`(
@@ -53,7 +55,8 @@ CREATE TABLE `subscription_plan`(
   PRIMARY KEY (`id`),
   UNIQUE KEY `UK_name` (`name`),
   INDEX `INDEX_BUSINESS` (`business`),
-  INDEX `INDEX_COUNTRY` (`country`)
+  INDEX `INDEX_COUNTRY` (`country`),
+  INDEX `INDEX_SP_DELETED` (`deleted`)
 );
 
 CREATE TABLE `subscription_variant`(
@@ -71,6 +74,7 @@ CREATE TABLE `subscription_variant`(
   UNIQUE KEY `UK_name` (`name`),
   INDEX `INDEX_PLAN_TYPE` (`plan_type`),
   INDEX `INDEX_SUBSCRIPTION_PLAN` (`subscription_plan_id`),
+  INDEX `INDEX_SV_DELETED` (`deleted`),
   UNIQUE KEY `UK_PLAN_PRICE_DURATION_DAYS` (`subscription_plan_id`, `price`, `duration_days`),
   CONSTRAINT `FK_SUBSCRIPTION` FOREIGN KEY (`subscription_plan_id`) REFERENCES `subscription_plan` (`id`)
 );
@@ -120,6 +124,7 @@ CREATE TABLE `user_subscription` (
   INDEX `INDEX_SSO_COMMUNICATED` (`sso_communicated`),
   INDEX `INDEX_END_DATE` (`end_date`),
   INDEX `INDEX_STATUS` (`status`),
+  INDEX `INDEX_US_DELETED` (`deleted`),
   CONSTRAINT `FK_USER_SUBSCRIPTION_USER` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`),
   CONSTRAINT `FK_SUBSCRIPTION_VARIANT` FOREIGN KEY (`subscription_variant_id`) REFERENCES `subscription_variant` (`id`)
 );
@@ -196,7 +201,8 @@ CREATE TABLE `job` (
   `deleted` tinyint(1) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `INDEX_NAME` (`name`),
-  UNIQUE KEY `INDEX_JOB_KEY` (`job_key`)
+  UNIQUE KEY `INDEX_JOB_KEY` (`job_key`),
+  INDEX `INDEX_JOB_DELETED` (`deleted`)
 );
 
 CREATE TABLE `job_audit` (
@@ -247,3 +253,10 @@ insert into job values (null, "EXPIRED_SUBSCRIPTION_RENEWAL_REMINDER_JOB", "EXPI
 insert into external_clients values (1, "1MG", "eoDpCkjF2tAYiWr5Ftbz8UFN3POpcvEf", "sNQjFGNiHEluTewYpuhrq8lbJAYJ0qclKNfReWIVrpDtneeB32aXpCqoMa3Fh6Go", now(), now(), false);
 insert into external_clients values (2, "HOUSEJOY", "tSh0IKWhyrBDs7xh7UkeO8xHAIrRvKFD", "077GIvqN7cZDm5xoY4g3O8optpjPxb0yGmPXrHmwkoVAx7pnF9FnhL6FJqhkD8Xq", now(), now(), false);
 insert into external_clients values (3, "DINEOUT", "UgWSecqXdgjvKPJxNqImcLBjBLlfGVEV", "lq8yhrjjnNEGPxsa2njWEXRGCrkodbxrPLzjFyR6ySg3HAGUZ07LgMx4mGWqP2iG", now(), now(), false);
+
+alter table user add INDEX `INDEX_USER_BLOCKED` (`blocked`);
+alter table user add INDEX `INDEX_USER_DELETED` (`deleted`);
+alter table subscription_plan add INDEX `INDEX_SP_DELETED` (`deleted`);
+alter table subscription_variant add INDEX `INDEX_SV_DELETED` (`deleted`);
+alter table user_subscription add INDEX `INDEX_US_DELETED` (`deleted`);
+alter table job add INDEX `INDEX_JOB_DELETED` (`deleted`);

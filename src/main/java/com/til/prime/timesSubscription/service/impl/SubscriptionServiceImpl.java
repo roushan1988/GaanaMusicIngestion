@@ -72,7 +72,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                         if(flag){
                             Collections.sort(subscriptionPlanModel.getVariants());
                         }
-                        UserSubscriptionModel lastUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndBusinessAndOrderCompletedAndDeletedOrderByIdDesc(request.getUser().getMobile(), request.getBusiness(), true, false);
+                        UserSubscriptionModel lastUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndBusinessAndOrderCompletedAndDeletedOrderByIdDesc(request.getUser().getMobile(), request.getBusiness(), true, false);
                         subscriptionPlans.add(ModelToDTOConvertorUtil.getSubscriptionPlanDTO(subscriptionPlanModel, lastUserSubscription));
                     }
                 }
@@ -117,10 +117,10 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             subscriptionVariantModel = subscriptionVariantRepository.findByIdAndSubscriptionPlanIdAndPriceAndDurationDaysAndDeleted(
                     request.getVariantId(), request.getPlanId(), request.getPrice(), request.getDurationDays(), false);
             if(PlanTypeEnum.USAGE_RESTRICTED_PLANS_TYPES.contains(planType)){
-                restrictedUsageUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndBusinessAndSubscriptionVariantPlanTypeAndOrderCompletedAndDeletedOrderByIdDesc(
+                restrictedUsageUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndBusinessAndSubscriptionVariantPlanTypeAndOrderCompletedAndDeletedOrderByIdDesc(
                         request.getUser().getMobile(), business, planType, true, false);
             }
-            lastUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndBusinessAndOrderCompletedAndDeletedOrderByIdDesc(request.getUser().getMobile(), business, true, false);
+            lastUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndBusinessAndOrderCompletedAndDeletedOrderByIdDesc(request.getUser().getMobile(), business, true, false);
             validationResponse = subscriptionValidationService.validatePostInitPurchasePlan(request, subscriptionVariantModel, restrictedUsageUserSubscription, lastUserSubscription, crmRequest, validationResponse);
         }
         if(validationResponse.isValid()) {
@@ -155,7 +155,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 subscriptionVariantModel = userSubscriptionModel.getSubscriptionVariant();
             }
             if(PlanTypeEnum.USAGE_RESTRICTED_PLANS_TYPES.contains(planType)){
-                restrictedUsageUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndBusinessAndSubscriptionVariantPlanTypeAndOrderCompletedAndDeletedOrderByIdDesc(
+                restrictedUsageUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndBusinessAndSubscriptionVariantPlanTypeAndOrderCompletedAndDeletedOrderByIdDesc(
                         request.getUser().getMobile(), business, planType, true, false);
             }
             validationResponse = subscriptionValidationService.validatePostGenerateOrder(request, subscriptionVariantModel, userSubscriptionModel, restrictedUsageUserSubscription, validationResponse);
@@ -164,7 +164,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             if(request.isRetryOnFailure() || request.isRenewal() || request.isDuplicate()){
                 useNewSubscription = true;
                 if(request.isRenewal()){
-                    lastUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndBusinessAndOrderCompletedAndDeletedOrderByIdDesc(request.getUser().getMobile(), business, true, false);
+                    lastUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndBusinessAndOrderCompletedAndDeletedOrderByIdDesc(request.getUser().getMobile(), business, true, false);
                     newUserSubscriptionModel = new UserSubscriptionModel(lastUserSubscription, request, request.isRenewal());
                 }else{
                     newUserSubscriptionModel = new UserSubscriptionModel(userSubscriptionModel, request, request.isRenewal());
@@ -194,7 +194,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             validationResponse = subscriptionValidationService.validatePostSubmitPurchasePlan(request, userSubscriptionModel, validationResponse);
         }
         if(validationResponse.isValid()){
-            UserSubscriptionModel lastUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndBusinessAndOrderCompletedAndDeletedOrderByIdDesc(userSubscriptionModel.getUser().getMobile(), userSubscriptionModel.getBusiness(), true, false);
+            UserSubscriptionModel lastUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndBusinessAndOrderCompletedAndDeletedOrderByIdDesc(userSubscriptionModel.getUser().getMobile(), userSubscriptionModel.getBusiness(), true, false);
             userSubscriptionModel = subscriptionServiceHelper.updateSubmitPurchaseUserSubscription(request, userSubscriptionModel, lastUserSubscription);
             userSubscriptionModel = saveUserSubscription(userSubscriptionModel, false, userSubscriptionModel.getUser().getSsoId(), userSubscriptionModel.getTicketId(), userSubscriptionModel.isOrderCompleted()? EventEnum.PAYMENT_SUCCESS: EventEnum.PAYMENT_FAILURE);
             if(userSubscriptionModel.getStatus()==StatusEnum.ACTIVE){
@@ -216,24 +216,24 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             if(!request.isCurrentSubscription()){
                 if(StringUtils.isEmpty(request.getBusiness())){
                     userSubscriptionModelList = request.isIncludeDeleted()?
-                            userSubscriptionRepository.findByUserMobileAndOrderCompleted(request.getUser().getMobile(),true):
-                            userSubscriptionRepository.findByUserMobileAndOrderCompletedAndDeleted(request.getUser().getMobile(),true, false);
+                            userSubscriptionRepository.findByUserMobileAndUserDeletedFalseAndOrderCompleted(request.getUser().getMobile(),true):
+                            userSubscriptionRepository.findByUserMobileAndUserDeletedFalseAndOrderCompletedAndDeleted(request.getUser().getMobile(),true, false);
                 }else{
                     userSubscriptionModelList = request.isIncludeDeleted()?
-                            userSubscriptionRepository.findByUserMobileAndBusinessAndOrderCompleted(request.getUser().getMobile(), BusinessEnum.valueOf(request.getBusiness()), true):
-                            userSubscriptionRepository.findByUserMobileAndBusinessAndOrderCompletedAndDeleted(request.getUser().getMobile(), BusinessEnum.valueOf(request.getBusiness()), true, false);
+                            userSubscriptionRepository.findByUserMobileAndUserDeletedFalseAndBusinessAndOrderCompleted(request.getUser().getMobile(), BusinessEnum.valueOf(request.getBusiness()), true):
+                            userSubscriptionRepository.findByUserMobileAndUserDeletedFalseAndBusinessAndOrderCompletedAndDeleted(request.getUser().getMobile(), BusinessEnum.valueOf(request.getBusiness()), true, false);
                 }
             }else{
                 Date currentDate = new Date();
                 UserSubscriptionModel userSubscriptionModel = new UserSubscriptionModel();
                 if(StringUtils.isEmpty(request.getBusiness())){
                     userSubscriptionModel = request.isIncludeDeleted()?
-                            userSubscriptionRepository.findFirstByUserMobileAndOrderCompletedAndStartDateBeforeAndEndDateAfter(request.getUser().getMobile(),true, currentDate, currentDate):
-                            userSubscriptionRepository.findFirstByUserMobileAndOrderCompletedAndStartDateBeforeAndEndDateAfterAndDeleted(request.getUser().getMobile(),true, currentDate, currentDate, false);
+                            userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndOrderCompletedAndStartDateBeforeAndEndDateAfter(request.getUser().getMobile(),true, currentDate, currentDate):
+                            userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndOrderCompletedAndStartDateBeforeAndEndDateAfterAndDeleted(request.getUser().getMobile(),true, currentDate, currentDate, false);
                 }else{
                     userSubscriptionModel = request.isIncludeDeleted()?
-                            userSubscriptionRepository.findFirstByUserMobileAndBusinessAndOrderCompletedAndStartDateBeforeAndEndDateAfter(request.getUser().getMobile(), BusinessEnum.valueOf(request.getBusiness()), true, currentDate, currentDate):
-                            userSubscriptionRepository.findFirstByUserMobileAndBusinessAndOrderCompletedAndStartDateBeforeAndEndDateAfterAndDeleted(request.getUser().getMobile(), BusinessEnum.valueOf(request.getBusiness()), true, currentDate, currentDate, false);
+                            userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndBusinessAndOrderCompletedAndStartDateBeforeAndEndDateAfter(request.getUser().getMobile(), BusinessEnum.valueOf(request.getBusiness()), true, currentDate, currentDate):
+                            userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndBusinessAndOrderCompletedAndStartDateBeforeAndEndDateAfterAndDeleted(request.getUser().getMobile(), BusinessEnum.valueOf(request.getBusiness()), true, currentDate, currentDate, false);
                 }
                 userSubscriptionModelList = new ArrayList<>();
                 userSubscriptionModelList.add(userSubscriptionModel);
@@ -290,7 +290,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         List<UserSubscriptionModel> userSubscriptionModelList = null;
         GenericResponse response = new GenericResponse();
         if(validationResponse.isValid()){
-            userSubscriptionModelList = userSubscriptionRepository.findByUserMobileAndStatusInAndOrderCompletedTrueAndAutoRenewalFalseAndDeletedFalse(request.getUser().getMobile(), StatusEnum.VALID_TURN_OFF_DEBIT_STATUS_SET);
+            userSubscriptionModelList = userSubscriptionRepository.findByUserMobileAndUserDeletedFalseAndStatusInAndOrderCompletedTrueAndAutoRenewalFalseAndDeletedFalse(request.getUser().getMobile(), StatusEnum.VALID_TURN_OFF_DEBIT_STATUS_SET);
             validationResponse = subscriptionValidationService.validatePostTurnOffAutoDebit(request, userSubscriptionModelList, validationResponse);
         }
         if(validationResponse.isValid()){
@@ -318,7 +318,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         if(validationResponse.isValid()){
             userModel.setBlocked(request.isBlockUser());
             userModel = saveUserModel(userModel, request.isBlockUser()? EventEnum.USER_BLOCK: EventEnum.USER_UNBLOCK);
-            UserSubscriptionModel userSubscriptionModel = userSubscriptionRepository.findByUserMobileAndStatusAndOrderCompletedTrue(request.getUser().getMobile(), StatusEnum.ACTIVE);
+            UserSubscriptionModel userSubscriptionModel = userSubscriptionRepository.findByUserMobileAndUserDeletedFalseAndStatusAndOrderCompletedTrue(request.getUser().getMobile(), StatusEnum.ACTIVE);
             updateUserStatus(userSubscriptionModel, userModel);
         }
         response = subscriptionServiceHelper.prepareBlockUnblockResponse(response, validationResponse);
@@ -360,10 +360,10 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             business = BusinessEnum.valueOf(request.getBusiness());
             subscriptionVariantModel = subscriptionVariantRepository.findByIdAndSubscriptionPlanIdAndDeleted(request.getVariantId(), request.getPlanId(), false);
             if(PlanTypeEnum.USAGE_RESTRICTED_PLANS_TYPES.contains(planType)){
-                restrictedUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndBusinessAndSubscriptionVariantPlanTypeAndOrderCompletedAndDeletedOrderByIdDesc(
+                restrictedUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndBusinessAndSubscriptionVariantPlanTypeAndOrderCompletedAndDeletedOrderByIdDesc(
                         request.getUser().getMobile(), business, planType, true, false);
             }
-            lastUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndBusinessAndOrderCompletedAndDeletedOrderByIdDesc(request.getUser().getMobile(), business, true, false);
+            lastUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndBusinessAndOrderCompletedAndDeletedOrderByIdDesc(request.getUser().getMobile(), business, true, false);
             validationResponse = subscriptionValidationService.validatePostCheckEligibility(request, subscriptionVariantModel, lastUserSubscription, restrictedUserSubscription, validationResponse);
             validExecution = true;
         }
@@ -403,7 +403,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         }
         UserSubscriptionModel userSubscriptionModel = null;
         if(validationResponse.isValid()){
-            userSubscriptionModel = userSubscriptionRepository.findByUserMobileAndStatusAndDeletedAndOrderCompletedTrue(request.getUser().getMobile(), StatusEnum.ACTIVE, false);
+            userSubscriptionModel = userSubscriptionRepository.findByUserMobileAndUserDeletedFalseAndStatusAndDeletedAndOrderCompletedTrue(request.getUser().getMobile(), StatusEnum.ACTIVE, false);
             validationResponse = subscriptionValidationService.validatePostCheckStatus(request, userSubscriptionModel, validationResponse);
         }
         if(validationResponse.isValid()){
@@ -425,7 +425,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             }
             if(statusDTO == null && !external){ //cache update step
                 UserSubscriptionModel userSubscriptionModel = null;
-                userSubscriptionModel = userSubscriptionRepository.findByUserMobileAndStatusAndDeletedAndOrderCompletedTrue(request.getUser().getMobile(), StatusEnum.ACTIVE, false);
+                userSubscriptionModel = userSubscriptionRepository.findByUserMobileAndUserDeletedFalseAndStatusAndDeletedAndOrderCompletedTrue(request.getUser().getMobile(), StatusEnum.ACTIVE, false);
                 validationResponse = subscriptionValidationService.validatePostCheckStatus(request, userSubscriptionModel, validationResponse);
                 if(validationResponse.isValid()){
                     updateUserStatus(userSubscriptionModel);
@@ -453,7 +453,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 userModel = saveUserModel(userModel, EventEnum.USER_SUSPENSION);
                 updateUserDetailsInCache(userModel);
                 if(StringUtils.isNotEmpty(userModel.getEmail())) {
-                    List<UserSubscriptionModel> relevantUserSubscriptions = userSubscriptionRepository.findByUserMobileAndStatusInAndOrderCompletedTrueAndDeletedFalse(userModel.getMobile(), Arrays.asList(StatusEnum.ACTIVE, StatusEnum.FUTURE));
+                    List<UserSubscriptionModel> relevantUserSubscriptions = userSubscriptionRepository.findByUserMobileAndUserDeletedFalseAndStatusInAndOrderCompletedTrueAndDeletedFalse(userModel.getMobile(), Arrays.asList(StatusEnum.ACTIVE, StatusEnum.FUTURE));
                     if(CollectionUtils.isNotEmpty(relevantUserSubscriptions)) {
                         EmailTask emailTask = subscriptionServiceHelper.getUserMobileUpdateEmailTask(userModel, relevantUserSubscriptions);
                         queueService.pushToEmailQueue(emailTask);
