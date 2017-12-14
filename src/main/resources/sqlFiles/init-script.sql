@@ -250,9 +250,24 @@ insert into job values (null, "SUBSCRIPTION_EXPIRY_JOB", "SUBSCRIPTION_EXPIRY", 
 insert into job values (null, "SUBSCRIPTION_EXPIRY_REMINDER_JOB", "SUBSCRIPTION_EXPIRY_REMINDER", null, now(), now(), false);
 insert into job values (null, "EXPIRED_SUBSCRIPTION_RENEWAL_REMINDER_JOB", "EXPIRED_SUBSCRIPTION_RENEWAL_REMINDER", null, now(), now(), false);
 
-insert into external_clients values (1, "1MG", "eoDpCkjF2tAYiWr5Ftbz8UFN3POpcvEf", "sNQjFGNiHEluTewYpuhrq8lbJAYJ0qclKNfReWIVrpDtneeB32aXpCqoMa3Fh6Go", now(), now(), false);
-insert into external_clients values (2, "HOUSEJOY", "tSh0IKWhyrBDs7xh7UkeO8xHAIrRvKFD", "077GIvqN7cZDm5xoY4g3O8optpjPxb0yGmPXrHmwkoVAx7pnF9FnhL6FJqhkD8Xq", now(), now(), false);
-insert into external_clients values (3, "DINEOUT", "UgWSecqXdgjvKPJxNqImcLBjBLlfGVEV", "lq8yhrjjnNEGPxsa2njWEXRGCrkodbxrPLzjFyR6ySg3HAGUZ07LgMx4mGWqP2iG", now(), now(), false);
+//production
++----+-----------+----------------------------------+------------------------------------------------------------------+
+| id | client_id | secret_key                       | encryption_key                                                   |
++----+-----------+----------------------------------+------------------------------------------------------------------+
+|  1 | 1MG       | naVwjBtl8kX4rv9Kzu6GA7dFeWM1UpSA | HXeIYmLvNCKjbamUnU04eOzumfsG096IYEhxFoqNCRvUYxkfN63k4584GMr8flj4 |
+|  2 | HOUSEJOY  | UxloH5QGnVdSdICIGSCqELYcPG6w1oLu | AZG5OJdFTTzeXeyrVhPJK1zSN7BsMaTt9oDbClF255WpfqzTJRidFC2HRBWZmPvY |
+|  3 | DINEOUT   | qfLKutHHwZyIYpJUEQQXpl48CG4fiNK3 | kYGMN7p0nG7bvjK1pEKQD2LbMcLY575mCJHKnD4vo0WzjmIR1CGdfquyo9q9LGvs |
+|  4 | OLA       | aNYwawgzNHpORkrKmGzhwz81O0rKbljU | 6o6RKuv6TnmEUZCcoyocyothlS0DH09WZRRqCV4Iut0i8l7B6r3EBCKYQOuGqbSn |
+|  5 | BIGBASKET | Om1omHMstMLyIfGYTt4Y4UHHwkqemcnp | DzSXz1aJJGmDQVbKYpmSLMNvKlNS1zA6cXgtArQD0wNRXISRdopVEV37t5iBKHoy |
+|  6 | QUIRK     | 4M5st2SB6MiwiwPXFtbHCqxAlMlEATI6 | fRcTL356OqPJzoueHWvZ0vyiEFdRvM9EsXh82oVy0an2OmMUwNTIPqVmJolnAhjd |
++----+-----------+----------------------------------+------------------------------------------------------------------+
+
+insert into external_clients values (1, "1MG", "naVwjBtl8kX4rv9Kzu6GA7dFeWM1UpSA", "HXeIYmLvNCKjbamUnU04eOzumfsG096IYEhxFoqNCRvUYxkfN63k4584GMr8flj4", now(), now(), false);
+insert into external_clients values (2, "HOUSEJOY", "UxloH5QGnVdSdICIGSCqELYcPG6w1oLu", "AZG5OJdFTTzeXeyrVhPJK1zSN7BsMaTt9oDbClF255WpfqzTJRidFC2HRBWZmPvY", now(), now(), false);
+insert into external_clients values (3, "DINEOUT", "qfLKutHHwZyIYpJUEQQXpl48CG4fiNK3", "kYGMN7p0nG7bvjK1pEKQD2LbMcLY575mCJHKnD4vo0WzjmIR1CGdfquyo9q9LGvs", now(), now(), false);
+insert into external_clients values (4, "OLA", "aNYwawgzNHpORkrKmGzhwz81O0rKbljU", "6o6RKuv6TnmEUZCcoyocyothlS0DH09WZRRqCV4Iut0i8l7B6r3EBCKYQOuGqbSn", now(), now(), false);
+insert into external_clients values (5, "BIGBASKET", "Om1omHMstMLyIfGYTt4Y4UHHwkqemcnp", "DzSXz1aJJGmDQVbKYpmSLMNvKlNS1zA6cXgtArQD0wNRXISRdopVEV37t5iBKHoy", now(), now(), false);
+insert into external_clients values (6, "QUIRK", "4M5st2SB6MiwiwPXFtbHCqxAlMlEATI6", "fRcTL356OqPJzoueHWvZ0vyiEFdRvM9EsXh82oVy0an2OmMUwNTIPqVmJolnAhjd", now(), now(), false);
 
 alter table user add INDEX `INDEX_USER_BLOCKED` (`blocked`);
 alter table user add INDEX `INDEX_USER_DELETED` (`deleted`);
