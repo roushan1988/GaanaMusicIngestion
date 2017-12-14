@@ -10,6 +10,7 @@ import org.springframework.amqp.core.AmqpTemplate;
 import org.springframework.amqp.core.Message;
 import org.springframework.amqp.core.MessageProperties;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -37,35 +38,37 @@ public class QueueServiceImpl implements QueueService {
         while (true) {
 //            SMSTask smsTask = new SMSTask();
 //            smsTask.setMobileNumber("9880252944");
-//            smsTask.setPartnerId("timesprime");
-//            smsTask.setTemplateKey("testmessage");
+//            smsTask.setPartnerId("TimesSubscription");
+//            smsTask.setTemplateKey("otpSmsKey");
 //            Map<String, String> map = Maps.newHashMap();
 //            map.put("otp", "9876");
-//            map.put("appId", "timesprime");
+//            map.put("appId", "TimesSubscription");
 //            map.put("timeStamp", "Thu 12:30PM");
 //            smsTask.setContext(map);
 //            smsTask.setTaskPriority(TaskPriorityEnum.HIGH_PRIORITY);
 //            pushToSMSQueue(smsTask);
 //            EmailTask emailTask = new EmailTask();
-//            emailTask.setTemplateKey("testemail3");
-//            emailTask.setPartnerId("timesprime");
+//            emailTask.setTemplateKey("USER_MOBILE_INVALIDATION_EMAIL");
+//            emailTask.setPartnerId("TimesSubscription");
 //            emailTask.setGroup("test");
 //            emailTask.setEmailId("roushan1988@gmail.com");
 //            emailTask.setFromName("TimesPrime");
-//            emailTask.setFromEmail("roushan.singh1@timesinternet.in");
+//            emailTask.setFromEmail("info@timesprime.com");
 //            Map<String, String> map2 = Maps.newHashMap();
 //            map2.put("otp", "9999");
 //            map2.put("appId", "timesprime");
 //            map2.put("timeStamp", "Thu 14:30PM");
+//            map2.put("content", "testing");
 //            emailTask.setContext(map2);
 //            emailTask.setCtaKey("link1");
 //            emailTask.setTaskPriority(TaskPriorityEnum.HIGH_PRIORITY);
 //            pushToEmailQueue(emailTask);
-//            Thread.sleep(30000);
+            Thread.sleep(10000);
         }
     }
 
     @Override
+    @Async
     public void pushToSMSQueue(SMSTask smsTask) {
         Message message = null;
         try {
@@ -78,6 +81,7 @@ public class QueueServiceImpl implements QueueService {
     }
 
     @Override
+    @Async
     public void pushToEmailQueue(EmailTask emailTask) {
         Message message = null;
         try {

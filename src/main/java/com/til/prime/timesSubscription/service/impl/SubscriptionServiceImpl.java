@@ -58,6 +58,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         }
         if(validationResponse.isValid()){
             if(request.getUser()!=null) {
+                UserModel userModel = getOrCreateUserWithMobileCheck(request, validationResponse);
                 List<SubscriptionPlanModel> subscriptionPlanModels = null;
                 boolean flag = false;
                 if (request.getPlanId() != null) {
@@ -452,8 +453,9 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 userModel.setIsDelete(true);
                 userModel = saveUserModel(userModel, EventEnum.USER_SUSPENSION);
                 updateUserDetailsInCache(userModel);
+                List<UserSubscriptionModel> relevantUserSubscriptions = null;
                 if(StringUtils.isNotEmpty(userModel.getEmail())) {
-                    List<UserSubscriptionModel> relevantUserSubscriptions = userSubscriptionRepository.findByUserMobileAndUserDeletedFalseAndStatusInAndOrderCompletedTrueAndDeletedFalse(userModel.getMobile(), Arrays.asList(StatusEnum.ACTIVE, StatusEnum.FUTURE));
+                    relevantUserSubscriptions = userSubscriptionRepository.findByUserMobileAndUserDeletedFalseAndStatusInAndOrderCompletedTrueAndDeletedFalse(userModel.getMobile(), Arrays.asList(StatusEnum.ACTIVE, StatusEnum.FUTURE));
                     if(CollectionUtils.isNotEmpty(relevantUserSubscriptions)) {
                         EmailTask emailTask = subscriptionServiceHelper.getUserMobileUpdateEmailTask(userModel, relevantUserSubscriptions);
                         queueService.pushToEmailQueue(emailTask);
@@ -461,6 +463,12 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 }
                 userModel = subscriptionServiceHelper.getUser(request);
                 userModel = saveUserModel(userModel, EventEnum.USER_CREATION_WITH_EXISTING_MOBILE);
+                if(CollectionUtils.isNotEmpty(relevantUserSubscriptions)) {
+                    for(UserSubscriptionModel model: relevantUserSubscriptions){
+                        model.setUser(userModel);
+                        saveUserSubscription(model, false, request.getUser().getSsoId(), request.getUser().getTicketId(), EventEnum.USER_SUBSCRIPTION_SWITCH);
+                    }
+                }
                 updateUserDetailsInCache(userModel);
             }
         }

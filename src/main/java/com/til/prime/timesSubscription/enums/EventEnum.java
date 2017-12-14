@@ -27,6 +27,7 @@ public enum EventEnum {
     USER_CREATION_WITH_EXISTING_MOBILE,
     USER_BLOCK,
     USER_UNBLOCK,
+    USER_SUBSCRIPTION_SWITCH
     ;
 
     public static final EventEnum getEventByInitPlanStatus(PlanStatusEnum planStatus){
