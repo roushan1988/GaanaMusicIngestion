@@ -450,12 +450,11 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             if(request.getUser().getSsoId().equals(userModel.getSsoId())){
                 subscriptionValidationService.validateBlockedUser(userModel, validationResponse);
             }else {
+                List<UserSubscriptionModel> relevantUserSubscriptions = userSubscriptionRepository.findByUserMobileAndUserDeletedFalseAndStatusInAndOrderCompletedTrueAndDeletedFalse(userModel.getMobile(), Arrays.asList(StatusEnum.ACTIVE, StatusEnum.FUTURE));
                 userModel.setIsDelete(true);
                 userModel = saveUserModel(userModel, EventEnum.USER_SUSPENSION);
                 updateUserDetailsInCache(userModel);
-                List<UserSubscriptionModel> relevantUserSubscriptions = null;
                 if(StringUtils.isNotEmpty(userModel.getEmail())) {
-                    relevantUserSubscriptions = userSubscriptionRepository.findByUserMobileAndUserDeletedFalseAndStatusInAndOrderCompletedTrueAndDeletedFalse(userModel.getMobile(), Arrays.asList(StatusEnum.ACTIVE, StatusEnum.FUTURE));
                     if(CollectionUtils.isNotEmpty(relevantUserSubscriptions)) {
                         EmailTask emailTask = subscriptionServiceHelper.getUserMobileUpdateEmailTask(userModel, relevantUserSubscriptions);
                         queueService.pushToEmailQueue(emailTask);
