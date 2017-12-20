@@ -32,5 +32,4 @@ public interface SubscriptionServiceHelper {
     UserAuditModel getUserAudit(UserModel userModel, EventEnum eventEnum);
     boolean renewSubscription(UserSubscriptionModel userSubscriptionModel);
     boolean refundPayment(String orderId, Double refundAmount);
-    EmailTask getUserMobileUpdateEmailTask(UserModel userModel, List<UserSubscriptionModel> userSubscriptionModels);
 }

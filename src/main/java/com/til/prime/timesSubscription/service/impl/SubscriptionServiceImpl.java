@@ -43,7 +43,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     @Autowired
     private SubscriptionServiceHelper subscriptionServiceHelper;
     @Autowired
-    private QueueService queueService;
+    private CommunicationService communicationService;
     @Autowired
     private PropertyService propertyService;
 
@@ -130,6 +130,9 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 userSubscriptionModel = subscriptionServiceHelper.generateInitPurchaseUserSubscription(request, subscriptionVariantModel, lastUserSubscription, userModel, request.getPrice(), crmRequest);
                 EventEnum eventEnum = EventEnum.getEventByInitPlanStatus(userSubscriptionModel.getPlanStatus());
                 userSubscriptionModel = saveUserSubscription(userSubscriptionModel, true, request.getUser().getSsoId(), request.getUser().getTicketId(), eventEnum);
+                if(userSubscriptionModel.isOrderCompleted()){
+                    communicationService.sendSubscriptionSuccessCommunication(userSubscriptionModel);
+                }
             }
         }
         response = subscriptionServiceHelper.prepareInitPurchaseResponse(response, userSubscriptionModel, lastUserSubscription, validationResponse);
@@ -200,6 +203,9 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             userSubscriptionModel = saveUserSubscription(userSubscriptionModel, false, userSubscriptionModel.getUser().getSsoId(), userSubscriptionModel.getTicketId(), userSubscriptionModel.isOrderCompleted()? EventEnum.PAYMENT_SUCCESS: EventEnum.PAYMENT_FAILURE);
             if(userSubscriptionModel.getStatus()==StatusEnum.ACTIVE){
                 updateUserStatus(userSubscriptionModel, userSubscriptionModel.getUser());
+            }
+            if(userSubscriptionModel.isOrderCompleted()){
+                communicationService.sendSubscriptionSuccessCommunication(userSubscriptionModel);
             }
         }
         response = subscriptionServiceHelper.prepareSubmitPurchaseResponse(response, userSubscriptionModel, validationResponse);
@@ -277,6 +283,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 if(statusEnum==StatusEnum.ACTIVE){
                     updateUserStatus(userSubscriptionModel, userSubscriptionModel.getUser());
                 }
+                communicationService.sendSubscriptionCancellationCommunication(userSubscriptionModel);
             }else{
                 validationResponse.addValidationError(ValidationError.PAYMENT_REFUND_ERROR);
             }
@@ -341,6 +348,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             if(userSubscriptionModel.getStatus()==StatusEnum.ACTIVE){
                 updateUserStatus(userSubscriptionModel, userSubscriptionModel.getUser());
             }
+            communicationService.sendSubscriptionExpiryExtensionCommunication(userSubscriptionModel);
         }
         response = subscriptionServiceHelper.prepareExtendExpiryResponse(response, userSubscriptionModel, validationResponse);
         return response;
@@ -420,6 +428,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         CheckStatusResponse response = new CheckStatusResponse();
         SubscriptionStatusDTO statusDTO = null;
         if(validationResponse.isValid()) {
+
             Cache.ValueWrapper vw = cacheManager.getCache(RedisConstants.PRIME_STATUS_CACHE_KEY).get(request.getUser().getMobile());
             if(vw!=null){
                 statusDTO = (SubscriptionStatusDTO) vw.get();
@@ -456,8 +465,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 updateUserDetailsInCache(userModel);
                 if(StringUtils.isNotEmpty(userModel.getEmail())) {
                     if(CollectionUtils.isNotEmpty(relevantUserSubscriptions)) {
-                        EmailTask emailTask = subscriptionServiceHelper.getUserMobileUpdateEmailTask(userModel, relevantUserSubscriptions);
-                        queueService.pushToEmailQueue(emailTask);
+                        communicationService.sendUserSuspensionCommunication(userModel, relevantUserSubscriptions);
                     }
                 }
                 userModel = subscriptionServiceHelper.getUser(request);
@@ -469,6 +477,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                     }
                 }
                 updateUserDetailsInCache(userModel);
+                communicationService.sendUserCreationWithExistingMobileCommunication(userModel, relevantUserSubscriptions);
             }
         }
         return userModel;

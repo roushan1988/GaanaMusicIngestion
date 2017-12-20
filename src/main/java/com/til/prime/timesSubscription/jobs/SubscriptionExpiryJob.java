@@ -11,6 +11,7 @@ import com.til.prime.timesSubscription.enums.StatusEnum;
 import com.til.prime.timesSubscription.model.JobModel;
 import com.til.prime.timesSubscription.model.UserSubscriptionAuditModel;
 import com.til.prime.timesSubscription.model.UserSubscriptionModel;
+import com.til.prime.timesSubscription.service.CommunicationService;
 import com.til.prime.timesSubscription.service.SubscriptionService;
 import com.til.prime.timesSubscription.service.SubscriptionServiceHelper;
 import com.til.prime.timesSubscription.util.TimeUtils;
@@ -33,6 +34,8 @@ public class SubscriptionExpiryJob extends AbstractJob {
     private UserSubscriptionAuditRepository userSubscriptionAuditRepository;
     @Autowired
     private SubscriptionService subscriptionService;
+    @Autowired
+    private CommunicationService communicationService;
     @Autowired
     private SubscriptionServiceHelper subscriptionServiceHelper;
     @Override
@@ -60,12 +63,14 @@ public class SubscriptionExpiryJob extends AbstractJob {
                         userSubscriptionModel.setStatus(StatusEnum.EXPIRED);
                         userSubscriptionModel = subscriptionService.saveUserSubscription(userSubscriptionModel, false, null, null, EventEnum.USER_SUBSCRIPTION_EXPIRY);
                         subscriptionService.updateUserStatus(userSubscriptionModel, userSubscriptionModel.getUser());
+                        communicationService.sendSubscriptionExpiryCommunication(userSubscriptionModel);
                         UserSubscriptionModel userSubscriptionModel1 = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndStatusAndStartDateAfterAndDeletedFalseAndOrderCompletedTrueOrderById(
                                 userSubscriptionModel.getUser().getMobile(), StatusEnum.FUTURE, TimeUtils.addMillisInDate(userSubscriptionModel.getEndDate(), -2000));
                         if(userSubscriptionModel1!=null){
                             userSubscriptionModel1.setStatus(StatusEnum.ACTIVE);
                             subscriptionService.saveUserSubscription(userSubscriptionModel1, false, userSubscriptionModel1.getUser().getSsoId(), userSubscriptionModel1.getTicketId(), EventEnum.USER_SUBSCRIPTION_ACTIVE);
                             subscriptionService.updateUserStatus(userSubscriptionModel1, userSubscriptionModel1.getUser());
+                            communicationService.sendSubscriptionActiveCommunication(userSubscriptionModel1);
                             recordsAffected++;
                             affectedModels.add(userSubscriptionModel1.getId());
                         }else if(userSubscriptionModel.getSubscriptionVariant().isRecurring() && userSubscriptionModel.isAutoRenewal() && !userSubscriptionModel.getUser().isBlocked()){
