@@ -75,8 +75,8 @@ public class QueueServiceImpl implements QueueService {
             message = new Message(gson.toJson(smsTask).getBytes(GlobalConstants.UTF_8), messageProperties);
             amqpTemplateSMS.send(properties.getProperty(GlobalConstants.SMS_ROUTING_KEY), message);
             LOG.info("SMSTask pushed into queue: "+smsTask);
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            LOG.error("Exception", e);
         }
     }
 
@@ -88,8 +88,8 @@ public class QueueServiceImpl implements QueueService {
             message = new Message(gson.toJson(emailTask).getBytes(GlobalConstants.UTF_8), messageProperties);
             amqpTemplateEmail.send(properties.getProperty(GlobalConstants.EMAIL_ROUTING_KEY), message);
             LOG.info("EMailTask pushed into queue: "+emailTask);
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            LOG.error("Exception", e);
         }
     }
 }
