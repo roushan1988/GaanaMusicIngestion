@@ -3,15 +3,15 @@ package com.til.prime.timesSubscription.dto.external;
 import java.math.BigDecimal;
 
 public class InitPurchaseRequest extends GenericRequest {
-    private Long planId;
-    private Long variantId;
-    private BigDecimal price;
-    private Long durationDays;
-    private String planType;
-    private String business;
-    private String channel;
-    private String platform;
-    private String checksum;
+    protected Long planId;
+    protected Long variantId;
+    protected BigDecimal price;
+    protected Long durationDays;
+    protected String planType;
+    protected String business;
+    protected String channel;
+    protected String platform;
+    protected String checksum;
 
     public Long getPlanId() {
         return planId;

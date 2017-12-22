@@ -109,9 +109,9 @@ public class SubscriptionController {
     @Loggable
     @RequestMapping(path="/server/offerSubscription", method = RequestMethod.POST)
     @ResponseBody
-    public InitPurchaseResponse offerSubscriptionViaServer(@RequestBody InitPurchaseRequest request){
+    public InitPurchaseResponse offerSubscriptionViaServer(@RequestBody CRMInitPurchaseRequest request){
         try {
-            return subscriptionService.initPurchasePlan(request);
+            return subscriptionService.initPurchasePlan(request, true, request.isFree());
         }catch (Exception e){
             LOG.error("Exception in offerSubscriptionViaServer: ", e);
             InitPurchaseResponse response = new InitPurchaseResponse();

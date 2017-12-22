@@ -9,6 +9,7 @@ import com.til.prime.timesSubscription.enums.*;
 import com.til.prime.timesSubscription.model.*;
 import com.til.prime.timesSubscription.service.*;
 import com.til.prime.timesSubscription.util.OrderIdGeneratorUtil;
+import com.til.prime.timesSubscription.util.TimeUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,11 +100,11 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     @Override
     @Transactional
     public InitPurchaseResponse initPurchasePlan(InitPurchaseRequest request) {
-        return initPurchasePlan(request, false);
+        return initPurchasePlan(request, false, false);
     }
 
     @Override
-    public InitPurchaseResponse initPurchasePlan(InitPurchaseRequest request, boolean crmRequest) {
+    public InitPurchaseResponse initPurchasePlan(InitPurchaseRequest request, boolean crmRequest, boolean isFree) {
         ValidationResponse validationResponse = subscriptionValidationService.validatePreInitPurchasePlan(request, crmRequest);
         SubscriptionVariantModel subscriptionVariantModel = null;
         UserSubscriptionModel userSubscriptionModel = null;
@@ -127,11 +128,23 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         if(validationResponse.isValid()) {
             UserModel userModel = getOrCreateUserWithMobileCheck(request, validationResponse);
             if(validationResponse.isValid()){
-                userSubscriptionModel = subscriptionServiceHelper.generateInitPurchaseUserSubscription(request, subscriptionVariantModel, lastUserSubscription, userModel, request.getPrice(), crmRequest);
+                userSubscriptionModel = subscriptionServiceHelper.generateInitPurchaseUserSubscription(request, subscriptionVariantModel, lastUserSubscription, userModel, request.getPrice(), crmRequest, isFree);
                 EventEnum eventEnum = EventEnum.getEventByInitPlanStatus(userSubscriptionModel.getPlanStatus());
                 userSubscriptionModel = saveUserSubscription(userSubscriptionModel, true, request.getUser().getSsoId(), request.getUser().getTicketId(), eventEnum);
                 if(userSubscriptionModel.isOrderCompleted()){
                     communicationService.sendSubscriptionSuccessCommunication(userSubscriptionModel);
+                }else{
+                    if(crmRequest){
+                        boolean success = subscriptionServiceHelper.renewSubscription(userSubscriptionModel);
+                        if(success){
+                            UserSubscriptionModel userSubscriptionModel2 = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndStatusAndStartDateAfterAndDeletedFalseAndOrderCompletedTrueOrderById(
+                                    userSubscriptionModel.getUser().getMobile(), StatusEnum.ACTIVE, TimeUtils.addMillisInDate(userSubscriptionModel.getEndDate(), -2000));
+                            if(userSubscriptionModel2!=null){
+                                UserSubscriptionAuditModel auditModel = subscriptionServiceHelper.getUserSubscriptionAuditModel(userSubscriptionModel2, EventEnum.SUBSCRIPTION_AUTO_RENEWAL);
+                                userSubscriptionAuditRepository.save(auditModel);
+                            }
+                        }
+                    }
                 }
             }
         }

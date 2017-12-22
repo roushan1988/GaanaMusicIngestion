@@ -57,4 +57,12 @@ public class CommunicationServiceImpl implements CommunicationService {
         EmailTask emailTask = helper.getSubscriptionSuccessEmailTask(userSubscription);
         queueService.pushToEmailQueue(emailTask);
     }
+
+//    @Autowired
+//    private UserSubscriptionRepository repository;
+//    @PostConstruct
+//    public void test(){
+//        UserSubscriptionModel userSubscription = repository.findById(23l);
+//        sendSubscriptionSuccessCommunication(userSubscription);
+//    }
 }

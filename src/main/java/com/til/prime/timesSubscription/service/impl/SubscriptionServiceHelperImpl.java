@@ -31,7 +31,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
     @Autowired
     private ChecksumService checksumService;
 
-    public UserSubscriptionModel generateInitPurchaseUserSubscription(InitPurchaseRequest request, SubscriptionVariantModel variantModel, UserSubscriptionModel lastUserSubscription, UserModel userModel, BigDecimal price, boolean crmRequest){
+    public UserSubscriptionModel generateInitPurchaseUserSubscription(InitPurchaseRequest request, SubscriptionVariantModel variantModel, UserSubscriptionModel lastUserSubscription, UserModel userModel, BigDecimal price, boolean crmRequest, boolean free){
         Date date = new Date();
         PlanTypeEnum planType = PlanTypeEnum.valueOf(request.getPlanType());
         UserSubscriptionModel userSubscriptionModel = new UserSubscriptionModel();
@@ -45,7 +45,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
         userSubscriptionModel.setChannel(ChannelEnum.valueOf(request.getChannel()));
         userSubscriptionModel.setPlatform(PlatformEnum.valueOf(request.getPlatform()));
         userSubscriptionModel.setCreated(new Date());
-        if(price.compareTo(BigDecimal.ZERO)<=0 || crmRequest){
+        if(price.compareTo(BigDecimal.ZERO)<=0 || (crmRequest&&free)){
             String orderId = OrderIdGeneratorUtil.generateOrderId(request.getUser().getSsoId(), request.getUser().getTicketId(), GlobalConstants.ORDER_ID_LENGTH);
             userSubscriptionModel.setOrderId(orderId);
             userSubscriptionModel.setPaymentMethod(GlobalConstants.PAYMENT_METHOD_NA);
