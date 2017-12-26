@@ -13,7 +13,7 @@ public class GenerateOrderRequest extends GenericRequest {
     private String paymentMethod;
     private boolean retryOnFailure;
     private boolean renewal;
-    private boolean duplicate;
+    private boolean duplicate = true;
     private boolean job;
     private String platform;
     private String checksum;
