@@ -30,10 +30,13 @@ public class ResponseInterceptor extends WebContentInterceptor {
 		}
 		sb.append("Time taken in millis :"+(end-start)).append(", ");
 		if (null != method.getParameterTypes() && null != joinPoint.getArgs() && joinPoint.getArgs().length > 0) {
-			sb.append("Request "+ (joinPoint.getArgs()[0]!=null? joinPoint.getArgs()[0].toString(): "")).append(", ");
+			sb.append("Request: ");
+			for(int i=0; i<joinPoint.getArgs().length; i++){
+				sb.append(joinPoint.getArgs()[i]!=null? joinPoint.getArgs()[i].toString(): "").append(", ");
+			}
 		}
 		if (null != returnValue ) {
-			sb.append(" Response "+ returnValue.toString()).append(", ");
+			sb.append(", Response: "+ returnValue.toString()).append(", ");
 		}
 		LOG.info(sb);
 		return returnValue;
