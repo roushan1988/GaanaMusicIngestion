@@ -44,12 +44,17 @@ public enum ValidationError {
 	NO_SUBSCRIPTIONS_FOUND(36, "No subscriptions found", 1, 1),
 	ALREADY_BLOCKED_USER(37, "User already blocked", 1, 3),
 	ALREADY_UNBLOCKED_USER(38, "User already unblocked", 1, 3),
+	RECORD_ALREADY_EXISTS_AND_NOT_ACTIVATED(39, "Record already exists and has not been activated", 1, 1),
+	FUTURE_SUBSCRIPTION_EXISTS_FOR_USER(40, "Future subscription exists for user", 1, 1),
+	INVALID_RECORD(41, "Invalid Record", 1, 1),
+	EMPTY_BACKEND_USER_LIST(42, "Empty backend user list", 1, 1),
 	INVALID_USER(1000, "Invalid User", 1, 1),
 	INVALID_CLIENT_ID(1001, "Invalid Client ID", 1, 1),
 	INVALID_CLIENT_SECRET_KEY(1002, "Invalid Client Secret Key", 1, 1),
 	INVALID_CHECKSUM(1003, "Invalid Checksum", 1, 1),
 	INVALID_ENCRYPTION(1004, "Invalid Encryption", 1, 1),
 	BLOCKED_USER(1005, "Oops! Your account is temporarily suspended.", 1, 3),
+	INVALID_ACTIVATION_CODE(1006, "Oops! Your activation code is invalid.", 1, 3),
 	;
 
 	public static final Integer maxCategory = 2;

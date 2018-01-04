@@ -4,12 +4,14 @@ import com.google.common.collect.Maps;
 import com.til.prime.timesSubscription.constants.GlobalConstants;
 import com.til.prime.timesSubscription.convertor.ModelToDTOConvertorUtil;
 import com.til.prime.timesSubscription.dto.external.*;
+import com.til.prime.timesSubscription.dto.internal.UrlShorteningRequest;
+import com.til.prime.timesSubscription.dto.internal.UrlShorteningResponse;
 import com.til.prime.timesSubscription.enums.*;
 import com.til.prime.timesSubscription.model.*;
 import com.til.prime.timesSubscription.service.ChecksumService;
 import com.til.prime.timesSubscription.service.SubscriptionServiceHelper;
 import com.til.prime.timesSubscription.util.HttpConnectionUtils;
-import com.til.prime.timesSubscription.util.OrderIdGeneratorUtil;
+import com.til.prime.timesSubscription.util.UniqueIdGeneratorUtil;
 import com.til.prime.timesSubscription.util.ResponseUtil;
 import com.til.prime.timesSubscription.util.TimeUtils;
 import org.apache.commons.collections.CollectionUtils;
@@ -31,22 +33,27 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
     @Autowired
     private ChecksumService checksumService;
 
+    @Override
     public UserSubscriptionModel generateInitPurchaseUserSubscription(InitPurchaseRequest request, SubscriptionVariantModel variantModel, UserSubscriptionModel lastUserSubscription, UserModel userModel, BigDecimal price, boolean crmRequest, boolean free){
+        return generateInitPurchaseUserSubscription(request.getUser(), ChannelEnum.valueOf(request.getChannel()), PlatformEnum.valueOf(request.getPlatform()), PlanTypeEnum.valueOf(request.getPlanType()), request.getDurationDays(), variantModel, lastUserSubscription, userModel, price, crmRequest, free);
+    }
+
+    @Override
+    public UserSubscriptionModel generateInitPurchaseUserSubscription(UserDTO userDTO, ChannelEnum channel, PlatformEnum platform, PlanTypeEnum planType, Long durationDays, SubscriptionVariantModel variantModel, UserSubscriptionModel lastUserSubscription, UserModel userModel, BigDecimal price, boolean crmRequest, boolean free){
         Date date = new Date();
-        PlanTypeEnum planType = PlanTypeEnum.valueOf(request.getPlanType());
         UserSubscriptionModel userSubscriptionModel = new UserSubscriptionModel();
         userSubscriptionModel.setUser(userModel);
-        userSubscriptionModel.setTicketId(request.getUser().getTicketId());
+        userSubscriptionModel.setTicketId(userDTO.getTicketId());
         userSubscriptionModel.setSubscriptionVariant(variantModel);
         userSubscriptionModel.setStartDate((lastUserSubscription==null || lastUserSubscription.getEndDate().before(date))? date: TimeUtils.addMillisInDate(lastUserSubscription.getEndDate(), 1));
-        userSubscriptionModel.setEndDate(TimeUtils.addDaysInDate(userSubscriptionModel.getStartDate(), request.getDurationDays().intValue()));
+        userSubscriptionModel.setEndDate(TimeUtils.addDaysInDate(userSubscriptionModel.getStartDate(), durationDays.intValue()));
         userSubscriptionModel.setPlanStatus(PlanStatusEnum.INIT);
         userSubscriptionModel.setBusiness(variantModel.getSubscriptionPlan().getBusiness());
-        userSubscriptionModel.setChannel(ChannelEnum.valueOf(request.getChannel()));
-        userSubscriptionModel.setPlatform(PlatformEnum.valueOf(request.getPlatform()));
+        userSubscriptionModel.setChannel(channel);
+        userSubscriptionModel.setPlatform(platform);
         userSubscriptionModel.setCreated(new Date());
         if(price.compareTo(BigDecimal.ZERO)<=0 || (crmRequest&&free)){
-            String orderId = OrderIdGeneratorUtil.generateOrderId(request.getUser().getSsoId(), request.getUser().getTicketId(), GlobalConstants.ORDER_ID_LENGTH);
+            String orderId = UniqueIdGeneratorUtil.generateOrderId(userDTO.getSsoId(), userDTO.getTicketId(), GlobalConstants.ORDER_ID_LENGTH);
             userSubscriptionModel.setOrderId(orderId);
             userSubscriptionModel.setPaymentMethod(GlobalConstants.PAYMENT_METHOD_NA);
             userSubscriptionModel.setPaymentReference(GlobalConstants.PAYMENT_REFERENCE_NA);
@@ -62,7 +69,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
 
     @Override
     public UserSubscriptionModel updateGenerateOrderUserSubscription(GenerateOrderRequest request, UserSubscriptionModel userSubscriptionModel) {
-        String orderId = OrderIdGeneratorUtil.generateOrderId(request.getUser().getSsoId(), request.getUser().getTicketId(), GlobalConstants.ORDER_ID_LENGTH);
+        String orderId = UniqueIdGeneratorUtil.generateOrderId(request.getUser().getSsoId(), request.getUser().getTicketId(), GlobalConstants.ORDER_ID_LENGTH);
         userSubscriptionModel.setOrderId(orderId);
         userSubscriptionModel.setPaymentMethod(request.getPaymentMethod());
         return userSubscriptionModel;
@@ -212,6 +219,37 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
     }
 
     @Override
+    public BackendSubscriptionResponse prepareBackendSubscriptionResponse(BackendSubscriptionResponse response, Set<ValidationError> validationErrors, List<BackendActivationUserDTO> successList, List<BackendActivationUserDTO> failureList) {
+        response.setSuccessList(successList);
+        response.setFailureList(failureList);
+        if(CollectionUtils.isEmpty(validationErrors) && CollectionUtils.isNotEmpty(response.getSuccessList())){
+            response = (BackendSubscriptionResponse) ResponseUtil.createSuccessResponse(response);
+        }else{
+            response.getValidationErrors().addAll(validationErrors);
+            response = ResponseUtil.createFailureResponse(response);
+        }
+        return response;
+    }
+
+    @Override
+    public BackendSubscriptionActivationResponse prepareBackendSubscriptionActivationResponse(BackendSubscriptionActivationResponse response, UserSubscriptionModel userSubscription, ValidationResponse validationResponse) {
+        if(validationResponse.isValid()){
+            SubscriptionVariantModel variantModel = userSubscription.getSubscriptionVariant();
+            response.setUserSubscriptionId(userSubscription.getId());
+            response.setOrderId(userSubscription.getOrderId());
+            response.setPlanId(variantModel.getSubscriptionPlan().getId());
+            response.setVariantId(variantModel.getId());
+            response.setStartDate(userSubscription.getStartDate());
+            response.setEndDate(userSubscription.getEndDate());
+            response.setVariantId(variantModel.getId());
+            response = (BackendSubscriptionActivationResponse) ResponseUtil.createSuccessResponse(response);
+        }else{
+            response = (BackendSubscriptionActivationResponse) ResponseUtil.createFailureResponse(response, validationResponse, validationResponse.getMaxCategory());
+        }
+        return response;
+    }
+
+    @Override
     public UserSubscriptionAuditModel getUserSubscriptionAuditModel(UserSubscriptionModel userSubscriptionModel, EventEnum event) {
         UserSubscriptionAuditModel auditModel = new UserSubscriptionAuditModel();
         auditModel.setUserSubscriptionId(userSubscriptionModel.getId());
@@ -342,6 +380,42 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
     }
 
     @Override
+    public BackendSubscriptionUserModel getBackendSubscriptionUser(BackendSubscriptionUserModel user, BackendActivationUserDTO dto) {
+        if(user==null){
+            user = new BackendSubscriptionUserModel();
+        }
+        user.setMobile(dto.getMobile());
+        user.setEmail(dto.getEmail());
+        user.setFirstName(dto.getFirstName());
+        user.setLastName(dto.getLastName());
+        user.setCode(UniqueIdGeneratorUtil.generateCode(dto.getMobile(), GlobalConstants.BACKEND_ACTIVATION_CODE_LENGTH));
+        StringBuilder url = new StringBuilder(properties.getProperty(GlobalConstants.PRIME_BACKEND_ACTIVATION_URL_KEY))
+                .append("?mobile=").append(dto.getMobile()).append("&code=").append(user.getCode());
+        String shortenedUrl = shortenUrl(url.toString());
+        user.setShortenedUrl(shortenedUrl);
+        user.setDurationDays(dto.getDurationDays());
+        user.setCreated(new Date());
+        return user;
+    }
+
+    @Override
+    public BackendSubscriptionUserAuditModel getBackendSubscriptionUserAudit(BackendSubscriptionUserModel user, EventEnum event) {
+        BackendSubscriptionUserAuditModel userAudit = new BackendSubscriptionUserAuditModel();
+        userAudit.setBackendSubscriptionUserId(user.getId());
+        userAudit.setMobile(user.getMobile());
+        userAudit.setEmail(user.getEmail());
+        userAudit.setFirstName(user.getFirstName());
+        userAudit.setLastName(user.getLastName());
+        userAudit.setEvent(event);
+        userAudit.setCode(user.getCode());
+        userAudit.setShortenedUrl(user.getShortenedUrl());
+        userAudit.setDurationDays(user.getDurationDays());
+        userAudit.setCompleted(user.isCompleted());
+        userAudit.setCreated(new Date());
+        return userAudit;
+    }
+
+    @Override
     public final boolean renewSubscription(UserSubscriptionModel userSubscriptionModel){
         try{
             RenewSubscriptionRequest renewSubscriptionRequest = new RenewSubscriptionRequest();
@@ -374,6 +448,22 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
             LOG.error("Exception in api call to payments for refund with orderId: "+orderId+", refundAmount: "+refundAmount, e);
         }
         return false;
+    }
+
+    @Override
+    public String shortenUrl(String longUrl) {
+        int retryCount = GlobalConstants.API_RETRY_COUNT;
+        RETRY_LOOP:
+        while(retryCount>0){
+            try{
+                UrlShorteningResponse response = httpConnectionUtils.requestForObject(new UrlShorteningRequest(longUrl), properties.getProperty(GlobalConstants.URL_SHORTENING_API_KEY), UrlShorteningResponse.class, GlobalConstants.POST);
+                return response.getId();
+            }catch (Exception e){
+                retryCount--;
+                continue RETRY_LOOP;
+            }
+        }
+        return null;
     }
 
     private void updateSubscriptionChecksumForRenewSubscription(RenewSubscriptionRequest request) {

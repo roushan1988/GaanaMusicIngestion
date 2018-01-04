@@ -4,13 +4,11 @@ import com.google.gson.Gson;
 import com.til.prime.timesSubscription.constants.GlobalConstants;
 import com.til.prime.timesSubscription.dto.external.*;
 import com.til.prime.timesSubscription.enums.*;
-import com.til.prime.timesSubscription.model.ExternalClientModel;
-import com.til.prime.timesSubscription.model.SubscriptionVariantModel;
-import com.til.prime.timesSubscription.model.UserModel;
-import com.til.prime.timesSubscription.model.UserSubscriptionModel;
+import com.til.prime.timesSubscription.model.*;
 import com.til.prime.timesSubscription.service.ChecksumService;
 import com.til.prime.timesSubscription.service.PropertyService;
 import com.til.prime.timesSubscription.service.SubscriptionValidationService;
+import com.til.prime.timesSubscription.util.GenericUtils;
 import com.til.prime.timesSubscription.util.PreConditions;
 import com.til.prime.timesSubscription.util.RestTemplateUtil;
 import com.til.prime.timesSubscription.util.TimeUtils;
@@ -457,6 +455,68 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
         PreConditions.notNull(userModel, ValidationError.INVALID_USER, validationResponse);
         if(userModel!=null){
             PreConditions.mustBeFalse(userModel.isBlocked(), ValidationError.BLOCKED_USER, validationResponse);
+        }
+        return updateValid(validationResponse);
+    }
+
+    @Override
+    public BackendSubscriptionValidationResponse validateBackendSubscriptionRequest(BackendSubscriptionRequest request) {
+        BackendSubscriptionValidationResponse validationResponse = new BackendSubscriptionValidationResponse();
+        ValidationResponse validationResponse1 = new ValidationResponse();
+        validationResponse1 = validateEncryptionForBackendSubscription(request, validationResponse1);
+        if(validationResponse1.isValid()){
+            for(BackendActivationUserDTO dto: request.getUserList()){
+                if(!GenericUtils.validMobile(dto.getMobile()) || StringUtils.isEmpty(dto.getFirstName()) || (StringUtils.isNotEmpty(dto.getEmail()) && !GenericUtils.validEmail(dto.getEmail())) ||
+                        (dto.getDurationDays()==null) || (dto.getDurationDays()!=null && (dto.getDurationDays()<=0 || dto.getDurationDays()>GlobalConstants.MAX_BACKEND_SUBSCRIPTION_DAYS))){
+                    dto.setMessage(ValidationError.INVALID_RECORD.getErrorMessage());
+                    validationResponse.getFailureList().add(dto);
+                }
+            }
+        }else{
+            validationResponse.getValidationErrors().addAll(validationResponse1.getValidationErrorSet());
+        }
+        return validationResponse;
+    }
+
+    @Override
+    public ValidationResponse validatePreBackendSubscriptionActivation(BackendSubscriptionActivationRequest request) {
+        ValidationResponse validationResponse = new ValidationResponse();
+        PreConditions.notNull(request.getUser(), ValidationError.INVALID_USER, validationResponse);
+        if(request.getUser()!=null){
+            validationResponse = validateUser(request, validationResponse);
+        }
+        PreConditions.notNull(request.getActivationCode(), ValidationError.INVALID_ACTIVATION_CODE, validationResponse);
+        PreConditions.notNull(request.getBusiness(), ValidationError.INVALID_BUSINESS, validationResponse);
+        PreConditions.notNull(request.getChannel(), ValidationError.INVALID_CHANNEL, validationResponse);
+        PreConditions.notNull(request.getPlatform(), ValidationError.INVALID_PLATFORM, validationResponse);
+        return updateValid(validationResponse);
+    }
+
+    @Override
+    public ValidationResponse validatePostBackendSubscriptionActivation(BackendSubscriptionActivationRequest request, BackendSubscriptionUserModel backendUser, ValidationResponse validationResponse) {
+        PreConditions.notNull(backendUser, ValidationError.INVALID_USER, validationResponse);
+        if(backendUser!=null){
+            PreConditions.mustBeEqual(backendUser.getCode(), request.getActivationCode(), ValidationError.INVALID_ACTIVATION_CODE, validationResponse);
+        }
+        return updateValid(validationResponse);
+    }
+
+    private ValidationResponse validateEncryptionForBackendSubscription(BackendSubscriptionRequest request, ValidationResponse validationResponse) {
+        PreConditions.mustBeEqual(request.getSecretKey(), properties.getProperty(GlobalConstants.PAYMENTS_SECRET_KEY), ValidationError.INVALID_SECRET_KEY, validationResponse);
+        PreConditions.notEmpty(request.getChecksum(), ValidationError.INVALID_CHECKSUM, validationResponse);
+        PreConditions.notEmpty(request.getUserList(), ValidationError.EMPTY_BACKEND_USER_LIST, validationResponse);
+        validationResponse = updateValid(validationResponse);
+        if(validationResponse.isValid()){
+            try {
+                StringBuilder sb = new StringBuilder();
+                for(BackendActivationUserDTO dto: request.getUserList()){
+                    sb.append(dto.toString());
+                }
+                String checksum = checksumService.calculateChecksumHmacSHA256(properties.getProperty(GlobalConstants.PAYMENTS_ENCRYPTION_KEY), sb.toString());
+                PreConditions.mustBeEqual(checksum, request.getChecksum(), ValidationError.INVALID_ENCRYPTION, validationResponse);
+            } catch (Exception e) {
+                validationResponse.addValidationError(ValidationError.INVALID_ENCRYPTION);
+            }
         }
         return updateValid(validationResponse);
     }

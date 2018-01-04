@@ -1,6 +1,7 @@
 package com.til.prime.timesSubscription.util;
 
 import com.til.prime.timesSubscription.constants.GlobalConstants;
+import com.til.prime.timesSubscription.dto.external.BackendSubscriptionResponse;
 import com.til.prime.timesSubscription.dto.external.GenericResponse;
 import com.til.prime.timesSubscription.dto.external.ValidationResponse;
 import com.til.prime.timesSubscription.enums.ResponseCode;
@@ -24,6 +25,13 @@ public class ResponseUtil {
 		genericResponse.setResponseMessage(validationResponse.getMessage());
 		genericResponse.getValidationErrors().addAll(validationResponse.getValidationErrorSet());
 		genericResponse.setValidationErrorCategory(validationErrorCategory);
+		return genericResponse;
+	}
+
+	public static BackendSubscriptionResponse createFailureResponse(BackendSubscriptionResponse genericResponse){
+		genericResponse.setSuccess(false);
+		genericResponse.setResponseCode(ResponseCode.VALIDATION_ERROR);
+		genericResponse.setResponseMessage(GlobalConstants.VALIDATION_FAILURE);
 		return genericResponse;
 	}
 
