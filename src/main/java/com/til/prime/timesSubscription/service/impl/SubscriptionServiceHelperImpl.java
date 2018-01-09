@@ -96,8 +96,9 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
     }
 
     @Override
-    public PlanListResponse preparePlanListResponse(PlanListResponse response, List<SubscriptionPlanDTO> subscriptionPlans, ValidationResponse validationResponse) {
+    public PlanListResponse preparePlanListResponse(PlanListResponse response, List<SubscriptionPlanDTO> subscriptionPlans, boolean freeTrialEnded, ValidationResponse validationResponse) {
         if(validationResponse.isValid()){
+            response.setFreeTrialEnded(freeTrialEnded);
             response.setPlanDTOList(subscriptionPlans);
             response = (PlanListResponse) ResponseUtil.createSuccessResponse(response);
         }else{
