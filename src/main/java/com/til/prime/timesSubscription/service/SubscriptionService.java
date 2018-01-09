@@ -2,7 +2,6 @@ package com.til.prime.timesSubscription.service;
 
 import com.til.prime.timesSubscription.dto.external.*;
 import com.til.prime.timesSubscription.enums.EventEnum;
-import com.til.prime.timesSubscription.model.BackendSubscriptionUserModel;
 import com.til.prime.timesSubscription.model.UserModel;
 import com.til.prime.timesSubscription.model.UserSubscriptionModel;
 
@@ -21,10 +20,7 @@ public interface SubscriptionService {
     GenericValidationResponse checkValidVariant(CheckValidVariantRequest request);
     CheckStatusResponse checkStatusViaApp(CheckStatusRequest request);
     CheckStatusResponse checkStatusViaServer(CheckStatusRequest request, boolean external);
-    BackendSubscriptionResponse backendSubscriptionViaServer(BackendSubscriptionRequest request);
-    BackendSubscriptionActivationResponse backendSubscriptionActivation(BackendSubscriptionActivationRequest request);
     UserSubscriptionModel saveUserSubscription(UserSubscriptionModel userSubscriptionModel, boolean retryForOrderId, String ssoId, String ticketId, EventEnum event);
     void updateUserStatus(UserSubscriptionModel userSubscriptionModel, UserModel userModel);
     UserModel saveUserModel(UserModel userModel, EventEnum eventEnum);
-    BackendSubscriptionUserModel saveBackendSubscriptionUser(BackendSubscriptionUserModel user, EventEnum eventEnum);
 }

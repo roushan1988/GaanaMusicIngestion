@@ -29,7 +29,6 @@ public class GlobalConstants {
     public static final int MAX_DAYS_DIFF_FOR_NEW_SUBSCRIPTION_PURCHASE = (365*2)+90;
     public static final String PAYMENTS_SECRET_KEY = "payments.secret.key";
     public static final long MAX_SUBSCRIPTION_EXTENSION_DAYS = 365l;
-    public static final long MAX_BACKEND_SUBSCRIPTION_DAYS = 365l;
     public static final String CONTENT_TYPE_JSON = "application/json";
     public static final String CONTENT_TYPE = "Content-Type";
     public static final String GET = "GET";
@@ -51,15 +50,4 @@ public class GlobalConstants {
     public static final String MOBILE_UPDATE_TEMPLATE_CTA_KEY = "mobile.update.template.cta.key";
     public static final String EMAIL_FOR_COMMUNICATION = "help@timesprime.com";
     public static final String EMAIL_NAME_FOR_COMMUNICATION = "Times Prime";
-    public static final int BACKEND_ACTIVATION_CODE_LENGTH = 15;
-    public static final String SUBSCRIPTION_SUCCESS_SMS_TEMPLATE_KEY = "subscription.success.sms.key";
-    public static final String SUBSCRIPTION_SUCCESS_EMAIL_TEMPLATE_KEY = "subscription.success.email.key";
-    public static final String BACKEND_ACTIVATION_SMS_TEMPLATE_KEY = "backend.activation.sms.key";
-    public static final String BACKEND_ACTIVATION_EMAIL_TEMPLATE_KEY = "backend.activation.sms.key";
-    public static final String BACKEND_ACTIVATION_EMAIL_GROUP_KEY = "backend.activation.email.group.key";
-    public static final String BACKEND_ACTIVATION_EMAIL_CTA_KEY = "backend.activation.email.cta.key";
-    public static final String URL_SHORTENING_API_KEY = "url.shortening.api";
-    public static final String PRIME_BACKEND_ACTIVATION_URL_KEY = "prime.backend.activation.url";
-    public static final String PRIME_COMM_FROM_NAME = "TimesPrime";
-    public static final String PRIME_COMM_FROM_EMAIL = "info@timesprime.com";
 }

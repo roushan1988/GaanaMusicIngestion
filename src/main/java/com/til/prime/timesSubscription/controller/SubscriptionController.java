@@ -5,13 +5,15 @@ import com.til.prime.timesSubscription.dto.external.*;
 import com.til.prime.timesSubscription.enums.PropertyEnum;
 import com.til.prime.timesSubscription.service.PropertyService;
 import com.til.prime.timesSubscription.service.SubscriptionService;
-import com.til.prime.timesSubscription.util.RequestUpdateUtil;
 import com.til.prime.timesSubscription.util.ResponseUtil;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.ResourceUtils;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.nio.file.Files;
 
@@ -231,36 +233,6 @@ public class SubscriptionController {
             LOG.error("Exception in checkStatus: ", e);
             CheckStatusResponse response = new CheckStatusResponse();
             return (CheckStatusResponse) ResponseUtil.createExceptionResponse(response, 10);
-        }
-    }
-
-    @Loggable
-    @RequestMapping(path="/server/backendSubscription", method = RequestMethod.POST)
-    @ResponseBody
-    public BackendSubscriptionResponse backendSubscriptionViaServer(@RequestBody BackendSubscriptionRequest request){
-        try {
-            return subscriptionService.backendSubscriptionViaServer(request);
-        }catch (Exception e){
-            LOG.error("Exception in backendSubscriptionViaServer: ", e);
-            BackendSubscriptionResponse response = new BackendSubscriptionResponse();
-            return (BackendSubscriptionResponse) ResponseUtil.createExceptionResponse(response, 10);
-        }
-    }
-
-    @Loggable
-    @RequestMapping(path="/backendSubscriptionActivation", method = {RequestMethod.GET, RequestMethod.POST})
-    @ResponseBody
-    public BackendSubscriptionActivationResponse backendSubscriptionActivation(@CookieValue(value = "ssoId", required = false) String ssoId,
-                                                                               @CookieValue(value = "ticketId", required = false) String ticketId,
-                                                                               @CookieValue(value = "mobile", required = false) String mobile,
-                                                                               @RequestBody BackendSubscriptionActivationRequest request){
-        try {
-            RequestUpdateUtil.updateRequest(request, ssoId, ticketId, mobile);
-            return subscriptionService.backendSubscriptionActivation(request);
-        }catch (Exception e){
-            LOG.error("Exception in backendSubscriptionActivationViaServer: ", e);
-            BackendSubscriptionActivationResponse response = new BackendSubscriptionActivationResponse();
-            return (BackendSubscriptionActivationResponse) ResponseUtil.createExceptionResponse(response, 10);
         }
     }
 

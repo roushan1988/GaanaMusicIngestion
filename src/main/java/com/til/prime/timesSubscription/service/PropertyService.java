@@ -6,7 +6,6 @@ import com.til.prime.timesSubscription.enums.CountryEnum;
 import com.til.prime.timesSubscription.enums.PropertyEnum;
 import com.til.prime.timesSubscription.model.ExternalClientModel;
 import com.til.prime.timesSubscription.model.SubscriptionPlanModel;
-import com.til.prime.timesSubscription.model.SubscriptionVariantModel;
 
 import java.util.List;
 
@@ -17,7 +16,6 @@ public interface PropertyService {
     List<Long> getSubscriptionExpiryReminderDays();
     List<Long> getExpiredSubscriptionRenewalReminderDays();
     ExternalClientModel getExternalClient(String clientId);
-    SubscriptionVariantModel getBackendFreeTrialVariant(BusinessEnum business, CountryEnum country);
     List<SubscriptionPlanDTO> getAllPlans(BusinessEnum business, CountryEnum country);
     List<SubscriptionPlanModel> getAllPlanModels(BusinessEnum business, CountryEnum country);
 }

@@ -11,8 +11,12 @@ import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class PreConditions {
+	private static final Pattern VALID_EMAIL_REGEX = Pattern.compile("^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$", Pattern.CASE_INSENSITIVE);
+
 	private PreConditions() {
 
 	}
@@ -66,13 +70,19 @@ public class PreConditions {
 	}
 
 	public static void validMobile(CharSequence obj, ValidationError error, ValidationResponse validationResponse) {
-		if(!GenericUtils.validMobile(obj)){
+		if (StringUtils.isEmpty(obj)) {
 			validationResponse.addValidationError(error);
+		}else {
+			Pattern pattern = Pattern.compile("\\d{10}");
+			Matcher matcher = pattern.matcher(obj.toString());
+			if (!matcher.matches()) {
+				validationResponse.addValidationError(error);
+			}
 		}
 	}
 
 	public static void validEmail(CharSequence obj, ValidationError error, ValidationResponse validationResponse) {
-		if (!GenericUtils.validEmail(obj)) {
+		if (StringUtils.isEmpty(obj) || !VALID_EMAIL_REGEX.matcher(obj).find()) {
 			validationResponse.addValidationError(error);
 		}
 	}

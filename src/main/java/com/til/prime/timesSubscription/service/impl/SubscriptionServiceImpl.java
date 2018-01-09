@@ -8,7 +8,7 @@ import com.til.prime.timesSubscription.dto.external.*;
 import com.til.prime.timesSubscription.enums.*;
 import com.til.prime.timesSubscription.model.*;
 import com.til.prime.timesSubscription.service.*;
-import com.til.prime.timesSubscription.util.UniqueIdGeneratorUtil;
+import com.til.prime.timesSubscription.util.OrderIdGeneratorUtil;
 import com.til.prime.timesSubscription.util.TimeUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -42,17 +42,11 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     @Autowired
     private UserSubscriptionAuditRepository userSubscriptionAuditRepository;
     @Autowired
-    private BackendSubscriptionUserRepository backendSubscriptionUserRepository;
-    @Autowired
-    private BackendSubscriptionUserAuditRepository backendSubscriptionUserAuditRepository;
-    @Autowired
     private SubscriptionServiceHelper subscriptionServiceHelper;
     @Autowired
     private CommunicationService communicationService;
     @Autowired
     private PropertyService propertyService;
-    @Resource(name = "config_properties")
-    private Properties properties;
 
     @Override
     public PlanListResponse getAllPlans(PlanListRequest request) {
@@ -469,80 +463,6 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         return response;
     }
 
-    @Override
-    public BackendSubscriptionResponse backendSubscriptionViaServer(BackendSubscriptionRequest request) {
-        BackendSubscriptionResponse response = new BackendSubscriptionResponse();
-        BackendSubscriptionValidationResponse validationResponse = subscriptionValidationService.validateBackendSubscriptionRequest(request);
-        List<BackendActivationUserDTO> successList = new ArrayList<>();
-        List<BackendActivationUserDTO> failureList = new ArrayList<>();
-        if(validationResponse.getValidationErrors().isEmpty()){
-            failureList.addAll(validationResponse.getFailureList());
-            request.getUserList().removeAll(failureList);
-            if(CollectionUtils.isNotEmpty(request.getUserList())){
-                for(BackendActivationUserDTO dto: request.getUserList()){
-                    BackendSubscriptionUserModel model = backendSubscriptionUserRepository.findByMobileAndDeletedFalse(dto.getMobile());
-                    if(model==null || (model!=null && model.isCompleted() && dto.isForceActivation())){
-                        UserSubscriptionModel lastUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndBusinessAndOrderCompletedAndDeletedOrderByIdDesc(dto.getMobile(), BusinessEnum.TIMES_PRIME, true, false);
-                        if(lastUserSubscription!=null && lastUserSubscription.getStatus()==StatusEnum.FUTURE){
-                            dto.setMessage(ValidationError.FUTURE_SUBSCRIPTION_EXISTS_FOR_USER.getErrorMessage());
-                            failureList.add(dto);
-                        }else{
-                            model = subscriptionServiceHelper.getBackendSubscriptionUser(model, dto);
-                            saveBackendSubscriptionUser(model, EventEnum.BACKEND_USER_SUBSCRIPTION_CREATION);
-                            successList.add(dto);
-                        }
-                    }else{
-                        dto.setMessage(ValidationError.RECORD_ALREADY_EXISTS_AND_NOT_ACTIVATED.getErrorMessage());
-                        failureList.add(dto);
-                    }
-                }
-            }
-        }
-        response = subscriptionServiceHelper.prepareBackendSubscriptionResponse(response, validationResponse.getValidationErrors(), successList, failureList);
-        return response;
-    }
-
-    @Override
-    @Transactional
-    public BackendSubscriptionActivationResponse backendSubscriptionActivation(BackendSubscriptionActivationRequest request) {
-        BackendSubscriptionActivationResponse response = new BackendSubscriptionActivationResponse();
-        ValidationResponse validationResponse = subscriptionValidationService.validatePreBackendSubscriptionActivation(request);
-        BackendSubscriptionUserModel backendUser = null;
-        if(validationResponse.isValid()){
-            backendUser = backendSubscriptionUserRepository.findByMobileAndCompletedFalseAndDeletedFalse(request.getUser().getMobile());
-            validationResponse = subscriptionValidationService.validatePostBackendSubscriptionActivation(request, backendUser, validationResponse);
-        }
-        UserSubscriptionModel userSubscriptionModel = null;
-        if(validationResponse.isValid()){
-            UserSubscriptionModel lastUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndBusinessAndOrderCompletedAndDeletedOrderByIdDesc(request.getUser().getMobile(), request.getBusiness(), true, false);
-            if(lastUserSubscription==null){
-                SubscriptionVariantModel variantModel = propertyService.getBackendFreeTrialVariant(BusinessEnum.TIMES_PRIME, CountryEnum.IN);
-                UserModel userModel = getOrCreateUserWithMobileCheck(request, validationResponse);
-                userSubscriptionModel = subscriptionServiceHelper.generateInitPurchaseUserSubscription(request.getUser(), request.getChannel(), request.getPlatform(), PlanTypeEnum.TRIAL, variantModel.getDurationDays(), variantModel, null, userModel, variantModel.getPrice(), false, true);
-                EventEnum eventEnum = EventEnum.getEventForBackendActivation(userSubscriptionModel.getPlanStatus());
-                userSubscriptionModel = saveUserSubscription(userSubscriptionModel, true, request.getUser().getSsoId(), request.getUser().getTicketId(), eventEnum);
-                if(userSubscriptionModel.isOrderCompleted()){
-                    communicationService.sendSubscriptionSuccessCommunication(userSubscriptionModel);
-                }
-            }else if(lastUserSubscription.getStatus()==StatusEnum.FUTURE){
-                validationResponse.addValidationError(ValidationError.FUTURE_SUBSCRIPTION_EXISTS_FOR_USER);
-            }else{
-                //extend
-                lastUserSubscription = subscriptionServiceHelper.extendTrial(lastUserSubscription, backendUser.getDurationDays());
-                userSubscriptionModel = saveUserSubscription(lastUserSubscription, false, request.getUser().getSsoId(), request.getUser().getTicketId(), EventEnum.SUBSCRIPTION_TRIAL_EXTENSION);
-                backendUser.setCompleted(true);
-                EventEnum eventEnum = EventEnum.getEventForBackendActivation(userSubscriptionModel.getPlanStatus());
-                saveBackendSubscriptionUser(backendUser, eventEnum);
-                if(userSubscriptionModel.getStatus()==StatusEnum.ACTIVE){
-                    updateUserStatus(userSubscriptionModel, userSubscriptionModel.getUser());
-                }
-                communicationService.sendSubscriptionExpiryExtensionCommunication(userSubscriptionModel);
-            }
-        }
-        response = subscriptionServiceHelper.prepareBackendSubscriptionActivationResponse(response, userSubscriptionModel, validationResponse);
-        return response;
-    }
-
     private UserModel getOrCreateUserWithMobileCheck(GenericRequest request, ValidationResponse validationResponse) {
         UserModel userModel = userRepository.findByMobileAndDeletedFalse(request.getUser().getMobile());
         if(userModel==null){
@@ -591,7 +511,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             } catch (Exception e) {
                 retryCount--;
                 if(retryCount>0){
-                    userSubscriptionModel.setOrderId(UniqueIdGeneratorUtil.generateOrderId(ssoId, ticketId, GlobalConstants.ORDER_ID_LENGTH));
+                    userSubscriptionModel.setOrderId(OrderIdGeneratorUtil.generateOrderId(ssoId, ticketId, GlobalConstants.ORDER_ID_LENGTH));
                     continue retryLoop;
                 }
                 throw e;
@@ -673,35 +593,5 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         UserAuditModel userAuditModel = subscriptionServiceHelper.getUserAudit(userModel, eventEnum);
         userAuditRepository.save(userAuditModel);
         return userModel;
-    }
-
-    @Override
-    @Transactional
-    public BackendSubscriptionUserModel saveBackendSubscriptionUser(BackendSubscriptionUserModel user, EventEnum eventEnum){
-        int retryCount = GlobalConstants.DB_RETRY_COUNT;
-        retryLoop:
-        while (retryCount > 0) {
-            try {
-                user = backendSubscriptionUserRepository.save(user);
-                BackendSubscriptionUserAuditModel userAudit = subscriptionServiceHelper.getBackendSubscriptionUserAudit(user, eventEnum);
-                backendSubscriptionUserAuditRepository.save(userAudit);
-                break retryLoop;
-            } catch (Exception e) {
-                retryCount--;
-                if(retryCount>0){
-                    user.setCode(UniqueIdGeneratorUtil.generateCode(user.getMobile(), GlobalConstants.BACKEND_ACTIVATION_CODE_LENGTH));
-                    StringBuilder url = new StringBuilder(properties.getProperty(GlobalConstants.PRIME_BACKEND_ACTIVATION_URL_KEY))
-                            .append("?mobile=").append(user.getMobile()).append("&code=").append(user.getCode());
-                    String shortenedUrl = subscriptionServiceHelper.shortenUrl(url.toString());
-                    user.setShortenedUrl(shortenedUrl);
-                    continue retryLoop;
-                }
-                throw e;
-            }
-        }
-        if(eventEnum == EventEnum.BACKEND_USER_SUBSCRIPTION_CREATION){
-            communicationService.sendBackendActivationPendingCommunication(user);
-        }
-        return user;
     }
 }

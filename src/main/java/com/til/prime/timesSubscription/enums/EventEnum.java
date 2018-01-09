@@ -27,10 +27,7 @@ public enum EventEnum {
     USER_CREATION_WITH_EXISTING_MOBILE,
     USER_BLOCK,
     USER_UNBLOCK,
-    USER_SUBSCRIPTION_SWITCH,
-    BACKEND_USER_SUBSCRIPTION_CREATION,
-    BACKEND_FREE_TRAIL_ACTIVATION,
-    BACKEND_SUBSCRIPTION_EXTENSION
+    USER_SUBSCRIPTION_SWITCH
     ;
 
     public static final EventEnum getEventByInitPlanStatus(PlanStatusEnum planStatus){
@@ -40,14 +37,6 @@ public enum EventEnum {
             return EventEnum.FREE_TRIAL_WITH_PAYMENT;
         }else{
             return EventEnum.INIT_PURCHASE;
-        }
-    }
-
-    public static final EventEnum getEventForBackendActivation(PlanStatusEnum planStatus){
-        if(planStatus== PlanStatusEnum.FREE_TRIAL){
-            return EventEnum.BACKEND_FREE_TRAIL_ACTIVATION;
-        }else{
-            return EventEnum.BACKEND_SUBSCRIPTION_EXTENSION;
         }
     }
 }

@@ -1,7 +1,6 @@
 package com.til.prime.timesSubscription.service;
 
 import com.til.prime.timesSubscription.dto.external.*;
-import com.til.prime.timesSubscription.model.BackendSubscriptionUserModel;
 import com.til.prime.timesSubscription.model.SubscriptionVariantModel;
 import com.til.prime.timesSubscription.model.UserModel;
 import com.til.prime.timesSubscription.model.UserSubscriptionModel;
@@ -40,7 +39,4 @@ public interface SubscriptionValidationService {
     ValidationResponse validateEncryptionForCheckStatus(CheckStatusRequest request, ValidationResponse validationResponse, boolean external);
     ValidationResponse validateEncryptionForValidVariant(CheckValidVariantRequest request, ValidationResponse validationResponse);
     ValidationResponse validateBlockedUser(UserModel userModel, ValidationResponse validationResponse);
-    BackendSubscriptionValidationResponse validateBackendSubscriptionRequest(BackendSubscriptionRequest request);
-    ValidationResponse validatePreBackendSubscriptionActivation(BackendSubscriptionActivationRequest request);
-    ValidationResponse validatePostBackendSubscriptionActivation(BackendSubscriptionActivationRequest request, BackendSubscriptionUserModel backendUser, ValidationResponse validationResponse);
 }

@@ -5,7 +5,6 @@ import java.util.List;
 
 public enum PropertyEnum {
     HEALTH_CHECK("String"),
-    BACKEND_FREE_TRIAL_PLAN("Object"),
     SUBSCRIPTION_RENEWAL_REMINDER_DAYS("String"),
     EXPIRED_SUBSCRIPTION_RENEWAL_REMINDER_DAYS("String"),
     SUBSCRIPTION_EXPIRY_REMINDER_DAYS("String"),
