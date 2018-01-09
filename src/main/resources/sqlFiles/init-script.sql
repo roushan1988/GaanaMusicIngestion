@@ -223,6 +223,41 @@ CREATE TABLE `job_audit` (
   CONSTRAINT `FK_AUDIT_JOB` FOREIGN KEY (`job_id`) REFERENCES `job` (`id`)
 );
 
+CREATE TABLE `backend_subscription_user` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `mobile` varchar(16) NOT NULL,
+  `email` varchar(128) DEFAULT NULL,
+  `first_name` varchar(128) NOT NULL,
+  `last_name` varchar(128) DEFAULT NULL,
+  `code` varchar(16) NOT NULL,
+  `shortened_url` varchar(128) NOT NULL,
+  `duration_days` int(11) NOT NULL,
+  `completed` tinyint(1) NOT NULL,
+  `created` datetime NOT NULL,
+  `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `deleted` tinyint(1) NOT NULL,
+  PRIMARY KEY (`id`),
+  INDEX `BSU_CODE` (`code`)
+);
+
+CREATE TABLE `backend_subscription_user_audit` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `backend_subscription_user_id` int(11) NOT NULL,
+  `mobile` varchar(16) NOT NULL,
+  `email` varchar(128) DEFAULT NULL,
+  `first_name` varchar(128) NOT NULL,
+  `last_name` varchar(128) DEFAULT NULL,
+  `code` varchar(16) NOT NULL,
+  `shortened_url` varchar(128) NOT NULL,
+  `duration_days` int(11) NOT NULL,
+  `completed` tinyint(1) NOT NULL,
+  `event` varchar(64) NOT NULL,
+  `created` datetime NOT NULL,
+  `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `deleted` tinyint(1) NOT NULL,
+  PRIMARY KEY (`id`)
+);
+
 insert into subscription_plan values (null, "TEST PLAN", "TEST PLAN DESCRIPTION", "TIMES_PRIME", "INR", "IN", "REGULAR", now(), now(), false);
 insert into subscription_plan values (null, "TEST PLAN 2", "TEST PLAN 2 DESCRIPTION", "TIMES_PRIME", "INR", "IN", "REGULAR", now(), now(), false);
 

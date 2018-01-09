@@ -8,10 +8,12 @@ import com.til.prime.timesSubscription.dao.SubscriptionPropertyRepository;
 import com.til.prime.timesSubscription.dto.external.SubscriptionPlanDTO;
 import com.til.prime.timesSubscription.enums.BusinessEnum;
 import com.til.prime.timesSubscription.enums.CountryEnum;
+import com.til.prime.timesSubscription.enums.PlanTypeEnum;
 import com.til.prime.timesSubscription.enums.PropertyEnum;
 import com.til.prime.timesSubscription.model.ExternalClientModel;
 import com.til.prime.timesSubscription.model.SubscriptionPlanModel;
 import com.til.prime.timesSubscription.model.SubscriptionPropertyModel;
+import com.til.prime.timesSubscription.model.SubscriptionVariantModel;
 import com.til.prime.timesSubscription.service.PropertyService;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,6 +101,28 @@ public class PropertyServiceImpl implements PropertyService {
             }
         }
         return ((Map<String, ExternalClientModel>)getProperty(PropertyEnum.EXTERNAL_CLIENTS)).get(clientId);
+    }
+
+    @Override
+    public SubscriptionVariantModel getBackendFreeTrialVariant(BusinessEnum business, CountryEnum country) {
+        SubscriptionVariantModel variantModel = (SubscriptionVariantModel) getProperty(PropertyEnum.BACKEND_FREE_TRIAL_PLAN);
+        if(variantModel==null){
+            List<SubscriptionPlanModel> plans = getAllPlanModels(business, country);
+            LOOP:
+            for(SubscriptionPlanModel plan: plans){
+                if(plan.getBusiness()==business && plan.getCountry()==country){
+                    for(SubscriptionVariantModel variant: plan.getVariants()){
+                        if(variant.getPlanType()== PlanTypeEnum.TRIAL){
+                            variantModel = variant;
+                            break LOOP;
+                        }
+                    }
+                    break LOOP;
+                }
+            }
+            propertyMap.put(PropertyEnum.BACKEND_FREE_TRIAL_PLAN, variantModel);
+        }
+        return variantModel;
     }
 
     @Override

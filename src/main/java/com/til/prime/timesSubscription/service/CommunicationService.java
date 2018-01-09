@@ -1,5 +1,6 @@
 package com.til.prime.timesSubscription.service;
 
+import com.til.prime.timesSubscription.model.BackendSubscriptionUserModel;
 import com.til.prime.timesSubscription.model.UserModel;
 import com.til.prime.timesSubscription.model.UserSubscriptionModel;
 
@@ -13,4 +14,5 @@ public interface CommunicationService {
     void sendSubscriptionCancellationCommunication(UserSubscriptionModel userSubscription);
     void sendSubscriptionActiveCommunication(UserSubscriptionModel userSubscription);
     void sendSubscriptionSuccessCommunication(UserSubscriptionModel userSubscription);
+    void sendBackendActivationPendingCommunication(BackendSubscriptionUserModel model);
 }
