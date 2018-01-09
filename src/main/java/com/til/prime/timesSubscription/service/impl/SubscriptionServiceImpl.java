@@ -59,7 +59,6 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         ValidationResponse validationResponse = subscriptionValidationService.validatePreAllPlans(request);
         PlanListResponse response = new PlanListResponse();
         List<SubscriptionPlanDTO> subscriptionPlans = null;
-        boolean freeTrialEnded = false;
         if(validationResponse.isValid() && request.getUser()!=null){
             UserModel userModel = userRepository.findByMobileAndDeletedFalse(request.getUser().getMobile());
             validationResponse = subscriptionValidationService.validatePostAllPlans(userModel, validationResponse);
@@ -82,22 +81,6 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                             Collections.sort(subscriptionPlanModel.getVariants());
                         }
                         UserSubscriptionModel lastUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndBusinessAndOrderCompletedAndDeletedOrderByIdDesc(request.getUser().getMobile(), request.getBusiness(), true, false);
-                        if(lastUserSubscription.getStatus()==StatusEnum.ACTIVE){
-                            if(lastUserSubscription.getSubscriptionVariant().getPlanType().getOrder()>1){
-                                freeTrialEnded = true;
-                            }else{
-                                freeTrialEnded = false;
-                            }
-                        }else if(lastUserSubscription.getStatus()==StatusEnum.EXPIRED){
-                            freeTrialEnded = true;
-                        }else{
-                            UserSubscriptionModel currentSubscription = userSubscriptionRepository.findFirstByUserMobileAndBusinessAndStatusAndUserDeletedFalseAndOrderCompletedTrueAndDeletedFalseOrderByIdDesc(request.getUser().getMobile(), request.getBusiness(), StatusEnum.ACTIVE);
-                            if(currentSubscription.getSubscriptionVariant().getPlanType().getOrder()>1){
-                                freeTrialEnded = true;
-                            }else{
-                                freeTrialEnded = false;
-                            }
-                        }
                         subscriptionPlans.add(ModelToDTOConvertorUtil.getSubscriptionPlanDTO(subscriptionPlanModel, lastUserSubscription));
                     }
                 }
@@ -116,7 +99,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 }
             }
         }
-        response = subscriptionServiceHelper.preparePlanListResponse(response, subscriptionPlans, freeTrialEnded, validationResponse);
+        response = subscriptionServiceHelper.preparePlanListResponse(response, subscriptionPlans, validationResponse);
         return response;
     }
 
