@@ -1,6 +1,6 @@
 package com.til.prime.timesSubscription.dto.external;
 
-public class ExtendExpiryRequest extends CancelSubscriptionRequest {
+public class ExtendExpiryRequest extends CancelSubscriptionServerRequest {
     private Long extensionDays;
 
     public Long getExtensionDays() {

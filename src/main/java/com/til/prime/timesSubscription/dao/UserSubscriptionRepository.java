@@ -36,6 +36,13 @@ public interface UserSubscriptionRepository extends GenericJpaRepository<UserSub
     Long countByStatusAndEndDateBetweenAndDeletedFalseAndOrderCompletedTrue(StatusEnum status, Date date1, Date date2);
     Long countByStatusAndEndDateBetweenAndDeletedFalseAndOrderCompletedTrueAndAutoRenewalFalse(StatusEnum status, Date date1, Date date2);
     Long countByStatusAndEndDateBetweenAndDeletedFalseAndOrderCompletedTrueAndAutoRenewalTrue(StatusEnum status, Date date1, Date date2);
+    UserSubscriptionModel findByUserMobileAndUserDeletedFalseAndStatusAndUserDeleted(String mobile, StatusEnum statusEnum, boolean deleted);
+    Page<UserSubscriptionModel> findByUserMobileAndUserDeletedFalseAndStatusAndUserDeletedOrderByEndDateDesc(String mobile, StatusEnum statusEnum, boolean deleted, Pageable pageable);
+    UserSubscriptionModel findByOrderIdAndDeleted(String orderId, boolean deleted);
+    List<UserSubscriptionModel> findByStatusAndDeletedFalseAndOrderCompletedTrue(StatusEnum status);
+    List<UserSubscriptionModel> findByStatusAndCreatedBetweenAndDeletedFalseAndOrderCompletedTrue(StatusEnum status, Date date1, Date date2);
+    List<UserSubscriptionModel> findByCreatedBetweenAndDeletedFalseAndOrderCompletedTrue(Date date1, Date date2);
+    List<UserSubscriptionModel> findByOrderIdAndDeletedFalseAndOrderCompletedTrue(String orderId);
     Long countByUserMobileAndUserDeletedFalseAndStatusAndStartDateAfterAndDeletedFalseAndOrderCompletedTrue(String mobile, StatusEnum status, Date date1);
     UserSubscriptionModel findFirstByUserMobileAndUserDeletedFalseAndStatusAndStartDateAfterAndDeletedFalseAndOrderCompletedTrueOrderById(String mobile, StatusEnum status, Date date1);
     List<UserSubscriptionModel> findByUserMobileAndUserDeletedFalseAndStatusInAndOrderCompletedTrueAndDeletedFalse(String mobile, Collection<StatusEnum> statusCollection);

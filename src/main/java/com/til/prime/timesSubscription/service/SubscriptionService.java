@@ -1,5 +1,7 @@
 package com.til.prime.timesSubscription.service;
 
+import java.util.List;
+
 import com.til.prime.timesSubscription.dto.external.*;
 import com.til.prime.timesSubscription.enums.EventEnum;
 import com.til.prime.timesSubscription.model.BackendSubscriptionUserModel;
@@ -26,5 +28,11 @@ public interface SubscriptionService {
     UserSubscriptionModel saveUserSubscription(UserSubscriptionModel userSubscriptionModel, boolean retryForOrderId, String ssoId, String ticketId, EventEnum event);
     void updateUserStatus(UserSubscriptionModel userSubscriptionModel, UserModel userModel);
     UserModel saveUserModel(UserModel userModel, EventEnum eventEnum);
+    void updateUserStatus(UserSubscriptionModel userSubscriptionModel);
+    public String updateCacheForMobile(UpdateCacheForMobileRequest request);
+    public CustomerSearchDTOs customerSearchCRM(CustomerSearchRequest request);
+    public CustomerCRM customerDetailsCRM(CustomerSearchRequest request);
+    public OrderDetailsCRM getOrderDetailsCRM(OrderDetailsRequest request);
+    public OrderSearchResultsCRM orderSearchCRM(OrderSearchRequest request);
     BackendSubscriptionUserModel saveBackendSubscriptionUser(BackendSubscriptionUserModel user, EventEnum eventEnum);
 }

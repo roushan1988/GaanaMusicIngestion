@@ -7,6 +7,7 @@ import com.til.prime.timesSubscription.service.PropertyService;
 import com.til.prime.timesSubscription.service.SubscriptionService;
 import com.til.prime.timesSubscription.util.RequestUpdateUtil;
 import com.til.prime.timesSubscription.util.ResponseUtil;
+
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -92,32 +93,6 @@ public class SubscriptionController {
     }
 
     @Loggable
-    @RequestMapping(path="/server/cancelSubscription", method = RequestMethod.POST)
-    @ResponseBody
-    public CancelSubscriptionResponse cancelSubscriptionViaServer(@RequestBody CancelSubscriptionServerRequest request){
-        try {
-            return subscriptionService.cancelSubscription(request, true);
-        }catch (Exception e){
-            LOG.error("Exception in cancelSubscription: ", e);
-            CancelSubscriptionResponse response = new CancelSubscriptionResponse();
-            return (CancelSubscriptionResponse) ResponseUtil.createExceptionResponse(response, 10);
-        }
-    }
-
-    @Loggable
-    @RequestMapping(path="/server/offerSubscription", method = RequestMethod.POST)
-    @ResponseBody
-    public InitPurchaseResponse offerSubscriptionViaServer(@RequestBody CRMInitPurchaseRequest request){
-        try {
-            return subscriptionService.initPurchasePlan(request, true, request.isFree());
-        }catch (Exception e){
-            LOG.error("Exception in offerSubscriptionViaServer: ", e);
-            InitPurchaseResponse response = new InitPurchaseResponse();
-            return (InitPurchaseResponse) ResponseUtil.createExceptionResponse(response, 10);
-        }
-    }
-
-    @Loggable
     @RequestMapping(path="/app/cancelSubscription", method = RequestMethod.POST)
     @ResponseBody
     public CancelSubscriptionResponse cancelSubscriptionViaApp(@RequestBody CancelSubscriptionRequest request){
@@ -127,45 +102,6 @@ public class SubscriptionController {
             LOG.error("Exception in cancelSubscription: ", e);
             CancelSubscriptionResponse response = new CancelSubscriptionResponse();
             return (CancelSubscriptionResponse) ResponseUtil.createExceptionResponse(response, 10);
-        }
-    }
-
-    @Loggable
-    @RequestMapping(path="/server/turnOffAutoDebit", method = RequestMethod.POST)
-    @ResponseBody
-    public GenericResponse turnOffAutoDebitViaServer(@RequestBody TurnOffAutoDebitRequest request){
-        try {
-            return subscriptionService.turnOffAutoDebit(request);
-        }catch (Exception e){
-            LOG.error("Exception in turnOffAutoDebitViaServer: ", e);
-            GenericResponse response = new GenericResponse();
-            return ResponseUtil.createExceptionResponse(response, 10);
-        }
-    }
-
-    @Loggable
-    @RequestMapping(path="/server/blockUnblockUser", method = RequestMethod.POST)
-    @ResponseBody
-    public GenericResponse blockUnblockUser(@RequestBody BlockUnblockRequest request){
-        try {
-            return subscriptionService.blockUnblockUser(request);
-        }catch (Exception e){
-            LOG.error("Exception in blockUser: ", e);
-            GenericResponse response = new GenericResponse();
-            return ResponseUtil.createExceptionResponse(response, 10);
-        }
-    }
-
-    @Loggable
-    @RequestMapping(path="/server/extendExpiry", method = RequestMethod.POST)
-    @ResponseBody
-    public ExtendExpiryResponse extendExpiry(@RequestBody ExtendExpiryRequest request){
-        try {
-            return subscriptionService.extendExpiry(request);
-        }catch (Exception e){
-            LOG.error("Exception in extendExpiry: ", e);
-            ExtendExpiryResponse response = new ExtendExpiryResponse();
-            return (ExtendExpiryResponse) ResponseUtil.createExceptionResponse(response, 10);
         }
     }
 
@@ -269,5 +205,18 @@ public class SubscriptionController {
     public String getServerStatus() throws Exception{
         String property = new String(Files.readAllBytes((ResourceUtils.getFile(HEALTH_CHECK_FILE_PATH)).toPath()));
         return (String) propertyService.getProperty(PropertyEnum.valueOf(property));
+    }
+    
+    @Loggable
+    @RequestMapping(path="/server/turnOffAutoDebit", method = RequestMethod.POST)
+    @ResponseBody
+    public GenericResponse turnOffAutoDebitViaServer(@RequestBody TurnOffAutoDebitRequest request){
+        try {
+            return subscriptionService.turnOffAutoDebit(request);
+        }catch (Exception e){
+            LOG.error("Exception in turnOffAutoDebitViaServer: ", e);
+            GenericResponse response = new GenericResponse();
+            return ResponseUtil.createExceptionResponse(response, 10);
+        }
     }
 }

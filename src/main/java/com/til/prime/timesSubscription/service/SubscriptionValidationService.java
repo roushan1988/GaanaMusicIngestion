@@ -40,6 +40,13 @@ public interface SubscriptionValidationService {
     ValidationResponse validateEncryptionForCheckStatus(CheckStatusRequest request, ValidationResponse validationResponse, boolean external);
     ValidationResponse validateEncryptionForValidVariant(CheckValidVariantRequest request, ValidationResponse validationResponse);
     ValidationResponse validateBlockedUser(UserModel userModel, ValidationResponse validationResponse);
+    ValidationResponse validatePreUpdateCacheForMobile(UpdateCacheForMobileRequest request);
+    ValidationResponse validatePostUpdateCacheForMobile(UserSubscriptionModel userSubscriptionModel, ValidationResponse validationResponse);
+    ValidationResponse validatePreCustomerSearchCRM(CustomerSearchRequest request);
+    //ValidationResponse validatePostCustomerSearchCRM(UserSubscriptionModel userSubscriptionModel, ValidationResponse validationResponse);
+    ValidationResponse validatePreCustomerDetailsCRM(CustomerSearchRequest request);
+    ValidationResponse validatePreOrderDetailsCRM(OrderDetailsRequest request);
+    ValidationResponse validatePreOrderSearchCRM(OrderSearchRequest request);
     BackendSubscriptionValidationResponse validateBackendSubscriptionRequest(BackendSubscriptionRequest request);
     ValidationResponse validatePreBackendSubscriptionActivation(BackendSubscriptionActivationRequest request);
     ValidationResponse validatePostBackendSubscriptionActivation(BackendSubscriptionActivationRequest request, BackendSubscriptionUserModel backendUser, ValidationResponse validationResponse);

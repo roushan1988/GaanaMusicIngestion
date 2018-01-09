@@ -44,6 +44,7 @@ public enum ValidationError {
 	NO_SUBSCRIPTIONS_FOUND(36, "No subscriptions found", 1, 1),
 	ALREADY_BLOCKED_USER(37, "User already blocked", 1, 3),
 	ALREADY_UNBLOCKED_USER(38, "User already unblocked", 1, 3),
+	INVALID_SUBSCRIPTION_STATUS(39, "Invalid Subscription Status", 1, 1),
 	RECORD_ALREADY_EXISTS_AND_NOT_ACTIVATED(39, "Record already exists and has not been activated", 1, 1),
 	FUTURE_SUBSCRIPTION_EXISTS_FOR_USER(40, "Future subscription exists for user", 1, 1),
 	INVALID_RECORD(41, "Invalid Record", 1, 1),
