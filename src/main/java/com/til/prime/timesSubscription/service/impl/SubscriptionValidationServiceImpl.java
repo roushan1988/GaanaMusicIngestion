@@ -510,7 +510,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
         validationResponse = updateValid(validationResponse);
         if(validationResponse.isValid()){
             try {
-                StringBuilder sb = new StringBuilder();
+                StringBuilder sb = new StringBuilder(request.getSecretKey());
                 for(BackendActivationUserDTO dto: request.getUserList()){
                     sb.append(dto.toString());
                 }
