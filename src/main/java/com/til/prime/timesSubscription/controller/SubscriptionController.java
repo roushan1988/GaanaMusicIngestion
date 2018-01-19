@@ -82,7 +82,11 @@ public class SubscriptionController {
     @Loggable
     @RequestMapping(path="/getPurchaseHistory", method = RequestMethod.GET)
     @ResponseBody
-    public PurchaseHistoryResponse getPurchaseHistory(@RequestBody PurchaseHistoryRequest request){
+    public PurchaseHistoryResponse getPurchaseHistory(@CookieValue(value = "ssoId", required = false) String ssoId,
+                                                      @CookieValue(value = "ticketId", required = false) String ticketId,
+                                                      @CookieValue(value = "mobile", required = false) String mobile,
+                                                      @RequestBody PurchaseHistoryRequest request){
+        RequestUpdateUtil.updateRequest(request, ssoId, ticketId, mobile);
         try {
             return subscriptionService.getPurchaseHistory(request);
         }catch (Exception e){
