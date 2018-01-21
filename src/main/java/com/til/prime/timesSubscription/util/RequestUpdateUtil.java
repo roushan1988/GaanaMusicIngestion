@@ -5,7 +5,11 @@ import com.til.prime.timesSubscription.dto.external.UserDTO;
 import org.apache.commons.lang3.StringUtils;
 
 public class RequestUpdateUtil {
-    public static final void updateRequest(GenericRequest request, String ssoId, String ticketId, String mobile){
+    public static final void updateRequest(GenericRequest request, String ssoId, String ticketId, String mobile) {
+        updateRequest(request, ssoId, ticketId, mobile, null);
+    }
+
+    public static final void updateRequest(GenericRequest request, String ssoId, String ticketId, String mobile, String email){
         UserDTO user = request.getUser();
         if(user==null){
             user = new UserDTO();
@@ -19,6 +23,9 @@ public class RequestUpdateUtil {
         }
         if(StringUtils.isNotEmpty(mobile)){
             user.setMobile(mobile);
+        }
+        if(StringUtils.isNotEmpty(email)){
+            user.setEmail(email);
         }
     }
 }

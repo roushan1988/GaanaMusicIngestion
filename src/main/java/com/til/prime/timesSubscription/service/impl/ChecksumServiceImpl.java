@@ -1,10 +1,13 @@
 package com.til.prime.timesSubscription.service.impl;
 
+import com.til.prime.timesSubscription.constants.GlobalConstants;
 import com.til.prime.timesSubscription.service.ChecksumService;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.Charset;
+import java.security.MessageDigest;
 
 @Service
 public class ChecksumServiceImpl implements ChecksumService {
@@ -18,6 +21,17 @@ public class ChecksumServiceImpl implements ChecksumService {
         byte[] checksumByte = mac.doFinal(dataToEncryptByte);
         String checksum = toHex(checksumByte);
         return checksum;
+    }
+
+    @Override
+    public String calculateChecksumMD5(String allParamValue) throws Exception {
+        MessageDigest md = MessageDigest.getInstance("MD5");
+        byte[] array = md.digest(allParamValue.getBytes(Charset.forName(GlobalConstants.UTF_8)));
+        StringBuffer sb = new StringBuffer();
+        for (int i = 0; i < array.length; ++i) {
+            sb.append(Integer.toHexString((array[i] & 0xFF) | 0x100).substring(1,3));
+        }
+        return sb.toString();
     }
 
     private String toHex(byte[] bytes) {
