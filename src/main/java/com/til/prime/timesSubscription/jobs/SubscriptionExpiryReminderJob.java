@@ -94,7 +94,7 @@ public class SubscriptionExpiryReminderJob extends AbstractJob {
                         if (PlanStatusEnum.FREE_TRIAL.equals(userSubscriptionModel.getPlanStatus())) {
                             communicationService.sendFreeTrailExpiryReminderCommunication(userSubscriptionModel, days);
                         } else {
-                            communicationService.sendSubscriptionRenewalReninderAutoDebitOffCommunication(userSubscriptionModel);
+                            communicationService.sendSubscriptionRenewalReminderAutoDebitOffCommunication(userSubscriptionModel);
                         }
                     }
                     idList.add(userSubscriptionModel.getId());

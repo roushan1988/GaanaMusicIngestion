@@ -14,8 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 @Service
 public class CommunicationServiceImpl implements CommunicationService {
     @Autowired
@@ -42,7 +40,7 @@ public class CommunicationServiceImpl implements CommunicationService {
         SMSTask smsTask = helper.getSubscriptionExpiredSMSTask(userSubscription);
         queueService.pushToSMSQueue(smsTask);
 
-        if (isNotBlank(userSubscription.getUser().getEmail())) {
+        if (StringUtils.isNotEmpty(userSubscription.getUser().getEmail())) {
             EmailTask emailTask = helper.getSubscriptionExpiredEmailTask(userSubscription);
             queueService.pushToEmailQueue(emailTask);
         }
@@ -54,7 +52,7 @@ public class CommunicationServiceImpl implements CommunicationService {
         SMSTask smsTask = helper.getSubscriptionExtensionSMSTask(userSubscription);
         queueService.pushToSMSQueue(smsTask);
 
-        if (isNotBlank(userSubscription.getUser().getEmail())) {
+        if (StringUtils.isNotEmpty(userSubscription.getUser().getEmail())) {
             EmailTask emailTask = helper.getSubscriptionExtensionEmailTask(userSubscription);
             queueService.pushToEmailQueue(emailTask);
 
@@ -76,7 +74,7 @@ public class CommunicationServiceImpl implements CommunicationService {
         SMSTask smsTask = helper.getFreeTrialSubscriptionSMSTask(userSubscription);
         queueService.pushToSMSQueue(smsTask);
 
-        if (isNotBlank(userSubscription.getUser().getEmail())) {
+        if (StringUtils.isNotEmpty(userSubscription.getUser().getEmail())) {
             EmailTask emailTask = helper.getFreeTrialSubscriptionEmailTask(userSubscription);
             queueService.pushToEmailQueue(emailTask);
         }
@@ -84,11 +82,11 @@ public class CommunicationServiceImpl implements CommunicationService {
     }
 
     @Override
-    public void sendSubscriptionSuccessCommunication(UserSubscriptionModel userSubscription) {
+    public void sendPaidSubscriptionSuccessCommunication(UserSubscriptionModel userSubscription) {
         SMSTask smsTask = helper.getFirstTimePurchaseSMSTask(userSubscription);
         queueService.pushToSMSQueue(smsTask);
 
-        if (isNotBlank(userSubscription.getUser().getEmail())) {
+        if (StringUtils.isNotEmpty(userSubscription.getUser().getEmail())) {
             EmailTask emailTask = helper.getFirstTimePurchaseEmailTask(userSubscription);
             queueService.pushToEmailQueue(emailTask);
         }
@@ -110,7 +108,7 @@ public class CommunicationServiceImpl implements CommunicationService {
         SMSTask smsTask = helper.getSubscriptionRenewedSMSTask(userSubscription);
         queueService.pushToSMSQueue(smsTask);
 
-        if (isNotBlank(userSubscription.getUser().getEmail())) {
+        if (StringUtils.isNotEmpty(userSubscription.getUser().getEmail())) {
             EmailTask emailTask = helper.getSubscriptionRenewedEmailTask(userSubscription);
             queueService.pushToEmailQueue(emailTask);
         }
@@ -121,7 +119,7 @@ public class CommunicationServiceImpl implements CommunicationService {
         SMSTask smsTask = helper.getFreeTrialExpiryReminderSMSTask(userSubscription, days);
         queueService.pushToSMSQueue(smsTask);
 
-        if (isNotBlank(userSubscription.getUser().getEmail())) {
+        if (StringUtils.isNotEmpty(userSubscription.getUser().getEmail())) {
             EmailTask emailTask = helper.getFreeTrialExpiryReminderEmailTask(userSubscription, days);
             queueService.pushToEmailQueue(emailTask);
         }
@@ -132,7 +130,7 @@ public class CommunicationServiceImpl implements CommunicationService {
         SMSTask smsTask = helper.getFreeTrialExpiredSMSTask(userSubscription);
         queueService.pushToSMSQueue(smsTask);
 
-        if (isNotBlank(userSubscription.getUser().getEmail())) {
+        if (StringUtils.isNotEmpty(userSubscription.getUser().getEmail())) {
             EmailTask emailTask = helper.getFreeTrialExpiredEmailTask(userSubscription);
             queueService.pushToEmailQueue(emailTask);
         }
@@ -144,18 +142,18 @@ public class CommunicationServiceImpl implements CommunicationService {
         SMSTask smsTask = helper.getSubscriptionRenewalReminderSMSTask(userSubscription, true);
         queueService.pushToSMSQueue(smsTask);
 
-        if (isNotBlank(userSubscription.getUser().getEmail())) {
+        if (StringUtils.isNotEmpty(userSubscription.getUser().getEmail())) {
             EmailTask emailTask = helper.getSubscriptionRenewalReminderEmailTask(userSubscription, true);
             queueService.pushToEmailQueue(emailTask);
         }
     }
 
     @Override
-    public void sendSubscriptionRenewalReninderAutoDebitOffCommunication(UserSubscriptionModel userSubscription) {
+    public void sendSubscriptionRenewalReminderAutoDebitOffCommunication(UserSubscriptionModel userSubscription) {
         SMSTask smsTask = helper.getSubscriptionRenewalReminderSMSTask(userSubscription, false);
         queueService.pushToSMSQueue(smsTask);
 
-        if (isNotBlank(userSubscription.getUser().getEmail())) {
+        if (StringUtils.isNotEmpty(userSubscription.getUser().getEmail())) {
             EmailTask emailTask = helper.getSubscriptionRenewalReminderEmailTask(userSubscription, false);
             queueService.pushToEmailQueue(emailTask);
         }

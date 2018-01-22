@@ -19,7 +19,7 @@ public interface CommunicationService {
 
     void sendFreeTrialSubscriptionSuccessCommunication(UserSubscriptionModel userSubscription);
 
-    void sendSubscriptionSuccessCommunication(UserSubscriptionModel userSubscription);
+    void sendPaidSubscriptionSuccessCommunication(UserSubscriptionModel userSubscription);
 
     void sendFreeTrailExpiryReminderCommunication(UserSubscriptionModel userSubscription, Long days);
 
@@ -27,7 +27,7 @@ public interface CommunicationService {
 
     void sendSubscriptionRenewalReminderAutoDebitOnCommunication(UserSubscriptionModel model);
 
-    void sendSubscriptionRenewalReninderAutoDebitOffCommunication(UserSubscriptionModel model);
+    void sendSubscriptionRenewalReminderAutoDebitOffCommunication(UserSubscriptionModel model);
 
     void sendSubscriptionExpiredCommunication(UserSubscriptionModel userSubscription);
 

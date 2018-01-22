@@ -148,7 +148,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
                             communicationService.sendFreeTrialSubscriptionSuccessCommunication(userSubscriptionModel);
                         } else {
-                            communicationService.sendSubscriptionSuccessCommunication(userSubscriptionModel);
+                            communicationService.sendPaidSubscriptionSuccessCommunication(userSubscriptionModel);
                         }
                     } else {
                     if(crmRequest){
@@ -238,7 +238,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 if (PlanStatusEnum.SUBSCRIPTION_AUTO_RENEWAL.equals(userSubscriptionModel.getPlanStatus())) {
                     communicationService.sendSubscriptionRenewedCommunication(userSubscriptionModel);
                 } else if (PlanStatusEnum.SUBSCRIPTION.equals(userSubscriptionModel.getPlanStatus())) {
-                    communicationService.sendSubscriptionSuccessCommunication(userSubscriptionModel);
+                    communicationService.sendPaidSubscriptionSuccessCommunication(userSubscriptionModel);
                 }
             }
         }
@@ -540,7 +540,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                     if (PlanStatusEnum.FREE_TRIAL.equals(userSubscriptionModel.getPlanStatus())) {
                         communicationService.sendFreeTrialSubscriptionSuccessCommunication(userSubscriptionModel);
                     } else {
-                        communicationService.sendSubscriptionSuccessCommunication(userSubscriptionModel);
+                        communicationService.sendPaidSubscriptionSuccessCommunication(userSubscriptionModel);
                     }
                 }
             }else if(lastUserSubscription.getStatus()==StatusEnum.FUTURE){

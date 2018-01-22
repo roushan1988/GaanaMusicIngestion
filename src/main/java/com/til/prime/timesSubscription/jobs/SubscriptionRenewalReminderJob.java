@@ -73,6 +73,7 @@ public class SubscriptionRenewalReminderJob extends AbstractJob {
     @Override
     @Scheduled(cron = "${subscription.renewal.reminder.cron}")
     public void run() {
+        //commented out because this is being handled in SubscriptionExpiryReminderJob itself
         //runJob();
     }
 
