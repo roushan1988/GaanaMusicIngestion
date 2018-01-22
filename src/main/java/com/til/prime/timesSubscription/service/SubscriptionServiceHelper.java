@@ -27,7 +27,7 @@ public interface SubscriptionServiceHelper {
     BackendSubscriptionActivationResponse prepareBackendSubscriptionActivationResponse(BackendSubscriptionActivationResponse response, UserSubscriptionModel userSubscription, ValidationResponse validationResponse);
     UserSubscriptionAuditModel getUserSubscriptionAuditModel(UserSubscriptionModel userSubscriptionModel, EventEnum event);
     BigDecimal calculateRefundAmount(UserSubscriptionModel userSubscriptionModel);
-    UserSubscriptionModel extendTrial(UserSubscriptionModel userSubscriptionModel, Long extensionDays);
+    UserSubscriptionModel extendSubscription(UserSubscriptionModel userSubscriptionModel, Long extensionDays);
     ExtendExpiryResponse prepareExtendExpiryResponse(ExtendExpiryResponse response, UserSubscriptionModel userSubscriptionModel, ValidationResponse validationResponse);
     GenericValidationResponse prepareCheckEligibilityResponse(GenericValidationResponse response, ValidationResponse validationResponse, boolean validExecution);
     GenericValidationResponse prepareValidVariantResponse(GenericValidationResponse response, ValidationResponse validationResponse, boolean validExecution);
@@ -39,4 +39,5 @@ public interface SubscriptionServiceHelper {
     boolean renewSubscription(UserSubscriptionModel userSubscriptionModel);
     boolean refundPayment(String orderId, Double refundAmount);
     String shortenUrl(String longUrl);
+
 }

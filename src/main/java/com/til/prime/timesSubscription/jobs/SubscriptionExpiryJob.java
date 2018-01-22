@@ -7,6 +7,7 @@ import com.til.prime.timesSubscription.dto.internal.AffectedModelDetails;
 import com.til.prime.timesSubscription.dto.internal.JobDetails;
 import com.til.prime.timesSubscription.enums.EventEnum;
 import com.til.prime.timesSubscription.enums.JobKeyEnum;
+import com.til.prime.timesSubscription.enums.PlanStatusEnum;
 import com.til.prime.timesSubscription.enums.StatusEnum;
 import com.til.prime.timesSubscription.model.JobModel;
 import com.til.prime.timesSubscription.model.UserSubscriptionAuditModel;
@@ -61,16 +62,15 @@ public class SubscriptionExpiryJob extends AbstractJob {
                 if (userSubscriptionModelList != null) {
                     for (UserSubscriptionModel userSubscriptionModel : userSubscriptionModelList) {
                         userSubscriptionModel.setStatus(StatusEnum.EXPIRED);
+                        PlanStatusEnum plan = userSubscriptionModel.getPlanStatus();
                         userSubscriptionModel = subscriptionService.saveUserSubscription(userSubscriptionModel, false, null, null, EventEnum.USER_SUBSCRIPTION_EXPIRY);
                         subscriptionService.updateUserStatus(userSubscriptionModel, userSubscriptionModel.getUser());
-                        communicationService.sendSubscriptionExpiryCommunication(userSubscriptionModel);
                         UserSubscriptionModel userSubscriptionModel1 = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndStatusAndStartDateAfterAndDeletedFalseAndOrderCompletedTrueOrderById(
                                 userSubscriptionModel.getUser().getMobile(), StatusEnum.FUTURE, TimeUtils.addMillisInDate(userSubscriptionModel.getEndDate(), -2000));
                         if(userSubscriptionModel1!=null){
                             userSubscriptionModel1.setStatus(StatusEnum.ACTIVE);
                             subscriptionService.saveUserSubscription(userSubscriptionModel1, false, userSubscriptionModel1.getUser().getSsoId(), userSubscriptionModel1.getTicketId(), EventEnum.USER_SUBSCRIPTION_ACTIVE);
                             subscriptionService.updateUserStatus(userSubscriptionModel1, userSubscriptionModel1.getUser());
-                            communicationService.sendSubscriptionActiveCommunication(userSubscriptionModel1);
                             recordsAffected++;
                             affectedModels.add(userSubscriptionModel1.getId());
                         }else if(userSubscriptionModel.getSubscriptionVariant().isRecurring() && userSubscriptionModel.isAutoRenewal() && !userSubscriptionModel.getUser().isBlocked()){
@@ -85,6 +85,12 @@ public class SubscriptionExpiryJob extends AbstractJob {
                                     recordsAffected++;
                                     affectedModels.add(userSubscriptionModel2.getId());
                                 }
+                            }
+                        }else {
+                            if (PlanStatusEnum.FREE_TRIAL.equals(plan)){
+                                communicationService.sendFreeTrailExpiredCommunication(userSubscriptionModel);
+                            }else {
+                                communicationService.sendSubscriptionExpiredCommunication(userSubscriptionModel);
                             }
                         }
                         recordsAffected++;

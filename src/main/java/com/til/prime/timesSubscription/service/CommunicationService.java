@@ -8,11 +8,31 @@ import java.util.List;
 
 public interface CommunicationService {
     void sendUserSuspensionCommunication(UserModel user, List<UserSubscriptionModel> relevantSubscriptions);
+
     void sendUserCreationWithExistingMobileCommunication(UserModel user, List<UserSubscriptionModel> relevantSubscriptions);
-    void sendSubscriptionExpiryCommunication(UserSubscriptionModel userSubscription);
-    void sendSubscriptionExpiryExtensionCommunication(UserSubscriptionModel userSubscription);
+
     void sendSubscriptionCancellationCommunication(UserSubscriptionModel userSubscription);
+
     void sendSubscriptionActiveCommunication(UserSubscriptionModel userSubscription);
-    void sendSubscriptionSuccessCommunication(UserSubscriptionModel userSubscription);
+
     void sendBackendActivationPendingCommunication(BackendSubscriptionUserModel model);
+
+    void sendFreeTrialSubscriptionSuccessCommunication(UserSubscriptionModel userSubscription);
+
+    void sendSubscriptionSuccessCommunication(UserSubscriptionModel userSubscription);
+
+    void sendFreeTrailExpiryReminderCommunication(UserSubscriptionModel userSubscription, Long days);
+
+    void sendFreeTrailExpiredCommunication(UserSubscriptionModel userSubscription);
+
+    void sendSubscriptionRenewalReminderAutoDebitOnCommunication(UserSubscriptionModel model);
+
+    void sendSubscriptionRenewalReninderAutoDebitOffCommunication(UserSubscriptionModel model);
+
+    void sendSubscriptionExpiredCommunication(UserSubscriptionModel userSubscription);
+
+    void sendSubscriptionRenewedCommunication(UserSubscriptionModel model);
+
+    void sendSubscriptionExpiryExtensionCommunication(UserSubscriptionModel userSubscription);
+
 }

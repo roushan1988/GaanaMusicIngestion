@@ -62,4 +62,27 @@ public class GlobalConstants {
     public static final String PRIME_BACKEND_ACTIVATION_URL_KEY = "prime.backend.activation.url";
     public static final String PRIME_COMM_FROM_NAME = "TimesPrime";
     public static final String PRIME_COMM_FROM_EMAIL = "info@timesprime.com";
+
+    public static final String FREE_TRAIL_ACTIVATION_SMS_TEMPLATE_KEY = "free.trail.activation.sms.key";
+    public static final String FIRST_TIME_PURCHASE_SMS_TEMPLATE_KEY = "first.time.purchase.sms.key";
+    public static final String FREE_TRAIL_EXPIRED_SMS_TEMPLATE_KEY = "free.trail.expired.sms.key";
+    public static final String SUBSCRIPTION_EXPIRED_SMS_TEMPLATE_KEY = "subscription.expired.sms.key";
+    public static final String SUBSCRIPTION_RENEWED_SMS_TEMPLATE_KEY = "subscription.renewed.sms.key";
+    public static final String SUBSCRIPTION_EXTENDED_SMS_TEMPLATE_KEY = "subscription.extended.sms.key";
+
+    public static final String FREE_TRAIL_EXPIRY_REMINDER_SMS_TEMPLATE_KEY = "free.trail.expiry.reminder.sms.key";
+    public static final String SUBSCRIPTION_EXPIRY_REMINDER_SMS_TEMPLATE_KEY = "subscription.expiry.reminder.sms.key";
+    public static final String SUBSCRIPTION_EXPIRY_AUTO_DEBIT_REMINDER_SMS_TEMPLATE_KEY = "subscription.expiry.auto.debit.reminder.sms.key";
+
+    public static final String FREE_TRAIL_ACTIVATION_EMAIL_TEMPLATE_KEY = "free.trail.activation.email.key";
+    public static final String FIRST_TIME_PURCHASE_EMAIL_TEMPLATE_KEY = "first.time.purchase.email.key";
+    public static final String FREE_TRAIL_EXPIRED_EMAIL_TEMPLATE_KEY = "free.trail.expired.email.key";
+    public static final String SUBSCRIPTION_EXPIRED_EMAIL_TEMPLATE_KEY = "subscription.expired.email.key";
+    public static final String SUBSCRIPTION_RENEWED_EMAIL_TEMPLATE_KEY = "subscription.renewed.email.key";
+    public static final String SUBSCRIPTION_EXTENDED_EMAIL_TEMPLATE_KEY = "subscription.extended.email.key";
+
+    public static final String FREE_TRAIL_EXPIRY_REMINDER_EMAIL_TEMPLATE_KEY = "free.trail.expiry.reminder.email.key";
+    public static final String SUBSCRIPTION_EXPIRY_REMINDER_EMAIL_TEMPLATE_KEY = "subscription.expiry.reminder.email.key";
+    public static final String SUBSCRIPTION_EXPIRY_AUTO_DEBIT_REMINDER_EMAIL_TEMPLATE_KEY = "subscription.expiry.auto.debit.reminder.email.key";
+
 }

@@ -68,14 +68,6 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
     }
 
     @Override
-    public UserSubscriptionModel updateGenerateOrderUserSubscription(GenerateOrderRequest request, UserSubscriptionModel userSubscriptionModel) {
-        String orderId = UniqueIdGeneratorUtil.generateOrderId(request.getUser().getSsoId(), request.getUser().getTicketId(), GlobalConstants.ORDER_ID_LENGTH);
-        userSubscriptionModel.setOrderId(orderId);
-        userSubscriptionModel.setPaymentMethod(request.getPaymentMethod());
-        return userSubscriptionModel;
-    }
-
-    @Override
     public UserSubscriptionModel updateSubmitPurchaseUserSubscription(SubmitPurchaseRequest request, UserSubscriptionModel userSubscriptionModel, UserSubscriptionModel lastUserSubscription) {
         SubscriptionVariantModel variantModel = userSubscriptionModel.getSubscriptionVariant();
         userSubscriptionModel.setPlanStatus(PlanStatusEnum.getPlanStatus(variantModel.getPlanType(), variantModel.getPrice(), lastUserSubscription,  request.isAutoRenewalJob()));
@@ -86,6 +78,14 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
 //        if (userSubscriptionModel.isOrderCompleted()) {
 //            userSubscriptionModel = updateSSOStatus(userSubscriptionModel);
 //        }
+        return userSubscriptionModel;
+    }
+
+    @Override
+    public UserSubscriptionModel updateGenerateOrderUserSubscription(GenerateOrderRequest request, UserSubscriptionModel userSubscriptionModel) {
+        String orderId = UniqueIdGeneratorUtil.generateOrderId(request.getUser().getSsoId(), request.getUser().getTicketId(), GlobalConstants.ORDER_ID_LENGTH);
+        userSubscriptionModel.setOrderId(orderId);
+        userSubscriptionModel.setPaymentMethod(request.getPaymentMethod());
         return userSubscriptionModel;
     }
 
@@ -290,7 +290,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
     }
 
     @Override
-    public UserSubscriptionModel extendTrial(UserSubscriptionModel userSubscriptionModel, Long extensionDays) {
+    public UserSubscriptionModel extendSubscription(UserSubscriptionModel userSubscriptionModel, Long extensionDays) {
         Date newEndDate = TimeUtils.addDaysInDate(userSubscriptionModel.getEndDate(), extensionDays.intValue());
         userSubscriptionModel.setEndDate(newEndDate);
         userSubscriptionModel.setStatus(StatusEnum.getStatusForUserSubscription(userSubscriptionModel, null));
