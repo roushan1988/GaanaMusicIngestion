@@ -52,8 +52,6 @@ public class GlobalConstants {
     public static final String EMAIL_FOR_COMMUNICATION = "help@timesprime.com";
     public static final String EMAIL_NAME_FOR_COMMUNICATION = "Times Prime";
     public static final int BACKEND_ACTIVATION_CODE_LENGTH = 15;
-    public static final String SUBSCRIPTION_SUCCESS_SMS_TEMPLATE_KEY = "subscription.success.sms.key";
-    public static final String SUBSCRIPTION_SUCCESS_EMAIL_TEMPLATE_KEY = "subscription.success.email.key";
     public static final String BACKEND_ACTIVATION_SMS_TEMPLATE_KEY = "backend.activation.sms.key";
     public static final String BACKEND_ACTIVATION_EMAIL_TEMPLATE_KEY = "backend.activation.sms.key";
     public static final String BACKEND_ACTIVATION_EMAIL_GROUP_KEY = "backend.activation.email.group.key";

@@ -11,10 +11,6 @@ import java.util.List;
 public interface CommunicationServiceHelper {
     EmailTask getUserMobileUpdateEmailTask(UserModel userModel, List<UserSubscriptionModel> userSubscriptionModels);
 
-    EmailTask getSubscriptionSuccessEmailTask(UserSubscriptionModel userSubscription);
-
-    SMSTask getSubscriptionSuccessSMSTask(UserSubscriptionModel userSubscription);
-
     SMSTask getBackendActivationSMSTask(BackendSubscriptionUserModel user);
 
     EmailTask getBackendActivationEmailTask(BackendSubscriptionUserModel user);
@@ -42,7 +38,6 @@ public interface CommunicationServiceHelper {
     SMSTask getSubscriptionExpiredSMSTask(UserSubscriptionModel userSubscriptionModel);
 
     EmailTask getSubscriptionExpiredEmailTask(UserSubscriptionModel userSubscriptionModel);
-
 
     SMSTask getSubscriptionRenewedSMSTask(UserSubscriptionModel userSubscriptionModel);
 
