@@ -531,6 +531,9 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         if(validationResponse.isValid()){
             UserSubscriptionModel lastUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndBusinessAndOrderCompletedAndDeletedOrderByIdDesc(request.getUser().getMobile(), request.getBusiness(), true, false);
             if(lastUserSubscription==null){
+                request.getUser().setName(StringUtils.isEmpty(request.getUser().getName())?
+                        StringUtils.trim(backendUser.getFirstName()+" "+backendUser.getLastName()): request.getUser().getName());
+                request.getUser().setEmail(StringUtils.isEmpty(request.getUser().getEmail())? backendUser.getEmail(): request.getUser().getEmail());
                 SubscriptionVariantModel variantModel = propertyService.getBackendFreeTrialVariant(BusinessEnum.TIMES_PRIME, CountryEnum.IN);
                 UserModel userModel = getOrCreateUserWithMobileCheck(request, validationResponse);
                 userSubscriptionModel = subscriptionServiceHelper.generateInitPurchaseUserSubscription(request.getUser(), request.getChannel(), request.getPlatform(), PlanTypeEnum.TRIAL, variantModel.getDurationDays(), variantModel, null, userModel, variantModel.getPrice(), false, true);
