@@ -3,6 +3,8 @@ package com.til.prime.timesSubscription.constants;
 import com.google.gson.Gson;
 
 public class GlobalConstants {
+    public static final int MILLIS_IN_AN_HOUR = 3600000;
+    public static final int MILLIS_IN_A_DAY = 24*3600000;
     public static final String UTF_8 = "UTF-8";
     public static final String TYPE = "type";
     public static final String CHANNEL = "channel";
