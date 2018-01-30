@@ -435,22 +435,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         CheckStatusResponse response = new CheckStatusResponse();
         SubscriptionStatusDTO statusDTO = null;
         if(validationResponse.isValid()) {
-            Cache.ValueWrapper vw = cacheManager.getCache(RedisConstants.PRIME_STATUS_CACHE_KEY).get(request.getUser().getMobile());
-            if(vw!=null){
-                statusDTO = (SubscriptionStatusDTO) vw.get();
-            }
-        }
-        if(statusDTO!=null){
-            response = subscriptionServiceHelper.prepareCheckStatusResponse(response, false, statusDTO, validationResponse);
-            return response;
-        }
-        UserSubscriptionModel userSubscriptionModel = null;
-        if(validationResponse.isValid()){
-            userSubscriptionModel = userSubscriptionRepository.findByUserMobileAndUserDeletedFalseAndStatusAndDeletedAndOrderCompletedTrue(request.getUser().getMobile(), StatusEnum.ACTIVE, false);
-            validationResponse = subscriptionValidationService.validatePostCheckStatus(request, userSubscriptionModel, validationResponse);
-        }
-        if(validationResponse.isValid()){
-            updateUserStatus(userSubscriptionModel);
+            statusDTO = getSubscriptionStatusWithValidation(request, true, validationResponse);
         }
         response = subscriptionServiceHelper.prepareCheckStatusResponse(response, false, statusDTO, validationResponse);
         return response;
@@ -462,26 +447,31 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         CheckStatusResponse response = new CheckStatusResponse();
         SubscriptionStatusDTO statusDTO = null;
         if(validationResponse.isValid()) {
-
-            Cache.ValueWrapper vw = cacheManager.getCache(RedisConstants.PRIME_STATUS_CACHE_KEY).get(request.getUser().getMobile());
-            if(vw!=null){
-                statusDTO = (SubscriptionStatusDTO) vw.get();
-            }
-            if(statusDTO == null && !external){ //cache update step
-                UserSubscriptionModel userSubscriptionModel = null;
-                userSubscriptionModel = userSubscriptionRepository.findByUserMobileAndUserDeletedFalseAndStatusAndDeletedAndOrderCompletedTrue(request.getUser().getMobile(), StatusEnum.ACTIVE, false);
-                validationResponse = subscriptionValidationService.validatePostCheckStatus(request, userSubscriptionModel, validationResponse);
-                if(validationResponse.isValid()){
-                    updateUserStatus(userSubscriptionModel);
-                    vw = cacheManager.getCache(RedisConstants.PRIME_STATUS_CACHE_KEY).get(request.getUser().getMobile());
-                    if(vw!=null){
-                        statusDTO = (SubscriptionStatusDTO) vw.get();
-                    }
-                }
-            }
+            statusDTO = getSubscriptionStatusWithValidation(request, !external, validationResponse);
         }
         response = subscriptionServiceHelper.prepareCheckStatusResponse(response, external, statusDTO, validationResponse);
         return response;
+    }
+
+    private SubscriptionStatusDTO getSubscriptionStatusWithValidation(CheckStatusRequest request, boolean updateCache, ValidationResponse validationResponse){
+        SubscriptionStatusDTO statusDTO = null;
+        Cache.ValueWrapper vw = cacheManager.getCache(RedisConstants.PRIME_STATUS_CACHE_KEY).get(request.getUser().getMobile());
+        if(vw!=null){
+            statusDTO = (SubscriptionStatusDTO) vw.get();
+        }
+        if(statusDTO == null && updateCache){ //cache update step
+            UserSubscriptionModel userSubscriptionModel = null;
+            userSubscriptionModel = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndStatusInAndDeletedFalseAndOrderCompletedTrueOrderByIdDesc(request.getUser().getMobile(), StatusEnum.VALID_USER_STATUS_HISTORY_SET);
+            validationResponse = subscriptionValidationService.validatePostCheckStatus(request, userSubscriptionModel, validationResponse);
+            if(userSubscriptionModel!=null){
+                updateUserStatus(userSubscriptionModel);
+                vw = cacheManager.getCache(RedisConstants.PRIME_STATUS_CACHE_KEY).get(request.getUser().getMobile());
+                if(vw!=null){
+                    statusDTO = (SubscriptionStatusDTO) vw.get();
+                }
+            }
+        }
+        return statusDTO;
     }
 
     @Override

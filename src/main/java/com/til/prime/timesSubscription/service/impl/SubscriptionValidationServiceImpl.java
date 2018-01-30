@@ -343,6 +343,9 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
     @Override
     public ValidationResponse validatePostCheckStatus(CheckStatusRequest request, UserSubscriptionModel userSubscriptionModel, ValidationResponse validationResponse) {
         PreConditions.notNull(userSubscriptionModel, ValidationError.INVALID_USER_SUBSCRIPTION_DETAILS, validationResponse);
+        if(userSubscriptionModel!=null){
+            PreConditions.mustBeEqual(userSubscriptionModel.getStatus(), StatusEnum.ACTIVE, ValidationError.USER_SUBSCRIPTION_EXPIRED, validationResponse);
+        }
         return updateValid(validationResponse);
     }
 

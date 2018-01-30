@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 @Repository
 public interface UserSubscriptionRepository extends GenericJpaRepository<UserSubscriptionModel, Long> {
@@ -48,5 +49,6 @@ public interface UserSubscriptionRepository extends GenericJpaRepository<UserSub
     UserSubscriptionModel findFirstByUserMobileAndUserDeletedFalseAndStatusAndStartDateAfterAndDeletedFalseAndOrderCompletedTrueOrderById(String mobile, StatusEnum status, Date date1);
     List<UserSubscriptionModel> findByUserMobileAndUserDeletedFalseAndStatusInAndOrderCompletedTrueAndDeletedFalse(String mobile, Collection<StatusEnum> statusCollection);
     UserSubscriptionModel findByUserMobileAndUserDeletedFalseAndStatusAndDeletedAndOrderCompletedTrue(String mobile, StatusEnum status, boolean deleted);
+    UserSubscriptionModel findFirstByUserMobileAndUserDeletedFalseAndStatusInAndDeletedFalseAndOrderCompletedTrueOrderByIdDesc(String mobile, Set<StatusEnum> statusSet);
     UserSubscriptionModel findByUserMobileAndUserDeletedFalseAndStatusAndOrderCompletedTrue(String mobile, StatusEnum statusEnum);
 }

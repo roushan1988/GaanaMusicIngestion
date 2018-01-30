@@ -49,6 +49,7 @@ public enum ValidationError {
 	FUTURE_SUBSCRIPTION_EXISTS_FOR_USER(40, "Future subscription exists for user", 1, 1),
 	INVALID_RECORD(41, "Invalid Record", 1, 1),
 	EMPTY_BACKEND_USER_LIST(42, "Empty backend user list", 1, 1),
+	USER_SUBSCRIPTION_EXPIRED(43, "User Subscription expired", 1, 1),
 	INVALID_USER(1000, "Invalid User", 1, 1),
 	INVALID_CLIENT_ID(1001, "Invalid Client ID", 1, 1),
 	INVALID_CLIENT_SECRET_KEY(1002, "Invalid Client Secret Key", 1, 1),
