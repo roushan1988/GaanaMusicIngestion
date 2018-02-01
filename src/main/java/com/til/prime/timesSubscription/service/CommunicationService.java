@@ -21,6 +21,8 @@ public interface CommunicationService {
 
     void sendPaidSubscriptionSuccessCommunication(UserSubscriptionModel userSubscription);
 
+    void sendExistingSubscriptionActivationCommunication(UserSubscriptionModel userSubscription);
+
     void sendFreeTrailExpiryReminderCommunication(UserSubscriptionModel userSubscription, Long days);
 
     void sendFreeTrailExpiredCommunication(UserSubscriptionModel userSubscription);

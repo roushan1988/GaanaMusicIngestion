@@ -65,6 +65,7 @@ public class GlobalConstants {
 
     public static final String FREE_TRAIL_ACTIVATION_SMS_TEMPLATE_KEY = "free.trail.activation.sms.key";
     public static final String FIRST_TIME_PURCHASE_SMS_TEMPLATE_KEY = "first.time.purchase.sms.key";
+    public static final String EXISTING_SUBS_ACTIVATION_SMS_TEMPLATE_KEY = "existing.subs.activation.sms.key";
     public static final String FREE_TRAIL_EXPIRED_SMS_TEMPLATE_KEY = "free.trail.expired.sms.key";
     public static final String SUBSCRIPTION_EXPIRED_SMS_TEMPLATE_KEY = "subscription.expired.sms.key";
     public static final String SUBSCRIPTION_RENEWED_SMS_TEMPLATE_KEY = "subscription.renewed.sms.key";
@@ -76,6 +77,7 @@ public class GlobalConstants {
 
     public static final String FREE_TRAIL_ACTIVATION_EMAIL_TEMPLATE_KEY = "free.trail.activation.email.key";
     public static final String FIRST_TIME_PURCHASE_EMAIL_TEMPLATE_KEY = "first.time.purchase.email.key";
+    public static final String EXISTING_SUBS_ACTIVATION_EMAIL_TEMPLATE_KEY = "existing.subs.activation.email.key";
     public static final String FREE_TRAIL_EXPIRED_EMAIL_TEMPLATE_KEY = "free.trail.expired.email.key";
     public static final String SUBSCRIPTION_EXPIRED_EMAIL_TEMPLATE_KEY = "subscription.expired.email.key";
     public static final String SUBSCRIPTION_RENEWED_EMAIL_TEMPLATE_KEY = "subscription.renewed.email.key";

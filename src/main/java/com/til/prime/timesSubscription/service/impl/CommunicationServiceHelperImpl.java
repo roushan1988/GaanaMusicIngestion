@@ -4,18 +4,23 @@ import com.google.common.collect.Maps;
 import com.til.prime.timesSubscription.constants.GlobalConstants;
 import com.til.prime.timesSubscription.dto.external.EmailTask;
 import com.til.prime.timesSubscription.dto.external.SMSTask;
+import com.til.prime.timesSubscription.enums.PlanTypeEnum;
 import com.til.prime.timesSubscription.enums.TaskPriorityEnum;
 import com.til.prime.timesSubscription.model.BackendSubscriptionUserModel;
+import com.til.prime.timesSubscription.model.SubscriptionVariantModel;
 import com.til.prime.timesSubscription.model.UserModel;
 import com.til.prime.timesSubscription.model.UserSubscriptionModel;
 import com.til.prime.timesSubscription.service.CommunicationServiceHelper;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 @Service
 public class CommunicationServiceHelperImpl implements CommunicationServiceHelper {
@@ -144,7 +149,12 @@ public class CommunicationServiceHelperImpl implements CommunicationServiceHelpe
         smsTask.setTemplateKey(properties.getProperty(GlobalConstants.FREE_TRAIL_EXPIRED_SMS_TEMPLATE_KEY));
         Map<String, String> map = Maps.newHashMap();
         map.put("firstName", userSubscriptionModel.getUser().getName());
-        map.put("subscriptionAmount", String.valueOf(userSubscriptionModel.getSubscriptionVariant().getPrice()));
+        Map<PlanTypeEnum, BigDecimal> planPrices = userSubscriptionModel.getSubscriptionVariant().getSubscriptionPlan().getVariants().stream().collect(Collectors.toMap(v -> v.getPlanType(), v -> v.getPrice()));
+        if (PlanTypeEnum.TRIAL.equals(userSubscriptionModel.getSubscriptionVariant().getSubscriptionPlan())) {
+            map.put("subscriptionAmount", String.valueOf(planPrices.get(PlanTypeEnum.TRIAL_WITH_PAYMENT!=null? planPrices.get(PlanTypeEnum.TRIAL_WITH_PAYMENT) : planPrices.get(PlanTypeEnum.PAYMENT))));
+        } else {
+            map.put("subscriptionAmount", String.valueOf(planPrices.get(PlanTypeEnum.PAYMENT)));
+        }
         smsTask.setContext(map);
         smsTask.setTaskPriority(TaskPriorityEnum.HIGH_PRIORITY);
         return smsTask;
@@ -160,7 +170,12 @@ public class CommunicationServiceHelperImpl implements CommunicationServiceHelpe
         emailTask.setFromEmail(GlobalConstants.PRIME_COMM_FROM_EMAIL);
         Map<String, String> map = Maps.newHashMap();
         map.put("firstName", userSubscriptionModel.getUser().getName());
-        map.put("subscriptionAmount", String.valueOf(userSubscriptionModel.getSubscriptionVariant().getPrice()));
+        Map<PlanTypeEnum, BigDecimal> planPrices = userSubscriptionModel.getSubscriptionVariant().getSubscriptionPlan().getVariants().stream().collect(Collectors.toMap(v -> v.getPlanType(), v -> v.getPrice()));
+        if (PlanTypeEnum.TRIAL.equals(userSubscriptionModel.getSubscriptionVariant().getSubscriptionPlan())) {
+            map.put("subscriptionAmount", String.valueOf(planPrices.get(PlanTypeEnum.TRIAL_WITH_PAYMENT!=null? planPrices.get(PlanTypeEnum.TRIAL_WITH_PAYMENT) : planPrices.get(PlanTypeEnum.PAYMENT))));
+        } else {
+            map.put("subscriptionAmount", String.valueOf(planPrices.get(PlanTypeEnum.PAYMENT)));
+        }
         emailTask.setContext(map);
         emailTask.setTaskPriority(TaskPriorityEnum.HIGH_PRIORITY);
         return emailTask;
@@ -190,6 +205,37 @@ public class CommunicationServiceHelperImpl implements CommunicationServiceHelpe
         emailTask.setFromEmail(GlobalConstants.PRIME_COMM_FROM_EMAIL);
         Map<String, String> map = Maps.newHashMap();
         map.put("firstName", userSubscriptionModel.getUser().getName());
+        map.put("endDate", SDF.format(userSubscriptionModel.getEndDate()));
+        emailTask.setContext(map);
+        emailTask.setTaskPriority(TaskPriorityEnum.HIGH_PRIORITY);
+        return emailTask;
+    }
+    @Override
+    public SMSTask getExistingSubsActivationSMSTask(UserSubscriptionModel userSubscriptionModel) {
+        SMSTask smsTask = new SMSTask();
+        smsTask.setMobileNumber(userSubscriptionModel.getUser().getMobile());
+        smsTask.setPartnerId(GlobalConstants.PARTNER_ID_FOR_COMMUNICATION);
+        smsTask.setTemplateKey(properties.getProperty(GlobalConstants.EXISTING_SUBS_ACTIVATION_SMS_TEMPLATE_KEY));
+        Map<String, String> map = Maps.newHashMap();
+        map.put("firstName", userSubscriptionModel.getUser().getName());
+        map.put("activationDate", SDF.format(userSubscriptionModel.getStartDate()));
+        map.put("endDate", SDF.format(userSubscriptionModel.getEndDate()));
+        smsTask.setContext(map);
+        smsTask.setTaskPriority(TaskPriorityEnum.HIGH_PRIORITY);
+        return smsTask;
+    }
+
+    @Override
+    public EmailTask getExistingSubsActivationEmailTask(UserSubscriptionModel userSubscriptionModel) {
+        EmailTask emailTask = new EmailTask();
+        emailTask.setTemplateKey(properties.getProperty(GlobalConstants.EXISTING_SUBS_ACTIVATION_EMAIL_TEMPLATE_KEY));
+        emailTask.setPartnerId(GlobalConstants.PARTNER_ID_FOR_COMMUNICATION);
+        emailTask.setEmailId(userSubscriptionModel.getUser().getEmail());
+        emailTask.setFromName(GlobalConstants.PRIME_COMM_FROM_NAME);
+        emailTask.setFromEmail(GlobalConstants.PRIME_COMM_FROM_EMAIL);
+        Map<String, String> map = Maps.newHashMap();
+        map.put("firstName", userSubscriptionModel.getUser().getName());
+        map.put("activationDate", SDF.format(userSubscriptionModel.getStartDate()));
         map.put("endDate", SDF.format(userSubscriptionModel.getEndDate()));
         emailTask.setContext(map);
         emailTask.setTaskPriority(TaskPriorityEnum.HIGH_PRIORITY);

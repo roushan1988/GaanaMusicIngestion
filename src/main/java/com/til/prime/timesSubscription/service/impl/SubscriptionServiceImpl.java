@@ -241,7 +241,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             if (userSubscriptionModel.isOrderCompleted()) {
                 if (PlanStatusEnum.SUBSCRIPTION_AUTO_RENEWAL.equals(userSubscriptionModel.getPlanStatus())) {
                     communicationService.sendSubscriptionRenewedCommunication(userSubscriptionModel);
-                } else if (PlanStatusEnum.SUBSCRIPTION.equals(userSubscriptionModel.getPlanStatus())) {
+                } else if (PlanStatusEnum.FREE_TRIAL_WITH_PAYMENT.equals(userSubscriptionModel.getPlanStatus()) || PlanStatusEnum.SUBSCRIPTION.equals(userSubscriptionModel.getPlanStatus())) {
                     communicationService.sendPaidSubscriptionSuccessCommunication(userSubscriptionModel);
                 }
             }

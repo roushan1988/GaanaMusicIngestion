@@ -23,6 +23,10 @@ public interface CommunicationServiceHelper {
 
     EmailTask getFirstTimePurchaseEmailTask(UserSubscriptionModel userSubscriptionModel);
 
+    SMSTask getExistingSubsActivationSMSTask(UserSubscriptionModel userSubscriptionModel);
+
+    EmailTask getExistingSubsActivationEmailTask(UserSubscriptionModel userSubscriptionModel);
+
     SMSTask getFreeTrialExpiryReminderSMSTask(UserSubscriptionModel userSubscriptionModel, Long days);
 
     EmailTask getFreeTrialExpiryReminderEmailTask(UserSubscriptionModel userSubscriptionModel, Long days);
