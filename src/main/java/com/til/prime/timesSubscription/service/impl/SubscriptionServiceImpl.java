@@ -195,6 +195,9 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             validationResponse = subscriptionValidationService.validatePostGenerateOrder(request, subscriptionVariantModel, userSubscriptionModel, restrictedUsageUserSubscription, validationResponse);
         }
         if(validationResponse.isValid()) {
+            if(userSubscriptionModel!=null && StringUtils.isNotEmpty(userSubscriptionModel.getOrderId())){
+                request.setDuplicate(true);
+            }
             if(request.isRetryOnFailure() || request.isRenewal() || request.isDuplicate()){
                 useNewSubscription = true;
                 if(request.isRenewal()){

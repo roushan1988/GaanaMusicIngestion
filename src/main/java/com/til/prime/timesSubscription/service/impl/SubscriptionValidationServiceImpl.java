@@ -119,10 +119,11 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
         PreConditions.notNull(variantModel, ValidationError.INVALID_SUBSCRIPTION_VARIANT, validationResponse);
         if(userSubscriptionModel!=null) {
             PreConditions.mustBeFalse(userSubscriptionModel.getUser().isBlocked(), ValidationError.BLOCKED_USER, validationResponse);
-            if (request.isRetryOnFailure() || request.isDuplicate()) {
+//            if (request.isRetryOnFailure() || request.isDuplicate()) {
+            if (request.isRetryOnFailure()) {
                 PreConditions.notNull(userSubscriptionModel.getOrderId(), ValidationError.ORDER_NOT_GENERATED, validationResponse);
             } else {
-                PreConditions.mustBeNull(userSubscriptionModel.getOrderId(), ValidationError.ORDER_ALREADY_GENERATED, validationResponse);
+//                PreConditions.mustBeNull(userSubscriptionModel.getOrderId(), ValidationError.ORDER_ALREADY_GENERATED, validationResponse);
                 PreConditions.mustBeFalse(TransactionStatusEnum.COMPLETED_STATES.contains(userSubscriptionModel.getTransactionStatus()), ValidationError.INVALID_TRANSACTION_STATUS, validationResponse);
             }
         }
