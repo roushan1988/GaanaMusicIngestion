@@ -1,35 +1,36 @@
 package com.til.prime.timesSubscription.util;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.CharacterPredicates;
 import org.apache.commons.text.RandomStringGenerator;
 
+import java.util.Random;
+
 public class UniqueIdGeneratorUtil {
 
-    private static final int SSO_ID_PREFIX_LENGTH = 3;
-    private static final int TICKET_ID_PREFIX_LENGTH = 3;
-    private static final int INDEPENDENT_SUFFIX_LENGTH = 18;
+    private static Random random = new Random();
     private static final int BASE36_RADIX = 36;
+    private static final int CONSECUTIVE_SIMILAR_CHARACTERS = 4;
 
-    public static final String generateOrderId(String ssoId, String ticketId, int length){
+    public static final String generateOrderId(int length){
         StringBuilder sb = new StringBuilder();
-        sb.append(ssoId.substring(0, Math.min(ssoId.length(), SSO_ID_PREFIX_LENGTH)));
-        if(StringUtils.isNotEmpty(ticketId)){
-            sb.append(ticketId.substring(0, Math.min(ssoId.length(), TICKET_ID_PREFIX_LENGTH)));
-            RandomStringGenerator generator = new RandomStringGenerator.Builder().withinRange('0', 'z').filteredBy(CharacterPredicates.LETTERS,
-                    CharacterPredicates.DIGITS).build();
-            sb.append(generator.generate(Math.max(length-SSO_ID_PREFIX_LENGTH-TICKET_ID_PREFIX_LENGTH, INDEPENDENT_SUFFIX_LENGTH)));
-            return sb.toString();
-        }else{
-            RandomStringGenerator generator = new RandomStringGenerator.Builder().withinRange('0', 'z').filteredBy(CharacterPredicates.LETTERS,
-                    CharacterPredicates.DIGITS).build();
-            sb.append(generator.generate(Math.max(length-SSO_ID_PREFIX_LENGTH, INDEPENDENT_SUFFIX_LENGTH)));
-            return sb.toString();
+        boolean flag = random.nextBoolean();
+        for(int i=0; i<=((length-1)/CONSECUTIVE_SIMILAR_CHARACTERS); i++){
+            if(flag){
+                RandomStringGenerator generator = new RandomStringGenerator.Builder().withinRange('A', 'Z').filteredBy(CharacterPredicates.LETTERS,
+                        CharacterPredicates.DIGITS).build();
+                sb.append(generator.generate(Math.min(CONSECUTIVE_SIMILAR_CHARACTERS, length-(CONSECUTIVE_SIMILAR_CHARACTERS*i))));
+            }else{
+                RandomStringGenerator generator = new RandomStringGenerator.Builder().withinRange('0', '9').filteredBy(CharacterPredicates.LETTERS,
+                        CharacterPredicates.DIGITS).build();
+                sb.append(generator.generate(Math.min(CONSECUTIVE_SIMILAR_CHARACTERS, length-(CONSECUTIVE_SIMILAR_CHARACTERS*i))));
+            }
+            flag = !flag;
         }
+        return sb.toString();
     }
 
     public static String convertToBase36(String arg) {
-        String base62 = Long.toString(Long.parseLong(arg), 36);
+        String base62 = Long.toString(Long.parseLong(arg), BASE36_RADIX);
         return base62;
     }
 

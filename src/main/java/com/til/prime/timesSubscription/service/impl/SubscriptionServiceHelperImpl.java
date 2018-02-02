@@ -53,7 +53,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
         userSubscriptionModel.setPlatform(platform);
         userSubscriptionModel.setCreated(new Date());
         if(price.compareTo(BigDecimal.ZERO)<=0 || (crmRequest&&free)){
-            String orderId = UniqueIdGeneratorUtil.generateOrderId(userDTO.getSsoId(), userDTO.getTicketId(), GlobalConstants.ORDER_ID_LENGTH);
+            String orderId = UniqueIdGeneratorUtil.generateOrderId(GlobalConstants.ORDER_ID_LENGTH);
             userSubscriptionModel.setOrderId(orderId);
             userSubscriptionModel.setPaymentMethod(GlobalConstants.PAYMENT_METHOD_NA);
             userSubscriptionModel.setPaymentReference(GlobalConstants.PAYMENT_REFERENCE_NA);
@@ -83,7 +83,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
 
     @Override
     public UserSubscriptionModel updateGenerateOrderUserSubscription(GenerateOrderRequest request, UserSubscriptionModel userSubscriptionModel) {
-        String orderId = UniqueIdGeneratorUtil.generateOrderId(request.getUser().getSsoId(), request.getUser().getTicketId(), GlobalConstants.ORDER_ID_LENGTH);
+        String orderId = UniqueIdGeneratorUtil.generateOrderId(GlobalConstants.ORDER_ID_LENGTH);
         userSubscriptionModel.setOrderId(orderId);
         userSubscriptionModel.setPaymentMethod(request.getPaymentMethod());
         return userSubscriptionModel;

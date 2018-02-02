@@ -19,7 +19,7 @@ public class GlobalConstants {
     public static final String PAYMENTS_ENCRYPTION_KEY= "payments.encryption.key";
     public static final String TICKETID = "ticketId";
     public static final String SITEID = "siteId";
-    public static final int ORDER_ID_LENGTH = 24;
+    public static final int ORDER_ID_LENGTH = 16;
     public static final String PAYMENT_REFERENCE_NA = "NA";
     public static final String PAYMENT_METHOD_NA = "NA";
     public static final int API_RETRY_COUNT = 3;

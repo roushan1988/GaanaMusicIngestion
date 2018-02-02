@@ -603,7 +603,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             } catch (Exception e) {
                 retryCount--;
                 if(retryCount>0){
-                    userSubscriptionModel.setOrderId(UniqueIdGeneratorUtil.generateOrderId(ssoId, ticketId, GlobalConstants.ORDER_ID_LENGTH));
+                    userSubscriptionModel.setOrderId(UniqueIdGeneratorUtil.generateOrderId(GlobalConstants.ORDER_ID_LENGTH));
                     continue retryLoop;
                 }
                 throw e;
