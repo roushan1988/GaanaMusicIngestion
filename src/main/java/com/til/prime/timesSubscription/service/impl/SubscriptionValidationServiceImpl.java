@@ -362,8 +362,8 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
     public ValidationResponse validateCredentials(GenericRequest request, ValidationResponse validationResponse) {
         PreConditions.notNull(request.getUser(), ValidationError.USER_DETAILS_MISSING, validationResponse);
         if(request.getUser()!=null){
-            PreConditions.notNull(request.getUser().getSsoId(), ValidationError.INVALID_SSO_ID, validationResponse);
-            PreConditions.notNull(request.getUser().getTicketId(), ValidationError.INVALID_TICKET_ID, validationResponse);
+            PreConditions.notEmpty(request.getUser().getSsoId(), ValidationError.INVALID_SSO_ID, validationResponse);
+            PreConditions.notEmpty(request.getUser().getTicketId(), ValidationError.INVALID_TICKET_ID, validationResponse);
             if(StringUtils.isNotEmpty(request.getUser().getSsoId()) && StringUtils.isNotEmpty(request.getUser().getTicketId()) && StringUtils.isNotEmpty(request.getUser().getMobile())){
                 validateSSOLogin(request.getUser().getSsoId(), request.getUser().getTicketId(), request.getUser().getMobile(), validationResponse);
             }
