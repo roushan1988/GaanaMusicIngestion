@@ -124,7 +124,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
                 PreConditions.notNull(userSubscriptionModel.getOrderId(), ValidationError.ORDER_NOT_GENERATED, validationResponse);
             } else {
 //                PreConditions.mustBeNull(userSubscriptionModel.getOrderId(), ValidationError.ORDER_ALREADY_GENERATED, validationResponse);
-                PreConditions.mustBeFalse(TransactionStatusEnum.COMPLETED_STATES.contains(userSubscriptionModel.getTransactionStatus()), ValidationError.INVALID_TRANSACTION_STATUS, validationResponse);
+//                PreConditions.mustBeFalse(TransactionStatusEnum.COMPLETED_STATES.contains(userSubscriptionModel.getTransactionStatus()), ValidationError.INVALID_TRANSACTION_STATUS, validationResponse);
             }
         }
         if(variantModel!=null) {
