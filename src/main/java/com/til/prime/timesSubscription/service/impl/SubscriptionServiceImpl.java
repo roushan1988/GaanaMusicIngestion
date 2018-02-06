@@ -5,6 +5,7 @@ import com.til.prime.timesSubscription.constants.RedisConstants;
 import com.til.prime.timesSubscription.convertor.ModelToDTOConvertorUtil;
 import com.til.prime.timesSubscription.dao.*;
 import com.til.prime.timesSubscription.dto.external.*;
+import com.til.prime.timesSubscription.dto.internal.RefundInternalResponse;
 import com.til.prime.timesSubscription.enums.*;
 import com.til.prime.timesSubscription.model.*;
 import com.til.prime.timesSubscription.service.*;
@@ -297,8 +298,9 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             userSubscriptionModel = userSubscriptionRepository.findByIdAndOrderIdAndSubscriptionVariantIdAndDeleted(request.getUserSubscriptionId(), request.getOrderId(), request.getVariantId(), false);
             validationResponse = subscriptionValidationService.validatePostCancelSubscription(request, userSubscriptionModel, validationResponse);
         }
-        BigDecimal refundAmount = null;
+        BigDecimal refundedAmount = null;
         if(validationResponse.isValid()){
+            BigDecimal refundAmount = null;
             if(serverRequest && (((CancelSubscriptionServerRequest) request).isRefund())){
                 if(((CancelSubscriptionServerRequest) request).getRefundAmount()!=null && ((CancelSubscriptionServerRequest) request).getRefundAmount()>0){
                     refundAmount = new BigDecimal(((CancelSubscriptionServerRequest) request).getRefundAmount());
@@ -308,24 +310,26 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             }else {
                 refundAmount = BigDecimal.ZERO;
             }
-            boolean success = true;
+            RefundInternalResponse refundResponse = null;
             if(refundAmount.compareTo(BigDecimal.ZERO)>0){
-                success = subscriptionServiceHelper.refundPayment(userSubscriptionModel.getOrderId(), refundAmount.doubleValue());
+                refundResponse = subscriptionServiceHelper.refundPayment(userSubscriptionModel.getOrderId(), refundAmount.doubleValue());
             }
-            if(success){
+            if(refundResponse.isSuccess()){
                 userSubscriptionModel.setIsDelete(true);
-                StatusEnum statusEnum = userSubscriptionModel.getStatus();
-                userSubscriptionModel.setStatus(StatusEnum.EXPIRED);
-                userSubscriptionModel = saveUserSubscription(userSubscriptionModel, false, null, null, serverRequest? EventEnum.SUBSCRIPTION_SERVER_CANCELLATION: EventEnum.SUBSCRIPTION_APP_CANCELLATION);
-                if(statusEnum==StatusEnum.ACTIVE){
-                    updateUserStatus(userSubscriptionModel, userSubscriptionModel.getUser());
+                userSubscriptionModel.setStatus(StatusEnum.CANCELLED);
+                if(refundResponse.getRefundedAmount()!=null){
+                    refundedAmount = new BigDecimal(refundResponse.getRefundedAmount());
+                    refundedAmount.setScale(2, BigDecimal.ROUND_HALF_EVEN);
                 }
+                userSubscriptionModel.setRefundedAmount(refundedAmount);
+                userSubscriptionModel = saveUserSubscription(userSubscriptionModel, false, null, null, serverRequest? EventEnum.SUBSCRIPTION_SERVER_CANCELLATION: EventEnum.SUBSCRIPTION_APP_CANCELLATION);
+                updateUserStatus(userSubscriptionModel, userSubscriptionModel.getUser());
                 communicationService.sendSubscriptionCancellationCommunication(userSubscriptionModel);
             }else{
                 validationResponse.addValidationError(ValidationError.PAYMENT_REFUND_ERROR);
             }
         }
-        response = subscriptionServiceHelper.prepareCancelSubscriptionResponse(response, refundAmount, validationResponse);
+        response = subscriptionServiceHelper.prepareCancelSubscriptionResponse(response, refundedAmount, validationResponse);
         return response;
     }
 

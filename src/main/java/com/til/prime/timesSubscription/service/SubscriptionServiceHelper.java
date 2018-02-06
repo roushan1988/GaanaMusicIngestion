@@ -1,6 +1,7 @@
 package com.til.prime.timesSubscription.service;
 
 import com.til.prime.timesSubscription.dto.external.*;
+import com.til.prime.timesSubscription.dto.internal.RefundInternalResponse;
 import com.til.prime.timesSubscription.enums.*;
 import com.til.prime.timesSubscription.model.*;
 
@@ -37,7 +38,7 @@ public interface SubscriptionServiceHelper {
     BackendSubscriptionUserModel getBackendSubscriptionUser(BackendSubscriptionUserModel model, BackendActivationUserDTO dto);
     BackendSubscriptionUserAuditModel getBackendSubscriptionUserAudit(BackendSubscriptionUserModel user, EventEnum event);
     boolean renewSubscription(UserSubscriptionModel userSubscriptionModel);
-    boolean refundPayment(String orderId, Double refundAmount);
+    RefundInternalResponse refundPayment(String orderId, Double refundAmount);
     String shortenUrl(String longUrl);
 
 }

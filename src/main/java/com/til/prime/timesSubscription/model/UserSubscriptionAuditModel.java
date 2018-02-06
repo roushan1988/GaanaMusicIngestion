@@ -3,6 +3,7 @@ package com.til.prime.timesSubscription.model;
 import com.til.prime.timesSubscription.enums.*;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.util.Date;
 
 @Entity
@@ -57,6 +58,8 @@ public class UserSubscriptionAuditModel extends BaseModel {
     @Column
     @Enumerated(EnumType.STRING)
     private PlatformEnum platform;
+    @Column(name="refunded_amount")
+    private BigDecimal refundedAmount;
 
     public Long getUserSubscriptionId() {
         return userSubscriptionId;
@@ -224,5 +227,13 @@ public class UserSubscriptionAuditModel extends BaseModel {
 
     public void setStatus(StatusEnum status) {
         this.status = status;
+    }
+
+    public BigDecimal getRefundedAmount() {
+        return refundedAmount;
+    }
+
+    public void setRefundedAmount(BigDecimal refundedAmount) {
+        this.refundedAmount = refundedAmount;
     }
 }

@@ -7,7 +7,7 @@ import java.util.Date;
 import java.util.Set;
 
 public enum StatusEnum {
-    EXPIRED, ACTIVE, FUTURE;
+    EXPIRED, ACTIVE, FUTURE, CANCELLED;
 
     public static Set<StatusEnum> VALID_TURN_OFF_DEBIT_STATUS_SET = Sets.newHashSet(StatusEnum.ACTIVE, StatusEnum.FUTURE);
     public static Set<StatusEnum> VALID_USER_STATUS_HISTORY_SET = Sets.newHashSet(StatusEnum.ACTIVE, StatusEnum.EXPIRED);

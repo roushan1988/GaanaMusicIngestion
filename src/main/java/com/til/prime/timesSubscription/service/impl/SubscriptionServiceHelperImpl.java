@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import com.til.prime.timesSubscription.constants.GlobalConstants;
 import com.til.prime.timesSubscription.convertor.ModelToDTOConvertorUtil;
 import com.til.prime.timesSubscription.dto.external.*;
+import com.til.prime.timesSubscription.dto.internal.RefundInternalResponse;
 import com.til.prime.timesSubscription.dto.internal.UrlShorteningRequest;
 import com.til.prime.timesSubscription.dto.internal.UrlShorteningResponse;
 import com.til.prime.timesSubscription.enums.*;
@@ -274,6 +275,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
         auditModel.setChannel(userSubscriptionModel.getChannel());
         auditModel.setPlatform(userSubscriptionModel.getPlatform());
         auditModel.setAutoRenewal(userSubscriptionModel.isAutoRenewal());
+        auditModel.setRefundedAmount(userSubscriptionModel.getRefundedAmount());
         return auditModel;
     }
 
@@ -438,19 +440,19 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
     }
 
     @Override
-    public final boolean refundPayment(String orderId, Double refundAmount){
+    public final RefundInternalResponse refundPayment(String orderId, Double refundAmount){
         try{
             PaymentsRefundRequest refundRequest = new PaymentsRefundRequest();
             refundRequest.setAmount(refundAmount);
             refundRequest.setOrderId(orderId);
             refundRequest.setSecretKey(properties.getProperty(GlobalConstants.PAYMENTS_SECRET_KEY));
             updateChecksumForRefund(refundRequest);
-            PaymentsGenericResponse response = httpConnectionUtils.requestForObject(refundRequest, properties.getProperty(GlobalConstants.PAYMENTS_REFUND_URL_KEY), PaymentsGenericResponse.class, GlobalConstants.POST);
-            return inferPaymentsResponse(response);
+            PaymentsRefundResponse response = httpConnectionUtils.requestForObject(refundRequest, properties.getProperty(GlobalConstants.PAYMENTS_REFUND_URL_KEY), PaymentsRefundResponse.class, GlobalConstants.POST);
+            return inferPaymentsRefundResponse(response);
         }catch (Exception e){
             LOG.error("Exception in api call to payments for refund with orderId: "+orderId+", refundAmount: "+refundAmount, e);
         }
-        return false;
+        return new RefundInternalResponse(false, null);
     }
 
     @Override
@@ -501,6 +503,14 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
             return true;
         }else{
             return false;
+        }
+    }
+
+    private RefundInternalResponse inferPaymentsRefundResponse(PaymentsRefundResponse response){
+        if(response.getStatus().equals(GlobalConstants.SUCCESS) && response.getStatusCode()==GlobalConstants.PAYMENTS_SUCCESS_STATUS_CODE){
+            return new RefundInternalResponse(true, response.getRefundedAmount());
+        }else{
+            return new RefundInternalResponse(true, null);
         }
     }
 
