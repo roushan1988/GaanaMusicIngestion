@@ -286,6 +286,9 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
         Long time = new Date().getTime();
         Long startTime = userSubscriptionModel.getStartDate().getTime();
         Long endTime = userSubscriptionModel.getEndDate().getTime();
+        if(time<startTime){
+            return price;
+        }
         return price.multiply(new BigDecimal((time-startTime)/(endTime-startTime)));
     }
 
