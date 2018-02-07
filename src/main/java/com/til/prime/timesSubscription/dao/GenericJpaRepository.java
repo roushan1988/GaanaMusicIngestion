@@ -21,4 +21,5 @@ public interface GenericJpaRepository<T, ID extends Serializable> extends JpaRep
     Long countByUpdatedAfter(Date updated);
     List<T> findByUpdatedAfter(Date updated);
     Page<T> findByUpdatedAfter(Pageable pageable, Date updated);
+    List<T> findByDeletedFalse();
 }
