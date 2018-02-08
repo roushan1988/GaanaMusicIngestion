@@ -642,7 +642,6 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             statusDTO = (SubscriptionStatusDTO) vw.get();
         }
         if(statusDTO!=null){
-            statusDTO.setUserId(userModel.getId());
             statusDTO.setBlocked(userModel.isBlocked());
             statusDTO.setEmail(userModel.getEmail());
             cacheManager.getCache(RedisConstants.PRIME_STATUS_CACHE_KEY).put(userModel.getMobile(), statusDTO);
@@ -655,13 +654,11 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             if(userModel==null){
                 throw new RuntimeException("User must be present");
             }
-            statusDTO.setUserId(userModel.getId());
             statusDTO.setBlocked(userModel.isBlocked());
             statusDTO.setPlanStatus(userModel.isBlocked()? PlanStatusEnum.BLOCKED.getCode(): PlanStatusEnum.INIT.getCode());
             return statusDTO;
         }
         StatusEnum status = userSubscriptionModel.getStatus();
-        statusDTO.setUserId(userSubscriptionModel.getUser().getId());
         statusDTO.setStartDate(userSubscriptionModel.getStartDate());
         statusDTO.setEndDate(userSubscriptionModel.getEndDate());
         statusDTO.setBlocked(userSubscriptionModel.getUser().isBlocked());
