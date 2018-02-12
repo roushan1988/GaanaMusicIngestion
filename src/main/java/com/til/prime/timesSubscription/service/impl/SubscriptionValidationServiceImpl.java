@@ -269,11 +269,14 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
     }
 
     @Override
-    public ValidationResponse validatePostExtendExpiry(ExtendExpiryRequest request, UserSubscriptionModel userSubscriptionModel, ValidationResponse validationResponse) {
+    public ValidationResponse validatePostExtendExpiry(ExtendExpiryRequest request, UserSubscriptionModel userSubscriptionModel, UserSubscriptionModel lastUserSubscription, ValidationResponse validationResponse) {
         PreConditions.notNull(userSubscriptionModel, ValidationError.INVALID_USER_SUBSCRIPTION_ID, validationResponse);
         if(userSubscriptionModel!=null){
             PreConditions.notAfter(new Date(), TimeUtils.addDaysInDate(userSubscriptionModel.getEndDate(), request.getExtensionDays().intValue()), ValidationError.ALREADY_EXPIRED, validationResponse);
             PreConditions.mustBeFalse(userSubscriptionModel.getUser().isBlocked(), ValidationError.BLOCKED_USER, validationResponse);
+        }
+        if(lastUserSubscription!=null){
+            PreConditions.mustBeFalse(lastUserSubscription.getStatus().equals(StatusEnum.FUTURE), ValidationError.USER_PLAN_DOES_NOT_QUALIFY, validationResponse);
         }
         return updateValid(validationResponse);
     }

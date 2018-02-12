@@ -378,10 +378,12 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     public ExtendExpiryResponse extendExpiry(ExtendExpiryRequest request) {
         ValidationResponse validationResponse = subscriptionValidationService.validatePreExtendExpiry(request);
         UserSubscriptionModel userSubscriptionModel = null;
+        UserSubscriptionModel lastUserSubscription = null;
         ExtendExpiryResponse response = new ExtendExpiryResponse();
         if(validationResponse.isValid()){
             userSubscriptionModel = userSubscriptionRepository.findByIdAndOrderIdAndSubscriptionVariantIdAndDeleted(request.getUserSubscriptionId(), request.getOrderId(), request.getVariantId(), false);
-            validationResponse = subscriptionValidationService.validatePostExtendExpiry(request, userSubscriptionModel, validationResponse);
+            lastUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndBusinessAndOrderCompletedAndDeletedOrderByIdDesc(request.getUser().getMobile(), BusinessEnum.TIMES_PRIME, true, false);
+            validationResponse = subscriptionValidationService.validatePostExtendExpiry(request, userSubscriptionModel, lastUserSubscription, validationResponse);
         }
         if(validationResponse.isValid()){
             userSubscriptionModel = subscriptionServiceHelper.extendSubscription(userSubscriptionModel, request.getExtensionDays());

@@ -25,7 +25,7 @@ public interface SubscriptionValidationService {
     ValidationResponse validatePostBlockUnblockUser(BlockUnblockRequest request, UserModel userModel, ValidationResponse validationResponse);
     ValidationResponse validatePostTurnOffAutoDebit(TurnOffAutoDebitRequest request, List<UserSubscriptionModel> userSubscriptionModelList, ValidationResponse validationResponse);
     ValidationResponse validatePreExtendExpiry(ExtendExpiryRequest request);
-    ValidationResponse validatePostExtendExpiry(ExtendExpiryRequest request, UserSubscriptionModel userSubscriptionModel, ValidationResponse validationResponse);
+    ValidationResponse validatePostExtendExpiry(ExtendExpiryRequest request, UserSubscriptionModel userSubscriptionModel, UserSubscriptionModel lastUserSubscription, ValidationResponse validationResponse);
     ValidationResponse validatePreCheckEligibility(CheckEligibilityRequest request);
     ValidationResponse validatePostCheckEligibility(CheckEligibilityRequest request, SubscriptionVariantModel variantModel, UserSubscriptionModel lastModel, UserSubscriptionModel restrictedModel, ValidationResponse validationResponse);
     ValidationResponse validatePreValidVariant(CheckValidVariantRequest request);
