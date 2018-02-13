@@ -490,7 +490,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
     private void updateChecksumForRefund(PaymentsRefundRequest refundRequest){
         try{
             StringBuilder checksumString = new StringBuilder(refundRequest.getOrderId()).append(GlobalConstants.PAYMENTS_REQ_DELIM)
-                    .append(refundRequest.getAmount()).append(GlobalConstants.PAYMENTS_REQ_DELIM).append(refundRequest.getSecretKey());
+                    .append(refundRequest.getAmount()).append(refundRequest.isForceAmount()).append(GlobalConstants.PAYMENTS_REQ_DELIM).append(refundRequest.getSecretKey());
             String checksum = checksumService.calculateChecksumHmacSHA256(properties.getProperty(GlobalConstants.PAYMENTS_ENCRYPTION_KEY), checksumString.toString());
             refundRequest.setRequestHash(checksum);
         }catch (Exception e){
