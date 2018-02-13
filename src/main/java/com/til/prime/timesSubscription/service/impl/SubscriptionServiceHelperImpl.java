@@ -440,11 +440,12 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
     }
 
     @Override
-    public final RefundInternalResponse refundPayment(String orderId, Double refundAmount){
+    public final RefundInternalResponse refundPayment(String orderId, Double refundAmount, boolean forceAmount){
         try{
             PaymentsRefundRequest refundRequest = new PaymentsRefundRequest();
             refundRequest.setAmount(refundAmount);
             refundRequest.setOrderId(orderId);
+            refundRequest.setForceAmount(forceAmount);
             refundRequest.setSecretKey(properties.getProperty(GlobalConstants.PAYMENTS_SECRET_KEY));
             updateChecksumForRefund(refundRequest);
             PaymentsRefundResponse response = httpConnectionUtils.requestForObject(refundRequest, properties.getProperty(GlobalConstants.PAYMENTS_REFUND_URL_KEY), PaymentsRefundResponse.class, GlobalConstants.POST);

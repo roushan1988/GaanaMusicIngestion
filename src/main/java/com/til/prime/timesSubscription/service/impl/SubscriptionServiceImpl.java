@@ -301,9 +301,11 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         BigDecimal refundedAmount = null;
         if(validationResponse.isValid()){
             BigDecimal refundAmount = null;
+            boolean forceAmount = false;
             if(serverRequest && (((CancelSubscriptionServerRequest) request).isRefund())){
                 if(((CancelSubscriptionServerRequest) request).getRefundAmount()!=null && ((CancelSubscriptionServerRequest) request).getRefundAmount()>0){
                     refundAmount = new BigDecimal(((CancelSubscriptionServerRequest) request).getRefundAmount());
+                    forceAmount = true;
                 }else{
                     refundAmount = subscriptionServiceHelper.calculateRefundAmount(userSubscriptionModel);
                 }
@@ -312,7 +314,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             }
             RefundInternalResponse refundResponse = null;
             if(refundAmount.compareTo(BigDecimal.ZERO)>0){
-                refundResponse = subscriptionServiceHelper.refundPayment(userSubscriptionModel.getOrderId(), refundAmount.doubleValue());
+                refundResponse = subscriptionServiceHelper.refundPayment(userSubscriptionModel.getOrderId(), refundAmount.doubleValue(), forceAmount);
             }
             if(refundResponse.isSuccess()){
                 userSubscriptionModel.setIsDelete(true);

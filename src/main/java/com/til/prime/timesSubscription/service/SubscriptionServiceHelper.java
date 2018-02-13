@@ -38,7 +38,7 @@ public interface SubscriptionServiceHelper {
     BackendSubscriptionUserModel getBackendSubscriptionUser(BackendSubscriptionUserModel model, BackendActivationUserDTO dto);
     BackendSubscriptionUserAuditModel getBackendSubscriptionUserAudit(BackendSubscriptionUserModel user, EventEnum event);
     boolean renewSubscription(UserSubscriptionModel userSubscriptionModel);
-    RefundInternalResponse refundPayment(String orderId, Double refundAmount);
+    RefundInternalResponse refundPayment(String orderId, Double refundAmount, boolean forceAmount);
     String shortenUrl(String longUrl);
 
 }
