@@ -729,21 +729,25 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
                 String ssoId = user.getSsoId();
                 String email = user.getEmail();
                 String mobile = user.getMobile();
-                String name = user.getName();
+                String firstName = user.getFirstName();
+                String lastName = user.getLastName();
                 if(ssoId!=null && !StringUtils.isEmpty(ssoId)){
                 	sb.append(ssoId);
                 }
                 
-                if(email!=null && !StringUtils.isEmpty(email)){
+                if(StringUtils.isNotEmpty(email)){
                 	sb.append(email);
                 }
                 
-                if(mobile!=null && !StringUtils.isEmpty(mobile)){
+                if(StringUtils.isNotEmpty(mobile)){
                 	sb.append(mobile);
                 }
                 
-                if(name!=null && !StringUtils.isEmpty(name)){
-                	sb.append(name);
+                if(StringUtils.isNotEmpty(firstName)){
+                	sb.append(firstName);
+                }
+                if(StringUtils.isNotEmpty(lastName)){
+                    sb.append(lastName);
                 }
                 
                 

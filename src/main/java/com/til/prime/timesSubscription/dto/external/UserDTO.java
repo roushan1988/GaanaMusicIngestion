@@ -3,7 +3,8 @@ package com.til.prime.timesSubscription.dto.external;
 public class UserDTO {
     private String ssoId;
     private String ticketId;
-    private String name;
+    private String firstName;
+    private String lastName;
     private String mobile;
     private String email;
     private String city;
@@ -24,12 +25,20 @@ public class UserDTO {
         this.ticketId = ticketId;
     }
 
-    public String getName() {
-        return name;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     public String getMobile() {
@@ -61,7 +70,8 @@ public class UserDTO {
         final StringBuilder sb = new StringBuilder("UserDTO{");
         sb.append("ssoId='").append(ssoId).append('\'');
         sb.append(", ticketId='").append(ticketId).append('\'');
-        sb.append(", name='").append(name).append('\'');
+        sb.append(", firstName='").append(firstName).append('\'');
+        sb.append(", lastName='").append(lastName).append('\'');
         sb.append(", mobile='").append(mobile).append('\'');
         sb.append(", email='").append(email).append('\'');
         sb.append(", city='").append(city).append('\'');

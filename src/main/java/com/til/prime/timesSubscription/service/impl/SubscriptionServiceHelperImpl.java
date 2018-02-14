@@ -361,7 +361,8 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
     public UserModel getUser(GenericRequest request) {
         UserModel userModel = new UserModel();
         userModel.setSsoId(request.getUser().getSsoId());
-        userModel.setName(request.getUser().getName());
+        userModel.setFirstName(request.getUser().getFirstName());
+        userModel.setLastName(request.getUser().getLastName());
         userModel.setMobile(request.getUser().getMobile());
         userModel.setEmail(request.getUser().getEmail());
         userModel.setCity(request.getUser().getCity());
@@ -374,7 +375,8 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
         UserAuditModel userAuditModel = new UserAuditModel();
         userAuditModel.setUserId(userModel.getId());
         userAuditModel.setSsoId(userModel.getSsoId());
-        userAuditModel.setName(userModel.getName());
+        userAuditModel.setFirstName(userModel.getFirstName());
+        userAuditModel.setLastName(userModel.getLastName());
         userAuditModel.setMobile(userModel.getMobile());
         userAuditModel.setEmail(userModel.getEmail());
         userAuditModel.setCity(userModel.getCity());

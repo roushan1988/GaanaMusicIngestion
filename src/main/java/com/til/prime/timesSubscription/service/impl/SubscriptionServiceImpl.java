@@ -532,8 +532,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         if(validationResponse.isValid()){
             UserSubscriptionModel lastUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndBusinessAndOrderCompletedAndDeletedOrderByIdDesc(request.getUser().getMobile(), request.getBusiness(), true, false);
             if(lastUserSubscription==null){
-                request.getUser().setName(StringUtils.isEmpty(request.getUser().getName())?
-                        StringUtils.trim(backendUser.getFirstName()+" "+backendUser.getLastName()): request.getUser().getName());
+                request.getUser().setFirstName(request.getUser().getFirstName());
+                request.getUser().setLastName(request.getUser().getLastName());
                 request.getUser().setEmail(StringUtils.isEmpty(request.getUser().getEmail())? backendUser.getEmail(): request.getUser().getEmail());
                 SubscriptionVariantModel variantModel = propertyService.getBackendFreeTrialVariant(BusinessEnum.TIMES_PRIME, CountryEnum.IN);
                 UserModel userModel = getOrCreateUserWithMobileCheck(request, validationResponse);
@@ -729,25 +729,26 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             String ssoId = user.getSsoId();
             String email = user.getEmail();
             String mobile = user.getMobile();
-            String name = user.getName();
-            boolean ssoIdExists = false; 
+            String firstName = user.getFirstName();
+            String lastName = user.getLastName();
+            boolean ssoIdExists = false;
             boolean emailExists = false; 
             boolean mobileExists = false; 
             boolean nameExists = false; 
             
-            if(ssoId!=null && !StringUtils.isEmpty(ssoId)){
+            if(StringUtils.isNotEmpty(ssoId)){
             	ssoIdExists=true;
             }
             
-            if(email!=null && !StringUtils.isEmpty(email)){
+            if(StringUtils.isNotEmpty(email)){
             	emailExists=true;
             }
             
-            if(mobile!=null && !StringUtils.isEmpty(mobile)){
+            if(StringUtils.isNotEmpty(mobile)){
             	mobileExists=true;
             }
             
-            if(name!=null && !StringUtils.isEmpty(name)){
+            if(StringUtils.isNotEmpty(firstName) && StringUtils.isNotEmpty(lastName)){
             	nameExists=true;
             }
             
@@ -761,7 +762,10 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             	userModel = userRepository.findByMobileAndDeletedFalse(mobile);
             	userModelList.add(userModel);
             }else if(nameExists){
-            	userModelList = userRepository.findByNameAndDeletedFalse(name);
+            	Page<UserModel> page = userRepository.findByFirstNameAndLastNameAndDeletedFalse(firstName, lastName, new PageRequest(request.getPage(), request.getPageSize()));
+                if(page!=null){
+                    userModelList = page.getContent();
+                }
             }
 
             Iterator itr = userModelList.iterator();
@@ -782,9 +786,10 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     
     private CustomerSearchDTO convertUserSubscriptionModelToCustomerSearchDTO(UserSubscriptionModel userSubscriptionModel){
     	CustomerSearchDTO customerSearchDTO = new CustomerSearchDTO();
-    	customerSearchDTO.setSsoId(userSubscriptionModel.getUser().getSsoId());
-    	customerSearchDTO.setMobile(userSubscriptionModel.getUser().getMobile());
-    	customerSearchDTO.setName(userSubscriptionModel.getUser().getName());
+    	UserModel user = userSubscriptionModel.getUser();
+    	customerSearchDTO.setSsoId(user.getSsoId());
+    	customerSearchDTO.setMobile(user.getMobile());
+    	customerSearchDTO.setName((user.getFirstName()+" "+user.getLastName()).trim());
     	customerSearchDTO.setEmail(userSubscriptionModel.getUser().getEmail());
     	
     	customerSearchDTO.setExpiryDate(userSubscriptionModel.getEndDate());
@@ -840,7 +845,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     	CustomerSearchDTO customerSearchDTO = new CustomerSearchDTO();
     	customerSearchDTO.setSsoId(userModel.getSsoId());
     	customerSearchDTO.setMobile(userModel.getMobile());
-    	customerSearchDTO.setName(userModel.getName());
+        customerSearchDTO.setName((userModel.getFirstName()+" "+userModel.getLastName()).trim());
     	customerSearchDTO.setEmail(userModel.getEmail());
 
     	
@@ -887,7 +892,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     	
     	customerCRM.setSsoId(userModel.getSsoId());
     	customerCRM.setMobileNumber(userModel.getMobile());
-    	customerCRM.setName(userModel.getName());
+    	customerCRM.setName((userModel.getFirstName()+" "+userModel.getLastName()).trim());
     	customerCRM.setEmailId(userModel.getEmail());
     	if(userModel.getCreated()!=null){
     		customerCRM.setActivationDate(userModel.getCreated());
@@ -1037,7 +1042,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     		orderDetailsCRM.setUserSubscriptionId(userSubscriptionModel.getId().toString());
     		if(user!=null){
         		orderDetailsCRM.setSsoId(user.getSsoId());
-        		orderDetailsCRM.setName(user.getName());
+        		orderDetailsCRM.setName((user.getFirstName()+" "+user.getLastName()).trim());
         		orderDetailsCRM.setMobileNumber(user.getMobile());
         		orderDetailsCRM.setEmailId(user.getEmail());
     		}
