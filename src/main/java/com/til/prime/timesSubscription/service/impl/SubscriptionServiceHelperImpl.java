@@ -15,6 +15,7 @@ import com.til.prime.timesSubscription.util.HttpConnectionUtils;
 import com.til.prime.timesSubscription.util.UniqueIdGeneratorUtil;
 import com.til.prime.timesSubscription.util.ResponseUtil;
 import com.til.prime.timesSubscription.util.TimeUtils;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.nio.charset.Charset;
 import java.util.*;
 
 @Service
@@ -396,8 +398,9 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
         user.setFirstName(dto.getFirstName());
         user.setLastName(dto.getLastName());
         user.setCode(UniqueIdGeneratorUtil.generateCode(dto.getMobile(), GlobalConstants.BACKEND_ACTIVATION_CODE_LENGTH));
-        StringBuilder url = new StringBuilder(properties.getProperty(GlobalConstants.PRIME_BACKEND_ACTIVATION_URL_KEY))
-                .append("?mobile=").append(dto.getMobile()).append("&code=").append(user.getCode());
+        String params = new StringBuilder("mobile=").append(dto.getMobile()).append("&code=").append(user.getCode()).toString();
+        String encodedParams = new String(Base64.encodeBase64(params.getBytes(Charset.forName(GlobalConstants.UTF_8))));
+        StringBuilder url = new StringBuilder(properties.getProperty(GlobalConstants.PRIME_BACKEND_ACTIVATION_URL_KEY)).append("?q=").append(encodedParams);
         String shortenedUrl = shortenUrl(url.toString());
         user.setShortenedUrl(shortenedUrl);
         user.setDurationDays(dto.getDurationDays());

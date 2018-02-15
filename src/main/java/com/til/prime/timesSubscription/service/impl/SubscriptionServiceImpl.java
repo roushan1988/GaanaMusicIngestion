@@ -11,6 +11,7 @@ import com.til.prime.timesSubscription.model.*;
 import com.til.prime.timesSubscription.service.*;
 import com.til.prime.timesSubscription.util.TimeUtils;
 import com.til.prime.timesSubscription.util.UniqueIdGeneratorUtil;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -24,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.nio.charset.Charset;
 import java.util.*;
 
 @Service
@@ -1192,8 +1194,9 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 retryCount--;
                 if(retryCount>0){
                     user.setCode(UniqueIdGeneratorUtil.generateCode(user.getMobile(), GlobalConstants.BACKEND_ACTIVATION_CODE_LENGTH));
-                    StringBuilder url = new StringBuilder(properties.getProperty(GlobalConstants.PRIME_BACKEND_ACTIVATION_URL_KEY))
-                            .append("?mobile=").append(user.getMobile()).append("&code=").append(user.getCode());
+                    String params = new StringBuilder("mobile=").append(user.getMobile()).append("&code=").append(user.getCode()).toString();
+                    String encodedParams = new String(Base64.encodeBase64(params.getBytes(Charset.forName(GlobalConstants.UTF_8))));
+                    StringBuilder url = new StringBuilder(properties.getProperty(GlobalConstants.PRIME_BACKEND_ACTIVATION_URL_KEY)).append("?q=").append(encodedParams);
                     String shortenedUrl = subscriptionServiceHelper.shortenUrl(url.toString());
                     user.setShortenedUrl(shortenedUrl);
                     continue retryLoop;
