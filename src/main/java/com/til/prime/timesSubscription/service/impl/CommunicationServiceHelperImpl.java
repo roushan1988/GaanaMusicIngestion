@@ -132,7 +132,8 @@ public class CommunicationServiceHelperImpl implements CommunicationServiceHelpe
         emailTask.setFromEmail(GlobalConstants.PRIME_COMM_FROM_EMAIL);
         Map<String, String> map = Maps.newHashMap();
         map.put("firstName", userSubscriptionModel.getUser().getFirstName());
-        map.put("subscriptionAmount", String.valueOf(userSubscriptionModel.getSubscriptionVariant().getPrice()));
+        Map<PlanTypeEnum, BigDecimal> planPrices = userSubscriptionModel.getSubscriptionVariant().getSubscriptionPlan().getVariants().stream().collect(Collectors.toMap(v -> v.getPlanType(), v -> v.getPrice()));
+        map.put("subscriptionAmount", String.valueOf(planPrices.get(PlanTypeEnum.TRIAL_WITH_PAYMENT!=null? planPrices.get(PlanTypeEnum.TRIAL_WITH_PAYMENT) : planPrices.get(PlanTypeEnum.PAYMENT))));
         map.put("daysRemaining", String.valueOf(days));
         emailTask.setContext(map);
         emailTask.setTaskPriority(TaskPriorityEnum.HIGH_PRIORITY);
