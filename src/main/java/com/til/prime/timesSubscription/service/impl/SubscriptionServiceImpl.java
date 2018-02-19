@@ -568,7 +568,9 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         return response;
     }
 
-    private UserModel getOrCreateUserWithMobileCheck(GenericRequest request, ValidationResponse validationResponse) {
+    @Override
+    @Transactional
+    public UserModel getOrCreateUserWithMobileCheck(GenericRequest request, ValidationResponse validationResponse) {
         UserModel userModel = userRepository.findByMobileAndDeletedFalse(request.getUser().getMobile());
         if(userModel==null){
             userModel = subscriptionServiceHelper.getUser(request);
