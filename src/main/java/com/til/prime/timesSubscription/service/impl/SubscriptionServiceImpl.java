@@ -688,6 +688,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             statusDTO.setPlanStatus(PlanStatusEnum.BLOCKED.getCode());
         }
         statusDTO.setAutoRenewal(userSubscriptionModel.isAutoRenewal());
+        statusDTO.setFirstName(userModel.getFirstName());
         return statusDTO;
     }
 

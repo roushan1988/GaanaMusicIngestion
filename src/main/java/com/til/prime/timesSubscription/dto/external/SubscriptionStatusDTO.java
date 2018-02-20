@@ -11,6 +11,7 @@ public class SubscriptionStatusDTO implements Serializable {
     private int planStatus;
     private boolean autoRenewal;
     private String email;
+    private String firstName;
 
     public boolean isBlocked() {
         return blocked;
@@ -58,6 +59,14 @@ public class SubscriptionStatusDTO implements Serializable {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
     }
 
     @Override
