@@ -24,7 +24,7 @@ public interface SubscriptionService {
     BackendSubscriptionResponse backendSubscriptionViaServer(BackendSubscriptionRequest request);
     BackendSubscriptionActivationResponse backendSubscriptionActivation(BackendSubscriptionActivationRequest request);
     UserModel getOrCreateUserWithMobileCheck(GenericRequest request, ValidationResponse validationResponse);
-    UserSubscriptionModel saveUserSubscription(UserSubscriptionModel userSubscriptionModel, boolean retryForOrderId, String ssoId, String ticketId, EventEnum event);
+    UserSubscriptionModel saveUserSubscription(UserSubscriptionModel userSubscriptionModel, boolean retryForOrderId, String ssoId, String ticketId, EventEnum event, boolean communicateSSO);
     void updateUserStatus(UserSubscriptionModel userSubscriptionModel, UserModel userModel);
     UserModel saveUserModel(UserModel userModel, EventEnum eventEnum);
     void updateUserStatus(UserSubscriptionModel userSubscriptionModel);

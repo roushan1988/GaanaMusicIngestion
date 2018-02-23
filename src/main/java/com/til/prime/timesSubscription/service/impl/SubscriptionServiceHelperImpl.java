@@ -78,9 +78,6 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
         userSubscriptionModel.setTransactionStatus(request.isPaymentSuccess()? TransactionStatusEnum.SUBSCRIPTION_TRANS_SUCCESS: TransactionStatusEnum.SUBSCRIPTION_TRANS_FAILED);
         userSubscriptionModel.setOrderCompleted(request.isPaymentSuccess());
         userSubscriptionModel.setAutoRenewal(request.isAutoRenewal());
-//        if (userSubscriptionModel.isOrderCompleted()) {
-//            userSubscriptionModel = updateSSOStatus(userSubscriptionModel);
-//        }
         return userSubscriptionModel;
     }
 
@@ -92,6 +89,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
         return userSubscriptionModel;
     }
 
+    @Override
     public UserSubscriptionModel updateSSOStatus(UserSubscriptionModel userSubscriptionModel){
         boolean success = communicateSSO(userSubscriptionModel);
         userSubscriptionModel.setSsoCommunicated(success);

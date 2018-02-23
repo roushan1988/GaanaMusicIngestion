@@ -64,7 +64,7 @@ public class SubscriptionFutureActivationJob extends AbstractJob {
                                 userSubscriptionModel.getUser().getMobile(), StatusEnum.FUTURE, TimeUtils.addMillisInDate(userSubscriptionModel.getEndDate(), -2000));
                         if(userSubscriptionModel1!=null){
                             userSubscriptionModel1.setStatus(StatusEnum.ACTIVE);
-                            subscriptionService.saveUserSubscription(userSubscriptionModel1, false, userSubscriptionModel1.getUser().getSsoId(), userSubscriptionModel1.getTicketId(), EventEnum.USER_SUBSCRIPTION_ACTIVE);
+                            subscriptionService.saveUserSubscription(userSubscriptionModel1, false, userSubscriptionModel1.getUser().getSsoId(), userSubscriptionModel1.getTicketId(), EventEnum.USER_SUBSCRIPTION_ACTIVE, true);
                             subscriptionService.updateUserStatus(userSubscriptionModel1, userSubscriptionModel1.getUser());
                             communicationService.sendPaidSubscriptionSuccessCommunication(userSubscriptionModel1);
                             recordsAffected++;
@@ -83,7 +83,7 @@ public class SubscriptionFutureActivationJob extends AbstractJob {
                                 userSubscriptionModel.getUser().getMobile(), StatusEnum.ACTIVE);
                         if(userCount==null || userCount<=0){
                             userSubscriptionModel.setStatus(StatusEnum.ACTIVE);
-                            subscriptionService.saveUserSubscription(userSubscriptionModel, false, userSubscriptionModel.getUser().getSsoId(), userSubscriptionModel.getTicketId(), EventEnum.USER_SUBSCRIPTION_ACTIVE);
+                            subscriptionService.saveUserSubscription(userSubscriptionModel, false, userSubscriptionModel.getUser().getSsoId(), userSubscriptionModel.getTicketId(), EventEnum.USER_SUBSCRIPTION_ACTIVE, true);
                             subscriptionService.updateUserStatus(userSubscriptionModel, userSubscriptionModel.getUser());
                             communicationService.sendPaidSubscriptionSuccessCommunication(userSubscriptionModel);
                             recordsAffected++;

@@ -6,6 +6,8 @@ import com.til.prime.timesSubscription.enums.StatusEnum;
 import com.til.prime.timesSubscription.model.UserSubscriptionModel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
@@ -15,6 +17,8 @@ import java.util.Set;
 
 @Repository
 public interface UserSubscriptionRepository extends GenericJpaRepository<UserSubscriptionModel, Long> {
+    @Query(value="select us from UserSubscriptionModel us where us.ssoCommunicated = false and us.id in (select max(id) from UserSubscriptionModel us1 where us1.orderCompleted = true and us1.status in :statusSet and us1.deleted = false and us1.user.deleted = false group by us1.user)")
+    List<UserSubscriptionModel> findUserSubscriptionsForSSOStatusUpdate(@Param("statusSet") Set<StatusEnum> statusSet, Pageable pageable);
     UserSubscriptionModel findByIdAndDeleted(Long id, boolean deleted);
     UserSubscriptionModel findByIdAndOrderIdAndSubscriptionVariantIdAndDeleted(Long id, String orderId, Long variantId, boolean deleted);
     UserSubscriptionModel findByOrderIdAndSubscriptionVariantIdAndDeleted(String orderId, Long variantId, boolean deleted);
@@ -47,7 +51,7 @@ public interface UserSubscriptionRepository extends GenericJpaRepository<UserSub
     List<UserSubscriptionModel> findByOrderIdAndDeletedFalseAndOrderCompletedTrue(String orderId);
     Long countByUserMobileAndUserDeletedFalseAndStatusAndStartDateAfterAndDeletedFalseAndOrderCompletedTrue(String mobile, StatusEnum status, Date date1);
     UserSubscriptionModel findFirstByUserMobileAndUserDeletedFalseAndStatusAndStartDateAfterAndDeletedFalseAndOrderCompletedTrueOrderById(String mobile, StatusEnum status, Date date1);
-    List<UserSubscriptionModel> findByUserMobileAndUserDeletedFalseAndStatusInAndOrderCompletedTrueAndDeletedFalse(String mobile, Collection<StatusEnum> statusCollection);
+    List<UserSubscriptionModel> findByUserMobileAndUserDeletedFalseAndStatusInAndOrderCompletedTrueAndDeletedFalseOrderById(String mobile, Collection<StatusEnum> statusCollection);
     UserSubscriptionModel findByUserMobileAndUserDeletedFalseAndStatusAndDeletedAndOrderCompletedTrue(String mobile, StatusEnum status, boolean deleted);
     UserSubscriptionModel findFirstByUserMobileAndUserDeletedFalseAndStatusInAndDeletedFalseAndOrderCompletedTrueOrderByIdDesc(String mobile, Set<StatusEnum> statusSet);
     UserSubscriptionModel findByUserMobileAndUserDeletedFalseAndStatusAndOrderCompletedTrue(String mobile, StatusEnum statusEnum);
