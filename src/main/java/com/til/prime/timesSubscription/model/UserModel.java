@@ -86,4 +86,19 @@ public class UserModel extends BaseModel {
     public void setUserSubscriptions(List<UserSubscriptionModel> userSubscriptions) {
         this.userSubscriptions = userSubscriptions;
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("UserModel{");
+        sb.append("firstName='").append(firstName).append('\'');
+        sb.append(", lastName='").append(lastName).append('\'');
+        sb.append(", mobile='").append(mobile).append('\'');
+        sb.append(", email='").append(email).append('\'');
+        sb.append(", ssoId='").append(ssoId).append('\'');
+        sb.append(", city='").append(city).append('\'');
+        sb.append(", blocked=").append(blocked);
+        sb.append(", userSubscriptions=").append(userSubscriptions);
+        sb.append('}');
+        return sb.toString();
+    }
 }
