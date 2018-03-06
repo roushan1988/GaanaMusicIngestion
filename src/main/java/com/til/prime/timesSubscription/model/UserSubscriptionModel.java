@@ -227,29 +227,4 @@ public class UserSubscriptionModel extends BaseModel {
     public void setRefundedAmount(BigDecimal refundedAmount) {
         this.refundedAmount = refundedAmount;
     }
-
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("UserSubscriptionModel{");
-        sb.append("user=").append(user);
-        sb.append(", ticketId='").append(ticketId).append('\'');
-        sb.append(", subscriptionVariant=").append(subscriptionVariant);
-        sb.append(", orderId='").append(orderId).append('\'');
-        sb.append(", paymentMethod='").append(paymentMethod).append('\'');
-        sb.append(", paymentReference='").append(paymentReference).append('\'');
-        sb.append(", orderCompleted=").append(orderCompleted);
-        sb.append(", ssoCommunicated=").append(ssoCommunicated);
-        sb.append(", startDate=").append(startDate);
-        sb.append(", endDate=").append(endDate);
-        sb.append(", planStatus=").append(planStatus);
-        sb.append(", status=").append(status);
-        sb.append(", transactionStatus=").append(transactionStatus);
-        sb.append(", business=").append(business);
-        sb.append(", autoRenewal=").append(autoRenewal);
-        sb.append(", channel=").append(channel);
-        sb.append(", platform=").append(platform);
-        sb.append(", refundedAmount=").append(refundedAmount);
-        sb.append('}');
-        return sb.toString();
-    }
 }
