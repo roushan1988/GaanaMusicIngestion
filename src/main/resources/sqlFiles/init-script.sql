@@ -2,7 +2,8 @@ USE `times_subscription`;
 
 CREATE TABLE `user`(
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(64) NOT NULL,
+  `first_name` varchar(64) NOT NULL,
+  `last_name` varchar(64) DEFAULT NULL,
   `mobile` varchar(32) NOT NULL,
   `email` varchar(32) NOT NULL,
   `sso_id` varchar(64) NOT NULL,
@@ -23,7 +24,8 @@ CREATE TABLE `user_audit`(
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` int(11) NOT NULL,
   `event` varchar(128) NOT NULL,
-  `name` varchar(64) NOT NULL,
+  `first_name` varchar(64) NOT NULL,
+  `last_name` varchar(64) DEFAULT NULL,
   `mobile` varchar(32) NOT NULL,
   `email` varchar(32) NOT NULL,
   `sso_id` varchar(64) NOT NULL,
