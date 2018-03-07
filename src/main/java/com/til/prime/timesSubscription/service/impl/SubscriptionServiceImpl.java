@@ -474,6 +474,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             statusDTO = (SubscriptionStatusDTO) vw.get();
         }
         if(statusDTO == null && updateCache){ //cache update step
+            LOG.info("Into cache update step");
             UserSubscriptionModel userSubscriptionModel = null;
             userSubscriptionModel = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndStatusInAndDeletedFalseAndOrderCompletedTrueOrderByIdDesc(request.getUser().getMobile(), StatusEnum.VALID_USER_STATUS_HISTORY_SET);
             subscriptionValidationService.validatePostCheckStatus(request, userSubscriptionModel, validationResponse);
@@ -485,6 +486,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 }
             }
         }
+        LOG.info("SubscriptionStatusDTO: "+statusDTO);
+        LOG.info("Validation Response: "+validationResponse);
         return statusDTO;
     }
 
@@ -640,12 +643,19 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     @Override
     @Transactional
     public void updateUserStatus(UserSubscriptionModel userSubscriptionModel, UserModel userModel){
-        SubscriptionStatusDTO statusDTO = getSubscriptionStatusDTO(userSubscriptionModel, userModel);
-        if(userSubscriptionModel.getStatus()==StatusEnum.FUTURE){
-            return;
+        try{
+            LOG.info("Updating user status, userSubscription: "+userSubscriptionModel+", user: "+userModel);
+            SubscriptionStatusDTO statusDTO = getSubscriptionStatusDTO(userSubscriptionModel, userModel);
+            if(userSubscriptionModel.getStatus()==StatusEnum.FUTURE){
+                return;
+            }
+            String mobile = userSubscriptionModel.getUser().getMobile();
+            LOG.info("Status DTO: "+statusDTO);
+            cacheManager.getCache(RedisConstants.PRIME_STATUS_CACHE_KEY).put(mobile, statusDTO);
+        }catch (Exception e){
+            LOG.error("Exception while updateUserStatus: ", e);
+            throw e;
         }
-        String mobile = userSubscriptionModel.getUser().getMobile();
-        cacheManager.getCache(RedisConstants.PRIME_STATUS_CACHE_KEY).put(mobile, statusDTO);
     }
 
     private void updateUserDetailsInCache(UserModel userModel){
@@ -662,6 +672,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     private SubscriptionStatusDTO getSubscriptionStatusDTO(UserSubscriptionModel userSubscriptionModel, UserModel userModel){
+        LOG.info("UserSubscription: "+userSubscriptionModel);
+        LOG.info("User: "+userModel);
         SubscriptionStatusDTO statusDTO = new SubscriptionStatusDTO();
         if(userSubscriptionModel==null){
             if(userModel==null){
@@ -669,6 +681,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             }
             statusDTO.setBlocked(userModel.isBlocked());
             statusDTO.setPlanStatus(userModel.isBlocked()? PlanStatusEnum.BLOCKED.getCode(): PlanStatusEnum.INIT.getCode());
+            LOG.info("StatusDTO: "+statusDTO);
             return statusDTO;
         }
         StatusEnum status = userSubscriptionModel.getStatus();
@@ -694,6 +707,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         }
         statusDTO.setAutoRenewal(userSubscriptionModel.isAutoRenewal());
         statusDTO.setFirstName(userSubscriptionModel.getUser().getFirstName());
+        LOG.info("StatusDTO: "+statusDTO);
         return statusDTO;
     }
 
