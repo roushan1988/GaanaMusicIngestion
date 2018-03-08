@@ -36,6 +36,7 @@ public class CommunicationServiceHelperImpl implements CommunicationServiceHelpe
         emailTask.setFromName(GlobalConstants.EMAIL_NAME_FOR_COMMUNICATION);
         emailTask.setFromEmail(GlobalConstants.EMAIL_FOR_COMMUNICATION);
         Map<String, String> map = Maps.newHashMap();
+        map.put("firstName", userModel.getFirstName());
         map.put("startDate", SDF.format(userSubscriptionModels.get(0).getStartDate()));
         map.put("endDate", SDF.format(userSubscriptionModels.get(userSubscriptionModels.size()-1).getEndDate()));
         map.put("mobile", userModel.getMobile());
