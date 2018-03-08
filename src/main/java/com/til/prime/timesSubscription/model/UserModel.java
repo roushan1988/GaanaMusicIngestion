@@ -97,7 +97,6 @@ public class UserModel extends BaseModel {
         sb.append(", ssoId='").append(ssoId).append('\'');
         sb.append(", city='").append(city).append('\'');
         sb.append(", blocked=").append(blocked);
-        sb.append(", userSubscriptions=").append(userSubscriptions);
         sb.append('}');
         return sb.toString();
     }
