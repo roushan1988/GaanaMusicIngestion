@@ -57,7 +57,7 @@ public enum ValidationError {
 	INVALID_ENCRYPTION(1004, "Invalid Encryption", 1, 1),
 	BLOCKED_USER(1005, "Oops! Your account is temporarily suspended.", 1, 3),
 	INVALID_ACTIVATION_CODE(1006, "Oops! Your activation code is invalid.", 1, 3),
-	USER_ALREADY_PURCHASED_MULTIPLE_FUTURE_PLANS(1007, "Don't worry! We've got you covered for more than 2 years, Please continue enjoying all your offers and privileges.", 2, 3),
+	USER_ALREADY_PURCHASED_MULTIPLE_FUTURE_PLANS(1007, "Don't worry! We've got you covered for more than 2 years, Please continue enjoying all your offers and privileges.", 3, 3),
 	;
 
 	public static final Integer maxCategory = 2;
