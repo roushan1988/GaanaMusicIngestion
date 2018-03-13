@@ -85,7 +85,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
         }
         if(lastUserSubscription!=null){
             PreConditions.notGreater(lastUserSubscription.getSubscriptionVariant().getPlanType().getOrder(), PlanTypeEnum.valueOf(request.getPlanType()).getOrder(), ValidationError.INVALID_PLAN_TYPE, validationResponse);
-            PreConditions.notAfter(lastUserSubscription.getEndDate(), TimeUtils.addDaysInDate(new Date(), GlobalConstants.MAX_DAYS_DIFF_FOR_NEW_SUBSCRIPTION_PURCHASE), ValidationError.USER_PLAN_DOES_NOT_QUALIFY, validationResponse);
+            PreConditions.notAfter(lastUserSubscription.getEndDate(), TimeUtils.addDaysInDate(new Date(), GlobalConstants.MAX_DAYS_DIFF_FOR_NEW_SUBSCRIPTION_PURCHASE), ValidationError.USER_ALREADY_PURCHASED_MULTIPLE_FUTURE_PLANS, validationResponse);
             PreConditions.mustBeFalse(lastUserSubscription.getUser().isBlocked(), ValidationError.BLOCKED_USER, validationResponse);
         }
         if(crmRequest){
@@ -300,7 +300,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
         if(lastModel!=null){
             PreConditions.mustBeFalse(lastModel.getUser().isBlocked(), ValidationError.BLOCKED_USER, validationResponse);
             PreConditions.notGreater(lastModel.getSubscriptionVariant().getPlanType().getOrder(), PlanTypeEnum.valueOf(request.getPlanType()).getOrder(), ValidationError.INVALID_PLAN_TYPE, validationResponse);
-            PreConditions.notAfter(lastModel.getEndDate(), TimeUtils.addDaysInDate(new Date(), GlobalConstants.MAX_DAYS_DIFF_FOR_NEW_SUBSCRIPTION_PURCHASE), ValidationError.USER_PLAN_DOES_NOT_QUALIFY, validationResponse);
+            PreConditions.notAfter(lastModel.getEndDate(), TimeUtils.addDaysInDate(new Date(), GlobalConstants.MAX_DAYS_DIFF_FOR_NEW_SUBSCRIPTION_PURCHASE), ValidationError.USER_ALREADY_PURCHASED_MULTIPLE_FUTURE_PLANS, validationResponse);
         }
         return updateValid(validationResponse);
     }
