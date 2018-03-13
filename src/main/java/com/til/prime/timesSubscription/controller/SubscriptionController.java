@@ -7,13 +7,13 @@ import com.til.prime.timesSubscription.service.PropertyService;
 import com.til.prime.timesSubscription.service.SubscriptionService;
 import com.til.prime.timesSubscription.util.RequestUpdateUtil;
 import com.til.prime.timesSubscription.util.ResponseUtil;
-
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.ResourceUtils;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.ServletContext;
 import java.nio.file.Files;
 
 @Controller
@@ -21,11 +21,13 @@ import java.nio.file.Files;
 public class SubscriptionController {
 
     private static final Logger LOG = Logger.getLogger(SubscriptionController.class);
-    private static final String HEALTH_CHECK_FILE_PATH = "classpath:healthCheck.txt";
+    private static final String HEALTH_CHECK_FILE_PATH = "/WEB-INF/healthCheck.txt";
     @Autowired
     private SubscriptionService subscriptionService;
     @Autowired
     PropertyService propertyService;
+    @Autowired
+    ServletContext servletContext;
 
     @Loggable
     @RequestMapping(path="/getAllPlans", method = {RequestMethod.GET, RequestMethod.POST})
@@ -207,7 +209,7 @@ public class SubscriptionController {
     @RequestMapping(value = "/getServerStatus", method = RequestMethod.GET)
     @ResponseBody
     public String getServerStatus() throws Exception{
-        String property = new String(Files.readAllBytes((ResourceUtils.getFile(HEALTH_CHECK_FILE_PATH)).toPath()));
+        String property = new String(Files.readAllBytes((ResourceUtils.getFile(servletContext.getRealPath(HEALTH_CHECK_FILE_PATH)).toPath())));
         return (String) propertyService.getProperty(PropertyEnum.valueOf(property));
     }
     
