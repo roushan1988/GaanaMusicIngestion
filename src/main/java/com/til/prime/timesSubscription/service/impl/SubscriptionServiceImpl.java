@@ -467,6 +467,17 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         return response;
     }
 
+    public void test(){
+        SubscriptionStatusDTO statusDTO = null;
+            for(int i=1; i<100; i++){
+            Cache.ValueWrapper vw = cacheManager.getCache(RedisConstants.PRIME_STATUS_CACHE_KEY).get("9711096153");
+            if(vw!=null){
+                statusDTO = (SubscriptionStatusDTO) vw.get();
+            }
+            System.out.println(statusDTO);
+        }
+    }
+
     private SubscriptionStatusDTO getSubscriptionStatusWithValidation(CheckStatusRequest request, boolean updateCache, ValidationResponse validationResponse){
         SubscriptionStatusDTO statusDTO = null;
         Cache.ValueWrapper vw = cacheManager.getCache(RedisConstants.PRIME_STATUS_CACHE_KEY).get(request.getUser().getMobile());
@@ -643,18 +654,20 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     @Override
     @Transactional
     public void updateUserStatus(UserSubscriptionModel userSubscriptionModel, UserModel userModel){
-        try{
-            LOG.info("Updating user status, userSubscription: "+userSubscriptionModel+", user: "+userModel);
-            SubscriptionStatusDTO statusDTO = getSubscriptionStatusDTO(userSubscriptionModel, userModel);
-            if(userSubscriptionModel.getStatus()==StatusEnum.FUTURE){
-                return;
+        if(userSubscriptionModel!=null && userSubscriptionModel.isOrderCompleted() && StatusEnum.VALID_SSO_COMMUNICATION_STATUS_SET.contains(userSubscriptionModel.getStatus())){
+            try{
+                LOG.info("Updating user status, userSubscription: "+userSubscriptionModel+", user: "+userModel);
+                SubscriptionStatusDTO statusDTO = getSubscriptionStatusDTO(userSubscriptionModel, userModel);
+                if(userSubscriptionModel.getStatus()==StatusEnum.FUTURE){
+                    return;
+                }
+                String mobile = userSubscriptionModel.getUser().getMobile();
+                LOG.info("Status DTO: "+statusDTO);
+                cacheManager.getCache(RedisConstants.PRIME_STATUS_CACHE_KEY).put(mobile, statusDTO);
+            }catch (Exception e){
+                LOG.error("Exception while updateUserStatus: ", e);
+                throw e;
             }
-            String mobile = userSubscriptionModel.getUser().getMobile();
-            LOG.info("Status DTO: "+statusDTO);
-            cacheManager.getCache(RedisConstants.PRIME_STATUS_CACHE_KEY).put(mobile, statusDTO);
-        }catch (Exception e){
-            LOG.error("Exception while updateUserStatus: ", e);
-            throw e;
         }
     }
 
