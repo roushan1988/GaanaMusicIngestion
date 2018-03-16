@@ -71,11 +71,13 @@
         <property name="initialPoolSize" value="${jdbc.initialpoolsize}" />
         <property name="maxPoolSize" value="${jdbc.maxpoolsize}" />
         <property name="minPoolSize" value="${jdbc.minpoolsize}" />
+        <property name="acquireIncrement" value="${jdbc.acquireIncrement}" />
         <property name="checkoutTimeout" value="${jdbc.checkoutTimeout}" />
         <property name="maxStatements" value="${jdbc.maxStatements}" />
         <property name="testConnectionOnCheckin" value="false" />
         <property name="testConnectionOnCheckout" value="true" />
         <property name="maxIdleTime" value="${jdbc.maxIdleTime}" />
+        <property name="maxIdleTimeExcessConnections" value="${jdbc.maxIdleTimeExcessConnections}" />
         <property name="idleConnectionTestPeriod" value="${jdbc.idleConnectionTestPeriod}" />
     </bean>
     <bean id="jpaVendorAdapter"
