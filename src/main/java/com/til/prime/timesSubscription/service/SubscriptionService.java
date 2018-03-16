@@ -28,10 +28,12 @@ public interface SubscriptionService {
     void updateUserStatus(UserSubscriptionModel userSubscriptionModel, UserModel userModel);
     UserModel saveUserModel(UserModel userModel, EventEnum eventEnum);
     void updateUserStatus(UserSubscriptionModel userSubscriptionModel);
-    public String updateCacheForMobile(UpdateCacheForMobileRequest request);
-    public CustomerSearchDTOs customerSearchCRM(CustomerSearchRequest request);
-    public CustomerCRM customerDetailsCRM(CustomerSearchRequest request);
-    public OrderDetailsCRM getOrderDetailsCRM(OrderDetailsRequest request);
-    public OrderSearchResultsCRM orderSearchCRM(OrderSearchRequest request);
+    GenericResponse sendOtp(OtpRequest request);
+    GenericResponse verifyOtp(OtpVerificationRequest request);
+    String updateCacheForMobile(UpdateCacheForMobileRequest request);
+    CustomerSearchDTOs customerSearchCRM(CustomerSearchRequest request);
+    CustomerCRM customerDetailsCRM(CustomerSearchRequest request);
+    OrderDetailsCRM getOrderDetailsCRM(OrderDetailsRequest request);
+    OrderSearchResultsCRM orderSearchCRM(OrderSearchRequest request);
     BackendSubscriptionUserModel saveBackendSubscriptionUser(BackendSubscriptionUserModel user, EventEnum eventEnum);
 }

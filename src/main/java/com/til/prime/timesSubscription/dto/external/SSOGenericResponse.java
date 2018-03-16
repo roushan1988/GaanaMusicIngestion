@@ -1,6 +1,6 @@
 package com.til.prime.timesSubscription.dto.external;
 
-public class SSOProfileUpdateResponse {
+public class SSOGenericResponse {
     private int code;
     private String status;
     private String message;
@@ -31,7 +31,7 @@ public class SSOProfileUpdateResponse {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("SSOProfileUpdateResponse{");
+        final StringBuilder sb = new StringBuilder("SSOGenericResponse{");
         sb.append("code=").append(code);
         sb.append(", status='").append(status).append('\'');
         sb.append(", message='").append(message).append('\'');

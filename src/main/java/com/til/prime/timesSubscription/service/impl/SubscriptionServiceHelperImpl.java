@@ -475,6 +475,70 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
         return null;
     }
 
+    @Override
+    public GenericResponse prepareGenericResponse(GenericResponse response, ValidationResponse validationResponse) {
+        if(validationResponse.isValid()){
+            response = ResponseUtil.createSuccessResponse(response);
+        }else{
+            response = ResponseUtil.createFailureResponse(response, validationResponse, validationResponse.getMaxCategory());
+        }
+        return response;
+    }
+
+    @Override
+    public boolean sendOtp(String mobile, boolean resend){
+        int retryCount = GlobalConstants.API_RETRY_COUNT;
+        String url = resend? properties.getProperty(GlobalConstants.SSO_RESEND_OTP_URL_KEY) : properties.getProperty(GlobalConstants.SSO_SEND_OTP_URL_KEY);
+        RETRY_LOOP:
+        while (retryCount>0){
+            try{
+                Map<String, String> headers = Maps.newHashMap();
+                headers.put(GlobalConstants.CONTENT_TYPE, GlobalConstants.CONTENT_TYPE_JSON);
+                headers.put(GlobalConstants.SSO_API_KEY, properties.getProperty(GlobalConstants.SSO_OTP_API_KEY_PROPERTY));
+                Map<String, String> data = Maps.newHashMap();
+                data.put(GlobalConstants.SSO_MOBILE_KEY, mobile);
+                SSOGenericResponse response = httpConnectionUtils.requestWithHeaders(data, headers, url, SSOGenericResponse.class, GlobalConstants.POST);
+                if(response.getCode()==200 && GlobalConstants.SUCCESS.equals(response.getStatus()) && GlobalConstants.OK.equals(response.getMessage())){
+                    return true;
+                }
+                return false;
+            }catch (Exception e){
+                retryCount--;
+                if(retryCount>0){
+                    continue RETRY_LOOP;
+                }
+            }
+        }
+        return false;
+    }
+
+    @Override
+    public boolean verifyOtp(String mobile, String otp){
+        int retryCount = GlobalConstants.API_RETRY_COUNT;
+        RETRY_LOOP:
+        while (retryCount>0){
+            try{
+                Map<String, String> headers = Maps.newHashMap();
+                headers.put(GlobalConstants.CONTENT_TYPE, GlobalConstants.CONTENT_TYPE_JSON);
+                headers.put(GlobalConstants.SSO_API_KEY, properties.getProperty(GlobalConstants.SSO_OTP_API_KEY_PROPERTY));
+                Map<String, String> data = Maps.newHashMap();
+                data.put(GlobalConstants.SSO_MOBILE_KEY, mobile);
+                data.put(GlobalConstants.SSO_OTP_KEY, otp);
+                SSOGenericResponse response = httpConnectionUtils.requestWithHeaders(data, headers, properties.getProperty(GlobalConstants.SSO_VERIFY_OTP_URL_KEY), SSOGenericResponse.class, GlobalConstants.POST);
+                if(response.getCode()==200 && GlobalConstants.SUCCESS.equals(response.getStatus()) && GlobalConstants.OK.equals(response.getMessage())){
+                    return true;
+                }
+                return false;
+            }catch (Exception e){
+                retryCount--;
+                if(retryCount>0){
+                    continue RETRY_LOOP;
+                }
+            }
+        }
+        return false;
+    }
+
     private void updateSubscriptionChecksumForRenewSubscription(RenewSubscriptionRequest request) {
         try {
             StringBuilder sb = new StringBuilder();
@@ -529,7 +593,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
                 headers.put(GlobalConstants.SSOID, userSubscriptionModel.getUser().getSsoId());
                 headers.put(GlobalConstants.STATUS, Integer.toString(userSubscriptionModel.getPlanStatus().getCode()));
                 headers.put(GlobalConstants.PLATFORM, userSubscriptionModel.getPlatform().getSsoChannel());
-                SSOProfileUpdateResponse response = httpConnectionUtils.requestWithHeaders(Maps.newHashMap(), headers, properties.getProperty(GlobalConstants.SSO_UPDATE_PROFILE_URL_KEY), SSOProfileUpdateResponse.class, GlobalConstants.POST);
+                SSOGenericResponse response = httpConnectionUtils.requestWithHeaders(Maps.newHashMap(), headers, properties.getProperty(GlobalConstants.SSO_UPDATE_PROFILE_URL_KEY), SSOGenericResponse.class, GlobalConstants.POST);
                 if(response.getCode()==200 && GlobalConstants.SUCCESS.equals(response.getStatus()) && GlobalConstants.OK.equals(response.getMessage())){
                     return true;
                 }

@@ -34,6 +34,8 @@ public interface SubscriptionValidationService {
     ValidationResponse validatePreCheckStatusViaServer(CheckStatusRequest request, boolean external);
     ValidationResponse validatePostCheckStatus(CheckStatusRequest request, UserSubscriptionModel userSubscriptionModel, ValidationResponse validationResponse);
     ValidationResponse validateUser(GenericRequest request, ValidationResponse validationResponse);
+    ValidationResponse validateSendOtp(OtpRequest request);
+    ValidationResponse validateVerifyOtp(OtpVerificationRequest request);
     ValidationResponse validateCredentials(GenericRequest request, ValidationResponse validationResponse);
     ValidationResponse validateEncryptionForSubmitPurchase(SubmitPurchaseRequest request, ValidationResponse validationResponse);
     ValidationResponse validateEncryptionForOrder(GenerateOrderRequest request, ValidationResponse validationResponse);

@@ -35,6 +35,13 @@ public class GlobalConstants {
     public static final long MAX_BACKEND_SUBSCRIPTION_DAYS = 365l;
     public static final String CONTENT_TYPE_JSON = "application/json";
     public static final String CONTENT_TYPE = "Content-Type";
+    public static final String SSO_API_KEY = "apikey";
+    public static final String SSO_OTP_API_KEY_PROPERTY = "sso.otp.apikey";
+    public static final String SSO_MOBILE_KEY = "mobile";
+    public static final String SSO_OTP_KEY = "otp";
+    public static final String SSO_SEND_OTP_URL_KEY = "sso.send.otp.url";
+    public static final String SSO_RESEND_OTP_URL_KEY = "sso.resend.otp.url";
+    public static final String SSO_VERIFY_OTP_URL_KEY = "sso.verify.otp.url";
     public static final String GET = "GET";
     public static final String POST = "POST";
     public static final String SUCCESS = "SUCCESS";

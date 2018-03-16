@@ -40,5 +40,7 @@ public interface SubscriptionServiceHelper {
     boolean renewSubscription(UserSubscriptionModel userSubscriptionModel);
     RefundInternalResponse refundPayment(String orderId, Double refundAmount, boolean forceAmount);
     String shortenUrl(String longUrl);
-
+    GenericResponse prepareGenericResponse(GenericResponse response, ValidationResponse validationResponse);
+    boolean sendOtp(String mobile, boolean resend);
+    boolean verifyOtp(String mobile, String otp);
 }

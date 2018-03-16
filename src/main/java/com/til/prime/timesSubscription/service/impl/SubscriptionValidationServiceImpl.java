@@ -12,7 +12,6 @@ import com.til.prime.timesSubscription.util.GenericUtils;
 import com.til.prime.timesSubscription.util.PreConditions;
 import com.til.prime.timesSubscription.util.RestTemplateUtil;
 import com.til.prime.timesSubscription.util.TimeUtils;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -20,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-
 import java.util.*;
 
 @Service
@@ -359,6 +357,27 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
                 PreConditions.validEmail(request.getUser().getEmail(), ValidationError.INVALID_EMAIL, validationResponse);
             }
         }
+        return updateValid(validationResponse);
+    }
+
+    @Override
+    public ValidationResponse validateSendOtp(OtpRequest request) {
+        ValidationResponse validationResponse = new ValidationResponse();
+        PreConditions.notNull(request.getUser(), ValidationError.INVALID_USER, validationResponse);
+        if(request.getUser()!=null){
+            PreConditions.notEmpty(request.getUser().getMobile(), ValidationError.INVALID_MOBILE, validationResponse);
+        }
+        return updateValid(validationResponse);
+    }
+
+    @Override
+    public ValidationResponse validateVerifyOtp(OtpVerificationRequest request) {
+        ValidationResponse validationResponse = new ValidationResponse();
+        PreConditions.notNull(request.getUser(), ValidationError.INVALID_USER, validationResponse);
+        if(request.getUser()!=null){
+            PreConditions.notEmpty(request.getUser().getMobile(), ValidationError.INVALID_MOBILE, validationResponse);
+        }
+        PreConditions.notEmpty(request.getOtp(), ValidationError.INVALID_OTP, validationResponse);
         return updateValid(validationResponse);
     }
 

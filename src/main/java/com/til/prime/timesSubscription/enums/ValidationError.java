@@ -24,6 +24,8 @@ public enum ValidationError {
 	ORDER_ALREADY_COMPLETED(15, "Order Already Completed", 1, 1),
 	INVALID_PLAN_TYPE(16, "Oops! Something went wrong. Please try again.", 1, 1),
 	USER_PLAN_DOES_NOT_QUALIFY(17, "Oops! Something went wrong. Please try again.", 2, 1),
+	OTP_SENDING_ERROR(17, "Oops! Something went wrong. Please try again.", 2, 1),
+	OTP_VERIFICATION_ERROR(17, "Oops! Something went wrong. Please try again.", 2, 1),
 	INVALID_USER_SUBSCRIPTION_ID(18, "Invalid User Subscription Id", 1, 1),
 	INVALID_PAYMENT_METHOD(19, "Invalid Payment Method", 1, 1),
 	INVALID_PAYMENT_REFERENCE(20, "Invalid Payment Reference", 1, 1),
@@ -58,6 +60,7 @@ public enum ValidationError {
 	BLOCKED_USER(1005, "Oops! Your account is temporarily suspended.", 1, 3),
 	INVALID_ACTIVATION_CODE(1006, "Oops! Your activation code is invalid.", 1, 3),
 	USER_ALREADY_PURCHASED_MULTIPLE_FUTURE_PLANS(1007, "Don't worry! We've got you covered for more than 2 years, Please continue enjoying all your offers and privileges.", 3, 3),
+	INVALID_OTP(1007, "Please enter correct otp.", 1, 2),
 	;
 
 	public static final Integer maxCategory = 2;
