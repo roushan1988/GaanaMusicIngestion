@@ -7,11 +7,11 @@ public class OrderSearchResultCRM {
 	
 	private String orderId;
 	private String orderDetail;
-	private Date orderDate;
+	private Date orderDateVal;
 	private Double amount;
 	private String currentStatus;
-	private Date expiryDate;
-	private boolean isAutoRenewal;
+	private Date expiryDateVal;
+	private boolean autoRenewal;
 	
 	public String getOrderId() {
 		return orderId;
@@ -42,21 +42,22 @@ public class OrderSearchResultCRM {
 
 
 	public boolean isAutoRenewal() {
-		return isAutoRenewal;
+		return autoRenewal;
 	}
-	public void setAutoRenewal(boolean isAutoRenewal) {
-		this.isAutoRenewal = isAutoRenewal;
+	public void setAutoRenewal(boolean autoRenewal) {
+		this.autoRenewal = autoRenewal;
 	}
-	public Date getOrderDate() {
-		return orderDate;
+	public Date getOrderDateVal() {
+		return orderDateVal;
 	}
-	public void setOrderDate(Date orderDate) {
-		this.orderDate = orderDate;
+	public void setOrderDateVal(Date orderDateVal) {
+		this.orderDateVal = orderDateVal;
 	}
-	public Date getExpiryDate() {
-		return expiryDate;
+	public Date getExpiryDateVal() {
+		return expiryDateVal;
 	}
-	public void setExpiryDate(Date expiryDate) {
-		this.expiryDate = expiryDate;
+	public void setExpiryDateVal(Date expiryDateVal) {
+		this.expiryDateVal = expiryDateVal;
 	}
+
 }

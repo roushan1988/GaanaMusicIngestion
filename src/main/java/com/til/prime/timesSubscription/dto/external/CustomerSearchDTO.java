@@ -10,8 +10,10 @@ public class CustomerSearchDTO {
     private String email;
     private String city;
     private Date dateOfActivation;
+    private Date dateOfActivationValSubs;
     private String currentStatus;
     private Date expiryDate;
+    private Date expiryDateValSubs;
     
     public String getSsoId() {
         return ssoId;
@@ -96,6 +98,22 @@ public class CustomerSearchDTO {
 
 	public void setExpiryDate(Date expiryDate) {
 		this.expiryDate = expiryDate;
+	}
+
+	public Date getDateOfActivationValSubs() {
+		return dateOfActivationValSubs;
+	}
+
+	public void setDateOfActivationValSubs(Date dateOfActivationValSubs) {
+		this.dateOfActivationValSubs = dateOfActivationValSubs;
+	}
+
+	public Date getExpiryDateValSubs() {
+		return expiryDateValSubs;
+	}
+
+	public void setExpiryDateValSubs(Date expiryDateValSubs) {
+		this.expiryDateValSubs = expiryDateValSubs;
 	}
 
 }

@@ -15,9 +15,11 @@ public class CustomerCRM {
 	private String name;
 	
 	private Date activationDate;
+	private Date activationDateValSubs;
 	private String subscriptionStatus;
 	private Date expiryDate;
-	
+	private Date expiryDateValSubs;
+
 	private Double timesPointsBalance;
 	private Double paytmBalance;
 	private Double mobikwikBalance;	
@@ -26,6 +28,7 @@ public class CustomerCRM {
 	private boolean autoRenewalStatus;
 	private boolean blockedStatus;
 	private Date blockedDate;
+	private Date blockedDateValSubs;
 	
 	private OrderSearchResultsCRM orderSearchResultsCRM;
 	private boolean futureSubscriptionExists;
@@ -170,6 +173,24 @@ public class CustomerCRM {
 	}
 	public void setBlockedDate(Date blockedDate) {
 		this.blockedDate = blockedDate;
+	}
+	public Date getActivationDateValSubs() {
+		return activationDateValSubs;
+	}
+	public void setActivationDateValSubs(Date activationDateValSubs) {
+		this.activationDateValSubs = activationDateValSubs;
+	}
+	public Date getExpiryDateValSubs() {
+		return expiryDateValSubs;
+	}
+	public void setExpiryDateValSubs(Date expiryDateValSubs) {
+		this.expiryDateValSubs = expiryDateValSubs;
+	}
+	public Date getBlockedDateValSubs() {
+		return blockedDateValSubs;
+	}
+	public void setBlockedDateValSubs(Date blockedDateValSubs) {
+		this.blockedDateValSubs = blockedDateValSubs;
 	}
 	
 }

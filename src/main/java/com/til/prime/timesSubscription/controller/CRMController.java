@@ -8,25 +8,30 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.google.gson.Gson;
 import com.til.prime.timesSubscription.aspect.Loggable;
 import com.til.prime.timesSubscription.dao.UserSubscriptionRepository;
 import com.til.prime.timesSubscription.dto.external.BlockUnblockRequest;
 import com.til.prime.timesSubscription.dto.external.CRMInitPurchaseRequest;
 import com.til.prime.timesSubscription.dto.external.CancelSubscriptionResponse;
 import com.til.prime.timesSubscription.dto.external.CancelSubscriptionServerRequest;
-import com.til.prime.timesSubscription.dto.external.CustomerCRM;
-import com.til.prime.timesSubscription.dto.external.CustomerSearchDTOs;
+import com.til.prime.timesSubscription.dto.external.CustomerDetailsCRMResponse;
+import com.til.prime.timesSubscription.dto.external.CustomerSearchCRMResponse;
 import com.til.prime.timesSubscription.dto.external.CustomerSearchRequest;
 import com.til.prime.timesSubscription.dto.external.ExtendExpiryRequest;
 import com.til.prime.timesSubscription.dto.external.ExtendExpiryResponse;
 import com.til.prime.timesSubscription.dto.external.GenericResponse;
 import com.til.prime.timesSubscription.dto.external.InitPurchaseResponse;
+import com.til.prime.timesSubscription.dto.external.OrderDetailsCRMResponse;
 import com.til.prime.timesSubscription.dto.external.OrderDetailsRequest;
+import com.til.prime.timesSubscription.dto.external.OrderSearchCRMResponse;
 import com.til.prime.timesSubscription.dto.external.OrderSearchRequest;
+import com.til.prime.timesSubscription.dto.external.PropertyDataGetResponseCRM;
+import com.til.prime.timesSubscription.dto.external.PropertyDataRequestCRM;
+import com.til.prime.timesSubscription.dto.external.PropertyDataUpdateRequestCRM;
 import com.til.prime.timesSubscription.dto.external.PurchaseHistoryRequest;
 import com.til.prime.timesSubscription.dto.external.PurchaseHistoryResponse;
 import com.til.prime.timesSubscription.dto.external.UpdateCacheForMobileRequest;
+import com.til.prime.timesSubscription.service.PropertyService;
 import com.til.prime.timesSubscription.service.SubscriptionService;
 import com.til.prime.timesSubscription.util.ResponseUtil;
 
@@ -42,6 +47,9 @@ public class CRMController {
     @Autowired
     private UserSubscriptionRepository userSubscriptionRepository;
 
+    @Autowired
+    PropertyService propertyService;
+    
     @Loggable
     @RequestMapping(path="/getPurchaseHistory", method = RequestMethod.GET)
     @ResponseBody
@@ -88,7 +96,7 @@ public class CRMController {
         try {
             return subscriptionService.blockUnblockUser(request);
         }catch (Exception e){
-            LOG.error("Exception in blockUser: ", e);
+            LOG.error("Exception in blockUnblockUser: ", e);
             GenericResponse response = new GenericResponse();
             return ResponseUtil.createExceptionResponse(response, 10);
         }
@@ -112,23 +120,22 @@ public class CRMController {
     @Loggable
     @RequestMapping(path="/server/updateCacheForMobile", method = RequestMethod.POST)
     @ResponseBody
-    public String updateCacheForMobile(@RequestBody UpdateCacheForMobileRequest request){
+    public GenericResponse updateCacheForMobile(@RequestBody UpdateCacheForMobileRequest request){
         try {
         	return subscriptionService.updateCacheForMobile(request);
         }catch (Exception e){
             LOG.error("Exception in updateCacheForMobile: ", e);
-            return "FAILED";
+            GenericResponse response = new GenericResponse();
+            return ResponseUtil.createExceptionResponse(response, 10);
         }
     }
 
-    
     @Loggable
     @RequestMapping(path="/server/customerSearchCRM", method = RequestMethod.POST)
     @ResponseBody
-    public String customerSearchCRM(@RequestBody CustomerSearchRequest request){
+    public CustomerSearchCRMResponse customerSearchCRM(@RequestBody CustomerSearchRequest request){
         try {
-        	CustomerSearchDTOs customerSearchDTOs = subscriptionService.customerSearchCRM(request);
-        	return new Gson().toJson(customerSearchDTOs);
+        	return subscriptionService.customerSearchCRM(request);
         }catch (Exception e){
             LOG.error("Exception in customerSearchCRM: ", e);
             return null;
@@ -139,10 +146,9 @@ public class CRMController {
     @Loggable
     @RequestMapping(path="/server/customerDetailsCRM", method = RequestMethod.POST)
     @ResponseBody
-    public String customerDetailsCRM(@RequestBody CustomerSearchRequest request){
+    public CustomerDetailsCRMResponse customerDetailsCRM(@RequestBody CustomerSearchRequest request){
         try {
-        	CustomerCRM customerCRM = subscriptionService.customerDetailsCRM(request);
-        	return new Gson().toJson(customerCRM);
+        	return subscriptionService.customerDetailsCRM(request);
         }catch (Exception e){
             LOG.error("Exception in customerDetailsCRM: ", e);
             return null;
@@ -153,40 +159,75 @@ public class CRMController {
     @Loggable
     @RequestMapping(path="/server/orderDetailsCRM", method = RequestMethod.POST)
     @ResponseBody
-    public String orderDetailsCRM(@RequestBody OrderDetailsRequest request){
+    public OrderDetailsCRMResponse orderDetailsCRM(@RequestBody OrderDetailsRequest request){
         try {
 
-        	return new Gson().toJson(subscriptionService.getOrderDetailsCRM(request));
+        	return subscriptionService.getOrderDetailsCRM(request);
 		} catch (Exception e) {
-            LOG.error("Exception in customerDetailsCRM: ", e);
-            return null;
+            LOG.error("Exception in orderDetailsCRM: ", e);
+            OrderDetailsCRMResponse response = new OrderDetailsCRMResponse();
+            return (OrderDetailsCRMResponse) ResponseUtil.createExceptionResponse(response, 10);
 		}
     }
-    
-
-    @Loggable
-    @RequestMapping(path="/server/orderSearchCRM", method = RequestMethod.POST)
-    @ResponseBody
-    public String orderSearchCRM(@RequestBody OrderSearchRequest request){
-        try {
-
-        	return new Gson().toJson(subscriptionService.orderSearchCRM(request));
+    	    
+	@Loggable
+	@RequestMapping(path="/server/orderSearchCRM", method = RequestMethod.POST)
+	@ResponseBody
+	public OrderSearchCRMResponse orderSearchCRM(@RequestBody OrderSearchRequest orderSearchRequest){
+		OrderSearchCRMResponse orderSearchCRMResponse = null;
+		
+		try {
+	    	orderSearchCRMResponse = subscriptionService.orderSearchCRM(orderSearchRequest);
+	    	return orderSearchCRMResponse;
 		} catch (Exception e) {
-            LOG.error("Exception in customerDetailsCRM: ", e);
-            return null;
+	        LOG.error("Exception in orderDetailsCRM: ", e);
+	        OrderSearchCRMResponse response = new OrderSearchCRMResponse();
+            return (OrderSearchCRMResponse) ResponseUtil.createExceptionResponse(response, 10);
 		}
-    }
-    
+	}
+	 
+
     @Loggable
     @RequestMapping(path="/server/renewSubscription", method = RequestMethod.POST)
     @ResponseBody
-    public String renewSubscription(@RequestBody CRMInitPurchaseRequest request){
+    public InitPurchaseResponse renewSubscription(@RequestBody CRMInitPurchaseRequest request){
         try {
 
-        	return new Gson().toJson(subscriptionService.initPurchasePlan(request, true, request.isFree()));
+        	return subscriptionService.initPurchasePlan(request, true, request.isFree());
         } catch (Exception e) {
-            LOG.error("Exception in customerDetailsCRM: ", e);
-            return null;
+            LOG.error("Exception in renewSubscription: ", e);
+            InitPurchaseResponse response = new InitPurchaseResponse();
+            return (InitPurchaseResponse) ResponseUtil.createExceptionResponse(response, 10);
 		}
     }
+
+
+    @Loggable
+    @RequestMapping(path="/server/getPropertyTableData", method = RequestMethod.POST)
+    @ResponseBody
+    public PropertyDataGetResponseCRM getPropertyTableData(@RequestBody PropertyDataRequestCRM request){
+        try {
+
+        	return subscriptionService.getPropertyTableData(request);
+		} catch (Exception e) {
+            LOG.error("Exception in getPropertyTableData: ", e);
+            PropertyDataGetResponseCRM response = new PropertyDataGetResponseCRM();
+            return (PropertyDataGetResponseCRM) ResponseUtil.createExceptionResponse(response, 10);
+		}
+    }
+
+    @Loggable
+    @RequestMapping(path="/server/updatePropertyTableData", method = RequestMethod.POST)
+    @ResponseBody
+    public GenericResponse updatePropertyTableData(@RequestBody PropertyDataUpdateRequestCRM request){
+        try {
+
+        	return subscriptionService.updatePropertyTableData(request);
+		} catch (Exception e) {
+            LOG.error("Exception in updatePropertyTableData: ", e);
+            GenericResponse response = new GenericResponse();
+            return ResponseUtil.createExceptionResponse(response, 10);
+		}
+    }
+    
 }

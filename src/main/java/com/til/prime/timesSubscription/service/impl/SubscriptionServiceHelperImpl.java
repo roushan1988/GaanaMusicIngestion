@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.util.*;
@@ -607,5 +608,73 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
         }
         return false;
     }
+    
+    @Override
+    public OrderSearchCRMResponse prepareOrderSearchResponse(OrderSearchCRMResponse orderSearchCRMResponse, OrderSearchResultsCRM orderSearchResultsCRM, ValidationResponse validationResponse) {
+        if(validationResponse.isValid()){
+        	orderSearchCRMResponse.setOrderSearchResultsCRM(orderSearchResultsCRM);
+        	orderSearchCRMResponse = (OrderSearchCRMResponse) ResponseUtil.createSuccessResponse(orderSearchCRMResponse);
+        }else{
+        	orderSearchCRMResponse = (OrderSearchCRMResponse) ResponseUtil.createFailureResponse(orderSearchCRMResponse, validationResponse, validationResponse.getMaxCategory());
+        }
+        return orderSearchCRMResponse;
+    }
+    
+    @Override
+    public PropertyDataGetResponseCRM preparePropertyDataGetResponse(PropertyDataGetResponseCRM propertyDataGetResponseCRM, Map<PropertyEnum, Object> propertyMap, ValidationResponse validationResponse){
+        if(validationResponse.isValid()){
+        	propertyDataGetResponseCRM.setSubscription_property_data(propertyMap);
+        	propertyDataGetResponseCRM = (PropertyDataGetResponseCRM) ResponseUtil.createSuccessResponse(propertyDataGetResponseCRM);
+        }else{
+        	propertyDataGetResponseCRM = (PropertyDataGetResponseCRM) ResponseUtil.createFailureResponse(propertyDataGetResponseCRM, validationResponse, validationResponse.getMaxCategory());
+        }
+        return propertyDataGetResponseCRM;
+    }
 
+    @Override
+    public GenericResponse prepareUpdateCacheResponse(GenericResponse response, ValidationResponse validationResponse) {
+        if(validationResponse.isValid()){
+            response = ResponseUtil.createSuccessResponse(response);
+        }else{
+            response = ResponseUtil.createFailureResponse(response, validationResponse, validationResponse.getMaxCategory());
+        }
+        return response;
+    }
+    
+    @Override
+    public OrderDetailsCRMResponse prepareOrderDetailsResponse(OrderDetailsCRMResponse orderDetailsCRMResponse, OrderDetailsCRM orderDetailsCRM, ValidationResponse validationResponse){
+        if(validationResponse.isValid()){
+        	orderDetailsCRMResponse.setOrderDetailsCRM(orderDetailsCRM);
+        	orderDetailsCRMResponse = (OrderDetailsCRMResponse) ResponseUtil.createSuccessResponse(orderDetailsCRMResponse);
+        }else{
+        	orderDetailsCRMResponse = (OrderDetailsCRMResponse) ResponseUtil.createFailureResponse(orderDetailsCRMResponse, validationResponse, validationResponse.getMaxCategory());
+        }
+        return orderDetailsCRMResponse;
+    }
+
+    @Override    
+    public CustomerDetailsCRMResponse prepareCustomerDetailsResponse(CustomerDetailsCRMResponse customerDetailsCRMResponse, CustomerCRM customerCRM, ValidationResponse validationResponse){
+        if(validationResponse.isValid()){
+        	customerDetailsCRMResponse.setCustomerCRM(customerCRM);
+        	customerDetailsCRMResponse = (CustomerDetailsCRMResponse) ResponseUtil.createSuccessResponse(customerDetailsCRMResponse);
+        }else{
+        	customerDetailsCRMResponse = (CustomerDetailsCRMResponse) ResponseUtil.createFailureResponse(customerDetailsCRMResponse, validationResponse, validationResponse.getMaxCategory());
+        }
+        return customerDetailsCRMResponse;
+    }
+    
+    
+    @Override    
+    public CustomerSearchCRMResponse prepareCustomerSearchCRMResponse(CustomerSearchCRMResponse customerSearchCRMResponse, CustomerSearchDTOs customerSearchDTOs, ValidationResponse validationResponse){
+        if(validationResponse.isValid()){
+        	customerSearchCRMResponse.setCustomerSearchDTOs(customerSearchDTOs);
+        	customerSearchCRMResponse = (CustomerSearchCRMResponse) ResponseUtil.createSuccessResponse(customerSearchCRMResponse);
+        }else{
+        	customerSearchCRMResponse = (CustomerSearchCRMResponse) ResponseUtil.createFailureResponse(customerSearchCRMResponse, validationResponse, validationResponse.getMaxCategory());
+        }
+        return customerSearchCRMResponse;
+    }
+
+    
+    
 }

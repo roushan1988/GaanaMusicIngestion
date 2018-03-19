@@ -1,13 +1,56 @@
 package com.til.prime.timesSubscription.service;
 
-import com.til.prime.timesSubscription.dto.external.*;
-import com.til.prime.timesSubscription.dto.internal.RefundInternalResponse;
-import com.til.prime.timesSubscription.enums.*;
-import com.til.prime.timesSubscription.model.*;
-
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+
+import com.til.prime.timesSubscription.dto.external.BackendActivationUserDTO;
+import com.til.prime.timesSubscription.dto.external.BackendSubscriptionActivationResponse;
+import com.til.prime.timesSubscription.dto.external.BackendSubscriptionResponse;
+import com.til.prime.timesSubscription.dto.external.CancelSubscriptionResponse;
+import com.til.prime.timesSubscription.dto.external.CheckStatusResponse;
+import com.til.prime.timesSubscription.dto.external.CustomerCRM;
+import com.til.prime.timesSubscription.dto.external.CustomerDetailsCRMResponse;
+import com.til.prime.timesSubscription.dto.external.CustomerSearchCRMResponse;
+import com.til.prime.timesSubscription.dto.external.CustomerSearchDTO;
+import com.til.prime.timesSubscription.dto.external.CustomerSearchDTOs;
+import com.til.prime.timesSubscription.dto.external.ExtendExpiryResponse;
+import com.til.prime.timesSubscription.dto.external.GenerateOrderRequest;
+import com.til.prime.timesSubscription.dto.external.GenerateOrderResponse;
+import com.til.prime.timesSubscription.dto.external.GenericRequest;
+import com.til.prime.timesSubscription.dto.external.GenericResponse;
+import com.til.prime.timesSubscription.dto.external.GenericValidationResponse;
+import com.til.prime.timesSubscription.dto.external.InitPurchaseRequest;
+import com.til.prime.timesSubscription.dto.external.InitPurchaseResponse;
+import com.til.prime.timesSubscription.dto.external.OrderDetailsCRM;
+import com.til.prime.timesSubscription.dto.external.OrderDetailsCRMResponse;
+import com.til.prime.timesSubscription.dto.external.OrderSearchCRMResponse;
+import com.til.prime.timesSubscription.dto.external.OrderSearchResultsCRM;
+import com.til.prime.timesSubscription.dto.external.PlanListResponse;
+import com.til.prime.timesSubscription.dto.external.PropertyDataGetResponseCRM;
+import com.til.prime.timesSubscription.dto.external.PurchaseHistoryResponse;
+import com.til.prime.timesSubscription.dto.external.SubmitPurchaseRequest;
+import com.til.prime.timesSubscription.dto.external.SubmitPurchaseResponse;
+import com.til.prime.timesSubscription.dto.external.SubscriptionPlanDTO;
+import com.til.prime.timesSubscription.dto.external.SubscriptionStatusDTO;
+import com.til.prime.timesSubscription.dto.external.UserDTO;
+import com.til.prime.timesSubscription.dto.external.UserSubscriptionDTO;
+import com.til.prime.timesSubscription.dto.external.ValidationResponse;
+import com.til.prime.timesSubscription.dto.internal.RefundInternalResponse;
+import com.til.prime.timesSubscription.enums.ChannelEnum;
+import com.til.prime.timesSubscription.enums.EventEnum;
+import com.til.prime.timesSubscription.enums.PlanTypeEnum;
+import com.til.prime.timesSubscription.enums.PlatformEnum;
+import com.til.prime.timesSubscription.enums.PropertyEnum;
+import com.til.prime.timesSubscription.enums.ValidationError;
+import com.til.prime.timesSubscription.model.BackendSubscriptionUserAuditModel;
+import com.til.prime.timesSubscription.model.BackendSubscriptionUserModel;
+import com.til.prime.timesSubscription.model.SubscriptionVariantModel;
+import com.til.prime.timesSubscription.model.UserAuditModel;
+import com.til.prime.timesSubscription.model.UserModel;
+import com.til.prime.timesSubscription.model.UserSubscriptionAuditModel;
+import com.til.prime.timesSubscription.model.UserSubscriptionModel;
 
 public interface SubscriptionServiceHelper {
     UserSubscriptionModel generateInitPurchaseUserSubscription(InitPurchaseRequest request, SubscriptionVariantModel variantModel, UserSubscriptionModel lastUserSubscription, UserModel userModel, BigDecimal price, boolean crmRequest, boolean free);
@@ -40,6 +83,12 @@ public interface SubscriptionServiceHelper {
     boolean renewSubscription(UserSubscriptionModel userSubscriptionModel);
     RefundInternalResponse refundPayment(String orderId, Double refundAmount, boolean forceAmount);
     String shortenUrl(String longUrl);
+    OrderSearchCRMResponse prepareOrderSearchResponse(OrderSearchCRMResponse response, OrderSearchResultsCRM orderSearchResultsCRM, ValidationResponse validationResponse);
+    PropertyDataGetResponseCRM preparePropertyDataGetResponse(PropertyDataGetResponseCRM response, Map<PropertyEnum, Object> propertyMap, ValidationResponse validationResponse);
+    GenericResponse prepareUpdateCacheResponse(GenericResponse response, ValidationResponse validationResponse);
+    OrderDetailsCRMResponse prepareOrderDetailsResponse(OrderDetailsCRMResponse orderDetailsCRMResponse, OrderDetailsCRM orderDetailsCRM, ValidationResponse validationResponse);
+    CustomerDetailsCRMResponse prepareCustomerDetailsResponse(CustomerDetailsCRMResponse customerDetailsCRMResponse, CustomerCRM customerCRM, ValidationResponse validationResponse);
+    CustomerSearchCRMResponse prepareCustomerSearchCRMResponse(CustomerSearchCRMResponse customerSearchCRMResponse, CustomerSearchDTOs customerSearchDTOs, ValidationResponse validationResponse);
     GenericResponse prepareGenericResponse(GenericResponse response, ValidationResponse validationResponse);
     boolean sendOtp(String mobile, boolean resend);
     boolean verifyOtp(String mobile, String otp);

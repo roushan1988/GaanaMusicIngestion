@@ -1,16 +1,19 @@
 package com.til.prime.timesSubscription.service.impl;
 
-import com.til.prime.timesSubscription.constants.GlobalConstants;
-import com.til.prime.timesSubscription.constants.RedisConstants;
-import com.til.prime.timesSubscription.convertor.ModelToDTOConvertorUtil;
-import com.til.prime.timesSubscription.dao.*;
-import com.til.prime.timesSubscription.dto.external.*;
-import com.til.prime.timesSubscription.dto.internal.RefundInternalResponse;
-import com.til.prime.timesSubscription.enums.*;
-import com.til.prime.timesSubscription.model.*;
-import com.til.prime.timesSubscription.service.*;
-import com.til.prime.timesSubscription.util.TimeUtils;
-import com.til.prime.timesSubscription.util.UniqueIdGeneratorUtil;
+import java.math.BigDecimal;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+
+import javax.annotation.Resource;
+import javax.ws.rs.HEAD;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -23,10 +26,95 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
-import java.math.BigDecimal;
-import java.nio.charset.Charset;
-import java.util.*;
+import com.til.prime.timesSubscription.constants.GlobalConstants;
+import com.til.prime.timesSubscription.constants.RedisConstants;
+import com.til.prime.timesSubscription.convertor.ModelToDTOConvertorUtil;
+import com.til.prime.timesSubscription.dao.BackendSubscriptionUserAuditRepository;
+import com.til.prime.timesSubscription.dao.BackendSubscriptionUserRepository;
+import com.til.prime.timesSubscription.dao.SubscriptionPlanRepository;
+import com.til.prime.timesSubscription.dao.SubscriptionVariantRepository;
+import com.til.prime.timesSubscription.dao.UserAuditRepository;
+import com.til.prime.timesSubscription.dao.UserRepository;
+import com.til.prime.timesSubscription.dao.UserSubscriptionAuditRepository;
+import com.til.prime.timesSubscription.dao.UserSubscriptionRepository;
+import com.til.prime.timesSubscription.dto.external.BackendActivationUserDTO;
+import com.til.prime.timesSubscription.dto.external.BackendSubscriptionActivationRequest;
+import com.til.prime.timesSubscription.dto.external.BackendSubscriptionActivationResponse;
+import com.til.prime.timesSubscription.dto.external.BackendSubscriptionRequest;
+import com.til.prime.timesSubscription.dto.external.BackendSubscriptionResponse;
+import com.til.prime.timesSubscription.dto.external.BackendSubscriptionValidationResponse;
+import com.til.prime.timesSubscription.dto.external.BlockUnblockRequest;
+import com.til.prime.timesSubscription.dto.external.CancelSubscriptionRequest;
+import com.til.prime.timesSubscription.dto.external.CancelSubscriptionResponse;
+import com.til.prime.timesSubscription.dto.external.CancelSubscriptionServerRequest;
+import com.til.prime.timesSubscription.dto.external.CheckEligibilityRequest;
+import com.til.prime.timesSubscription.dto.external.CheckStatusRequest;
+import com.til.prime.timesSubscription.dto.external.CheckStatusResponse;
+import com.til.prime.timesSubscription.dto.external.CheckValidVariantRequest;
+import com.til.prime.timesSubscription.dto.external.CustomerCRM;
+import com.til.prime.timesSubscription.dto.external.CustomerDetailsCRMResponse;
+import com.til.prime.timesSubscription.dto.external.CustomerSearchCRMResponse;
+import com.til.prime.timesSubscription.dto.external.CustomerSearchDTO;
+import com.til.prime.timesSubscription.dto.external.CustomerSearchDTOs;
+import com.til.prime.timesSubscription.dto.external.CustomerSearchRequest;
+import com.til.prime.timesSubscription.dto.external.ExtendExpiryRequest;
+import com.til.prime.timesSubscription.dto.external.ExtendExpiryResponse;
+import com.til.prime.timesSubscription.dto.external.GenerateOrderRequest;
+import com.til.prime.timesSubscription.dto.external.GenerateOrderResponse;
+import com.til.prime.timesSubscription.dto.external.GenericRequest;
+import com.til.prime.timesSubscription.dto.external.GenericResponse;
+import com.til.prime.timesSubscription.dto.external.GenericValidationResponse;
+import com.til.prime.timesSubscription.dto.external.InitPurchaseRequest;
+import com.til.prime.timesSubscription.dto.external.InitPurchaseResponse;
+import com.til.prime.timesSubscription.dto.external.OrderDetailsCRM;
+import com.til.prime.timesSubscription.dto.external.OrderDetailsCRMResponse;
+import com.til.prime.timesSubscription.dto.external.OrderDetailsRequest;
+import com.til.prime.timesSubscription.dto.external.OrderSearchCRMResponse;
+import com.til.prime.timesSubscription.dto.external.OrderSearchRequest;
+import com.til.prime.timesSubscription.dto.external.OrderSearchResultCRM;
+import com.til.prime.timesSubscription.dto.external.OrderSearchResultsCRM;
+import com.til.prime.timesSubscription.dto.external.OtpRequest;
+import com.til.prime.timesSubscription.dto.external.OtpVerificationRequest;
+import com.til.prime.timesSubscription.dto.external.PlanListRequest;
+import com.til.prime.timesSubscription.dto.external.PlanListResponse;
+import com.til.prime.timesSubscription.dto.external.PropertyDataGetResponseCRM;
+import com.til.prime.timesSubscription.dto.external.PropertyDataRequestCRM;
+import com.til.prime.timesSubscription.dto.external.PropertyDataUpdateRequestCRM;
+import com.til.prime.timesSubscription.dto.external.PurchaseHistoryRequest;
+import com.til.prime.timesSubscription.dto.external.PurchaseHistoryResponse;
+import com.til.prime.timesSubscription.dto.external.SubmitPurchaseRequest;
+import com.til.prime.timesSubscription.dto.external.SubmitPurchaseResponse;
+import com.til.prime.timesSubscription.dto.external.SubscriptionPlanDTO;
+import com.til.prime.timesSubscription.dto.external.SubscriptionStatusDTO;
+import com.til.prime.timesSubscription.dto.external.TurnOffAutoDebitRequest;
+import com.til.prime.timesSubscription.dto.external.UpdateCacheForMobileRequest;
+import com.til.prime.timesSubscription.dto.external.UserDTO;
+import com.til.prime.timesSubscription.dto.external.UserSubscriptionDTO;
+import com.til.prime.timesSubscription.dto.external.ValidationResponse;
+import com.til.prime.timesSubscription.dto.internal.RefundInternalResponse;
+import com.til.prime.timesSubscription.enums.BusinessEnum;
+import com.til.prime.timesSubscription.enums.CountryEnum;
+import com.til.prime.timesSubscription.enums.EventEnum;
+import com.til.prime.timesSubscription.enums.PlanStatusEnum;
+import com.til.prime.timesSubscription.enums.PlanTypeEnum;
+import com.til.prime.timesSubscription.enums.PropertyEnum;
+import com.til.prime.timesSubscription.enums.StatusEnum;
+import com.til.prime.timesSubscription.enums.ValidationError;
+import com.til.prime.timesSubscription.model.BackendSubscriptionUserAuditModel;
+import com.til.prime.timesSubscription.model.BackendSubscriptionUserModel;
+import com.til.prime.timesSubscription.model.SubscriptionPlanModel;
+import com.til.prime.timesSubscription.model.SubscriptionVariantModel;
+import com.til.prime.timesSubscription.model.UserAuditModel;
+import com.til.prime.timesSubscription.model.UserModel;
+import com.til.prime.timesSubscription.model.UserSubscriptionAuditModel;
+import com.til.prime.timesSubscription.model.UserSubscriptionModel;
+import com.til.prime.timesSubscription.service.CommunicationService;
+import com.til.prime.timesSubscription.service.PropertyService;
+import com.til.prime.timesSubscription.service.SubscriptionService;
+import com.til.prime.timesSubscription.service.SubscriptionServiceHelper;
+import com.til.prime.timesSubscription.service.SubscriptionValidationService;
+import com.til.prime.timesSubscription.util.TimeUtils;
+import com.til.prime.timesSubscription.util.UniqueIdGeneratorUtil;
 
 @Service
 @Transactional
@@ -755,34 +843,30 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
-    public String updateCacheForMobile(UpdateCacheForMobileRequest request) {
-        ValidationResponse validationResponse = subscriptionValidationService.validatePreUpdateCacheForMobile(request);
+    public GenericResponse updateCacheForMobile(UpdateCacheForMobileRequest request) {
+    	ValidationResponse validationResponse = subscriptionValidationService.validatePreUpdateCacheForMobile(request);
+        GenericResponse response = new GenericResponse();
         UserSubscriptionModel userSubscriptionModel = null;
 
         if (validationResponse.isValid()) {
             userSubscriptionModel = userSubscriptionRepository.findByUserMobileAndUserDeletedFalseAndStatusAndDeletedAndOrderCompletedTrue(request.getUser().getMobile(), StatusEnum.ACTIVE, false);
             validationResponse = subscriptionValidationService.validatePostUpdateCacheForMobile(userSubscriptionModel, validationResponse);
         }
-        if (validationResponse.isValid()) {
-            updateUserStatus(userSubscriptionModel);
-            return "SUCCESS";
-        } else {
-            return "FAILED";
-        }
-
+        response = subscriptionServiceHelper.prepareUpdateCacheResponse(response, validationResponse);
+        return response;
     }
 
     @Override
-    public CustomerSearchDTOs customerSearchCRM(CustomerSearchRequest request) {
-        ValidationResponse validationResponse = subscriptionValidationService.validatePreCustomerSearchCRM(request);
-
-        if (validationResponse.isValid()) {
-            List<CustomerSearchDTO> customerSearchDTOList = new ArrayList<CustomerSearchDTO>();
-            CustomerSearchDTOs customerSearchDTOs = new CustomerSearchDTOs();
-
-            UserModel userModel = new UserModel();
-            List<UserModel> userModelList = new ArrayList<UserModel>();
-
+    public CustomerSearchCRMResponse customerSearchCRM(CustomerSearchRequest request) {
+    	ValidationResponse validationResponse = subscriptionValidationService.validatePreCustomerSearchCRM(request);
+    	CustomerSearchCRMResponse customerSearchCRMResponse = new CustomerSearchCRMResponse();
+    	CustomerSearchDTOs customerSearchDTOs = new CustomerSearchDTOs();
+    	List<CustomerSearchDTO> customerSearchDTOList = new ArrayList<CustomerSearchDTO>();
+    	if(validationResponse.isValid()){
+        	
+        	UserModel userModel = new UserModel();
+        	List<UserModel> userModelList = new ArrayList<UserModel>();
+        	
             UserDTO user = request.getUser();
             String ssoId = user.getSsoId();
             String email = user.getEmail();
@@ -790,448 +874,480 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             String firstName = user.getFirstName();
             String lastName = user.getLastName();
             boolean ssoIdExists = false;
-            boolean emailExists = false;
-            boolean mobileExists = false;
-            boolean nameExists = false;
-
-            if (StringUtils.isNotEmpty(ssoId)) {
-                ssoIdExists = true;
+            boolean emailExists = false; 
+            boolean mobileExists = false; 
+            boolean nameExists = false; 
+            
+            if(StringUtils.isNotEmpty(ssoId)){
+            	ssoIdExists=true;
             }
-
-            if (StringUtils.isNotEmpty(email)) {
-                emailExists = true;
+            
+            if(StringUtils.isNotEmpty(email)){
+            	emailExists=true;
             }
-
-            if (StringUtils.isNotEmpty(mobile)) {
-                mobileExists = true;
+            
+            if(StringUtils.isNotEmpty(mobile)){
+            	mobileExists=true;
             }
-
-            if (StringUtils.isNotEmpty(firstName) && StringUtils.isNotEmpty(lastName)) {
-                nameExists = true;
+            
+            if(StringUtils.isNotEmpty(firstName) && StringUtils.isNotEmpty(lastName)){
+            	nameExists=true;
             }
-
-            if (ssoIdExists) {
-                userModel = userRepository.findBySsoIdAndDeletedFalse(ssoId);
-                userModelList.add(userModel);
-            } else if (emailExists) {
-                userModel = userRepository.findByEmailAndDeletedFalse(email);
-                userModelList.add(userModel);
-            } else if (mobileExists) {
-                userModel = userRepository.findByMobileAndDeletedFalse(mobile);
-                userModelList.add(userModel);
-            } else if (nameExists) {
-                Page<UserModel> page = userRepository.findByFirstNameAndLastNameAndDeletedFalse(firstName, lastName, new PageRequest(request.getPage(), request.getPageSize()));
-                if (page != null) {
+            
+            if(ssoIdExists){
+            	userModel = userRepository.findBySsoIdAndDeletedFalse(ssoId);
+            	userModelList.add(userModel);
+            }else if(emailExists){
+            	userModel = userRepository.findByEmailAndDeletedFalse(email);
+            	userModelList.add(userModel);
+            }else if(mobileExists){
+            	userModel = userRepository.findByMobileAndDeletedFalse(mobile);
+            	userModelList.add(userModel);
+            }else if(nameExists){
+            	Page<UserModel> page = userRepository.findByFirstNameAndLastNameAndDeletedFalse(firstName, lastName, new PageRequest(request.getPage(), request.getPageSize()));
+                if(page!=null){
                     userModelList = page.getContent();
                 }
             }
 
             Iterator itr = userModelList.iterator();
-            while (itr.hasNext()) {
-                UserModel um = (UserModel) itr.next();
-                if (um != null) {
-                    customerSearchDTOList.add(convertUserModelToCustomerSearchDTO(um));
-                }
+            while(itr.hasNext()){
+            	UserModel um = (UserModel)itr.next();
+            	if(um!=null){
+            		customerSearchDTOList.add(convertUserModelToCustomerSearchDTO(um));	
+            	}
             }
-
             customerSearchDTOs.setCustomerSearchDTOs(customerSearchDTOList);
-            return customerSearchDTOs;
-        } else {
-            return null;
         }
-
+        customerSearchCRMResponse = subscriptionServiceHelper.prepareCustomerSearchCRMResponse(customerSearchCRMResponse, customerSearchDTOs, validationResponse);
+        return customerSearchCRMResponse;
+    	
     }
 
-    private CustomerSearchDTO convertUserSubscriptionModelToCustomerSearchDTO(UserSubscriptionModel userSubscriptionModel) {
-        CustomerSearchDTO customerSearchDTO = new CustomerSearchDTO();
-        UserModel user = userSubscriptionModel.getUser();
-        customerSearchDTO.setSsoId(user.getSsoId());
-        customerSearchDTO.setMobile(user.getMobile());
-        customerSearchDTO.setName((user.getFirstName() + " " + user.getLastName()).trim());
-        customerSearchDTO.setEmail(userSubscriptionModel.getUser().getEmail());
-
-        customerSearchDTO.setExpiryDate(userSubscriptionModel.getEndDate());
-        customerSearchDTO.setDateOfActivation(userSubscriptionModel.getStartDate());
-        customerSearchDTO.setCurrentStatus(userSubscriptionModel.getStatus().name());
-
-        //customerSearchDTO.setOrderId(userSubscriptionModel.getOrderId());
-        //customerSearchDTO.setOrderAmount(userSubscriptionModel.getSubscriptionVariant().getPrice().toString());
-
-        return customerSearchDTO;
-    }
 
     @Override
-    public CustomerCRM customerDetailsCRM(CustomerSearchRequest request) {
-        ValidationResponse validationResponse = subscriptionValidationService.validatePreCustomerDetailsCRM(request);
-        if (validationResponse.isValid()) {
-
-            CustomerCRM customerCRM = new CustomerCRM();
-
-
-            UserModel userModel = new UserModel();
+    public CustomerDetailsCRMResponse customerDetailsCRM(CustomerSearchRequest request) {
+    	ValidationResponse validationResponse = subscriptionValidationService.validatePreCustomerDetailsCRM(request);
+    	CustomerDetailsCRMResponse customerDetailsCRMResponse = new CustomerDetailsCRMResponse();
+    	CustomerCRM customerCRM = null;
+    	if(validationResponse.isValid()){
+        	UserModel userModel = new UserModel(); 
             UserDTO user = request.getUser();
             String ssoId = user.getSsoId();
-            boolean ssoIdExists = false;
 
-            if (ssoId != null && !StringUtils.isEmpty(ssoId)) {
-                ssoIdExists = true;
-            }
+          	userModel = userRepository.findBySsoIdAndDeletedFalse(ssoId);
+           	//userSubscriptionModelList = userSubscriptionRepository.findByUserMobileAndOrderCompletedAndDeleted(userModel.getMobile(), true, false);
+           	if(userModel!=null){
+           		customerCRM = convertUserToCustomerCRM(userModel);	
+           	}
 
-            if (ssoIdExists) {
-                userModel = userRepository.findBySsoIdAndDeletedFalse(ssoId);
-                //userSubscriptionModelList = userSubscriptionRepository.findByUserMobileAndOrderCompletedAndDeleted(userModel.getMobile(), true, false);
-                if (userModel != null) {
-                    customerCRM = convertUserToCustomerCRM(userModel);
-                }
-                return customerCRM;
-
-            } else {
-                return null;
-            }
-
-
-        } else {
-            return null;
         }
 
+    	customerDetailsCRMResponse = subscriptionServiceHelper.prepareCustomerDetailsResponse(customerDetailsCRMResponse, customerCRM, validationResponse);
+    	return customerDetailsCRMResponse;            
+        
     }
 
-    private CustomerSearchDTO convertUserModelToCustomerSearchDTO(UserModel userModel) {
+    
 
-        CustomerSearchDTO customerSearchDTO = new CustomerSearchDTO();
-        customerSearchDTO.setSsoId(userModel.getSsoId());
-        customerSearchDTO.setMobile(userModel.getMobile());
-        customerSearchDTO.setName((userModel.getFirstName() + " " + userModel.getLastName()).trim());
-        customerSearchDTO.setEmail(userModel.getEmail());
+private CustomerSearchDTO convertUserModelToCustomerSearchDTO(UserModel userModel){
+	
+	CustomerSearchDTO customerSearchDTO = new CustomerSearchDTO();
+	customerSearchDTO.setSsoId(userModel.getSsoId());
+	customerSearchDTO.setMobile(userModel.getMobile());
+	if(userModel.getLastName()!=null){
+        customerSearchDTO.setName((userModel.getFirstName()+" "+userModel.getLastName()).trim());
+	}else{
+        customerSearchDTO.setName(userModel.getFirstName().trim());
+	}
+	customerSearchDTO.setEmail(userModel.getEmail());
 
+	
+	
+	if(userModel.getCreated()!=null){
+    	customerSearchDTO.setDateOfActivationValSubs(userModel.getCreated());
+	}
+	
+	try{
+	
+		UserSubscriptionModel userSubscriptionModel = userSubscriptionRepository.findByUserMobileAndUserDeletedFalseAndStatusAndDeleted(userModel.getMobile(), StatusEnum.ACTIVE, false);
 
-        if (userModel.getCreated() != null) {
-            customerSearchDTO.setDateOfActivation(userModel.getCreated());
-        }
+	if(userSubscriptionModel!=null){
+    	customerSearchDTO.setCurrentStatus(userSubscriptionModel.getStatus().name());
+    	if(userSubscriptionModel.getEndDate()!=null){
+    		customerSearchDTO.setExpiryDateValSubs(userSubscriptionModel.getEndDate());
+    	}
+	}else{
 
-        UserSubscriptionModel userSubscriptionModel = userSubscriptionRepository.findByUserMobileAndUserDeletedFalseAndStatusAndUserDeleted(userModel.getMobile(), StatusEnum.ACTIVE, false);
-        if (userSubscriptionModel != null) {
-            customerSearchDTO.setCurrentStatus(userSubscriptionModel.getStatus().name());
-            if (userSubscriptionModel.getEndDate() != null) {
-                customerSearchDTO.setExpiryDate(userSubscriptionModel.getEndDate());
-            }
-        } else {
-
-            Page<UserSubscriptionModel> userSubscriptionModels = userSubscriptionRepository.findByUserMobileAndUserDeletedFalseAndStatusAndUserDeletedOrderByEndDateDesc(userModel.getMobile(), StatusEnum.EXPIRED, false, new PageRequest(0, 1));
-            List<UserSubscriptionModel> userSubscriptionModelList = userSubscriptionModels.getContent();
+		Page<UserSubscriptionModel> userSubscriptionModels = userSubscriptionRepository.findByUserMobileAndUserDeletedFalseAndStatusAndDeletedOrderByEndDateDesc(userModel.getMobile(), StatusEnum.EXPIRED, false, new PageRequest(0,1));
+        if(userSubscriptionModels!=null && userSubscriptionModels.getSize()>0 
+    			&& userSubscriptionModels.getContent().size()>0){
+    		
+    		List<UserSubscriptionModel> userSubscriptionModelList = userSubscriptionModels.getContent();
             userSubscriptionModel = userSubscriptionModelList.get(0);
-            if (userSubscriptionModel != null) {
-                customerSearchDTO.setCurrentStatus(userSubscriptionModel.getStatus().name());
-                if (userSubscriptionModel.getEndDate() != null) {
-                    customerSearchDTO.setExpiryDate(userSubscriptionModel.getEndDate());
+            if(userSubscriptionModel!=null){
+            	customerSearchDTO.setCurrentStatus(userSubscriptionModel.getStatus().name());
+            	if(userSubscriptionModel.getEndDate()!=null){
+            		customerSearchDTO.setExpiryDateValSubs(userSubscriptionModel.getEndDate());
+            	}
+        	}
+    	}
+	}
+	}catch(Exception e){
+	    LOG.error("Exception in fetching user subscriptions: ", e);
+
+	}
+	
+	
+	//customerSearchDTO.setOrderId(userSubscriptionModel.getOrderId());
+	//customerSearchDTO.setOrderAmount(userSubscriptionModel.getSubscriptionVariant().getPrice().toString());
+
+	return customerSearchDTO;
+}
+    
+    
+private CustomerCRM convertUserToCustomerCRM(UserModel userModel){
+	
+	CustomerCRM customerCRM = new CustomerCRM();
+	OrderSearchResultsCRM orderSearchResultsCRM = new OrderSearchResultsCRM();
+	OrderSearchResultsCRM autoDebitOrders = new OrderSearchResultsCRM();
+	List<OrderSearchResultCRM> orderSearchResultCRMList=new ArrayList<OrderSearchResultCRM>();
+	List<OrderSearchResultCRM> autoDebitOrdersList=new ArrayList<OrderSearchResultCRM>();
+	
+	boolean activeStatus = false;
+	
+	customerCRM.setSsoId(userModel.getSsoId());
+	customerCRM.setMobileNumber(userModel.getMobile());
+	if(userModel.getLastName()!=null){
+		customerCRM.setName((userModel.getFirstName()+" "+userModel.getLastName()).trim());
+	}else{
+		customerCRM.setName(userModel.getFirstName().trim());
+	}
+	
+	customerCRM.setEmailId(userModel.getEmail());
+	if(userModel.getCreated()!=null){
+		customerCRM.setActivationDateValSubs(userModel.getCreated());
+	}
+	
+	if(userModel.isBlocked()){
+		customerCRM.setBlockedStatus(true);	
+		if(userModel.getUpdated()!=null){
+    		customerCRM.setBlockedDateValSubs(userModel.getUpdated());    			
+		}
+	}else{
+		customerCRM.setBlockedStatus(false);	
+	}
+	
+	List<UserSubscriptionModel> userSubscriptionModelList = userModel.getUserSubscriptions();
+	for(UserSubscriptionModel userSubscriptionModel: userSubscriptionModelList){
+		if(userSubscriptionModel.isOrderCompleted() && !userSubscriptionModel.isDeleted()){
+        	OrderSearchResultCRM orderSearchResultCRM = new OrderSearchResultCRM();
+        	
+            
+            if(userSubscriptionModel.getSubscriptionVariant()!=null && userSubscriptionModel.getSubscriptionVariant().getPrice()!=null){
+                orderSearchResultCRM.setAmount(userSubscriptionModel.getSubscriptionVariant().getPrice().doubleValue());            	
+            }
+
+            if(userSubscriptionModel.getStatus()!=null){
+                orderSearchResultCRM.setCurrentStatus(userSubscriptionModel.getStatus().toString());
+            }
+
+            if(userSubscriptionModel.getEndDate()!=null){
+                orderSearchResultCRM.setExpiryDateVal(userSubscriptionModel.getEndDate());            	
+            }
+
+            if(userSubscriptionModel.getCreated()!=null){
+                orderSearchResultCRM.setOrderDateVal(userSubscriptionModel.getCreated());            	
+            }
+
+            orderSearchResultCRM.setOrderDetail("");
+            orderSearchResultCRM.setOrderId(userSubscriptionModel.getOrderId());
+            
+            if(userSubscriptionModel.getStatus()==StatusEnum.ACTIVE){
+            	customerCRM.setActiveSubscriptionExists(true);
+            	customerCRM.setSubscriptionStatus(StatusEnum.ACTIVE.toString());
+            	OrderDetailsCRM activeSubscriptionDetails = new OrderDetailsCRM();
+            	activeSubscriptionDetails.setBusiness(userSubscriptionModel.getBusiness().toString());
+            	activeSubscriptionDetails.setChannel(userSubscriptionModel.getChannel().toString());
+            	activeSubscriptionDetails.setPlatform(userSubscriptionModel.getPlatform().toString());
+            	activeSubscriptionDetails.setUserSubscriptionId(userSubscriptionModel.getId().toString());
+            	activeSubscriptionDetails.setOrderId(userSubscriptionModel.getOrderId());
+            	
+            	if(userSubscriptionModel.getSubscriptionVariant()!=null){
+	            	activeSubscriptionDetails.setPlanDurationDays(userSubscriptionModel.getSubscriptionVariant().getDurationDays().toString());
+	            	activeSubscriptionDetails.setVariantId(userSubscriptionModel.getSubscriptionVariant().getId().toString());
+	            	activeSubscriptionDetails.setSubscriptionPlan(userSubscriptionModel.getSubscriptionVariant().getSubscriptionPlan().getName());
+	            	activeSubscriptionDetails.setPlanType(userSubscriptionModel.getSubscriptionVariant().getPlanType().toString());
+	            	activeSubscriptionDetails.setPlanID(userSubscriptionModel.getSubscriptionVariant().getSubscriptionPlan().getId().toString());
+	            	activeSubscriptionDetails.setPlanPrice(userSubscriptionModel.getSubscriptionVariant().getPrice().toString());
+            	}
+            	
+            	customerCRM.setActiveSubscriptionDetails(activeSubscriptionDetails);
+            	if(userSubscriptionModel.getEndDate()!=null){
+            		customerCRM.setExpiryDateValSubs(userSubscriptionModel.getEndDate());
+            		activeStatus = true;
+            	}
+                if(userSubscriptionModel.isAutoRenewal()){
+            		customerCRM.setAutoRenewalStatus(true);
+            		autoDebitOrdersList.add(orderSearchResultCRM);
+    	            orderSearchResultCRM.setAutoRenewal(true);
+            		customerCRM.setRenewalMode(userSubscriptionModel.getPaymentMethod());
+                }else{
+                	customerCRM.setAutoRenewalStatus(false);
                 }
             }
-        }
-
-        //customerSearchDTO.setOrderId(userSubscriptionModel.getOrderId());
-        //customerSearchDTO.setOrderAmount(userSubscriptionModel.getSubscriptionVariant().getPrice().toString());
-
-        return customerSearchDTO;
+            
+            if(userSubscriptionModel.getStatus()==StatusEnum.FUTURE){
+            	customerCRM.setFutureSubscriptionExists(true);
+                if(userSubscriptionModel.isAutoRenewal()){
+            		customerCRM.setAutoRenewalStatus(true);
+            		autoDebitOrdersList.add(orderSearchResultCRM);
+    	            orderSearchResultCRM.setAutoRenewal(true);;
+            		customerCRM.setRenewalMode(userSubscriptionModel.getPaymentMethod());
+                }else{
+                	customerCRM.setAutoRenewalStatus(false);
+                }
+            }
+            
+            orderSearchResultCRMList.add(orderSearchResultCRM);    			
+		}
     }
+	
+	if(!activeStatus){
+		
+		Page<UserSubscriptionModel> userSubscriptionModels = userSubscriptionRepository.findByUserMobileAndUserDeletedFalseAndStatusAndUserDeletedOrderByEndDateDesc(userModel.getMobile(), StatusEnum.EXPIRED, false, new PageRequest(0,1));
+		
+    	if(userSubscriptionModels!=null && userSubscriptionModels.getSize()>0 
+    			&& userSubscriptionModels.getContent().size()>0){
+    		List<UserSubscriptionModel> userSubscriptionModelSubList = userSubscriptionModels.getContent();
+    		UserSubscriptionModel userSubscriptionModel = userSubscriptionModelSubList.get(0);
+            if(userSubscriptionModel!=null){
+            	customerCRM.setSubscriptionStatus(StatusEnum.EXPIRED.toString());
+            	if(userSubscriptionModel.getEndDate()!=null){
+            		customerCRM.setExpiryDateValSubs(userSubscriptionModel.getEndDate());
+            	}
+        	}
+    	}
+	}
+	
+	
+	orderSearchResultsCRM.setOrderSearchResultsCRM(orderSearchResultCRMList);
+	customerCRM.setOrderSearchResultsCRM(orderSearchResultsCRM);
 
+	autoDebitOrders.setOrderSearchResultsCRM(autoDebitOrdersList);
+	customerCRM.setAutoDebitOrders(autoDebitOrders);
+	
+	//customerSearchDTO.setOrderId(userSubscriptionModel.getOrderId());
+	//customerSearchDTO.setOrderAmount(userSubscriptionModel.getSubscriptionVariant().getPrice().toString());
 
-    private CustomerCRM convertUserToCustomerCRM(UserModel userModel) {
+	return customerCRM;
+}
 
-        CustomerCRM customerCRM = new CustomerCRM();
-        OrderSearchResultsCRM orderSearchResultsCRM = new OrderSearchResultsCRM();
-        OrderSearchResultsCRM autoDebitOrders = new OrderSearchResultsCRM();
-        List<OrderSearchResultCRM> orderSearchResultCRMList = new ArrayList<OrderSearchResultCRM>();
-        List<OrderSearchResultCRM> autoDebitOrdersList = new ArrayList<OrderSearchResultCRM>();
-
-        boolean activeStatus = false;
-
-        customerCRM.setSsoId(userModel.getSsoId());
-        customerCRM.setMobileNumber(userModel.getMobile());
-        customerCRM.setName((userModel.getFirstName() + " " + userModel.getLastName()).trim());
-        customerCRM.setEmailId(userModel.getEmail());
-        if (userModel.getCreated() != null) {
-            customerCRM.setActivationDate(userModel.getCreated());
-        }
-
-        if (userModel.isBlocked()) {
-            customerCRM.setBlockedStatus(true);
-            //customerCRM.setBlockedDate(userModel.getBlockedDate());
-            if (userModel.getUpdated() != null) {
-                customerCRM.setBlockedDate(userModel.getUpdated());
-            }
-        } else {
-            customerCRM.setBlockedStatus(false);
-        }
-
-        List<UserSubscriptionModel> userSubscriptionModelList = userModel.getUserSubscriptions();
-        for (UserSubscriptionModel userSubscriptionModel : userSubscriptionModelList) {
-            if (userSubscriptionModel.isOrderCompleted() && !userSubscriptionModel.isDeleted()) {
-                OrderSearchResultCRM orderSearchResultCRM = new OrderSearchResultCRM();
-
-
-                if (userSubscriptionModel.getSubscriptionVariant() != null && userSubscriptionModel.getSubscriptionVariant().getPrice() != null) {
-                    orderSearchResultCRM.setAmount(userSubscriptionModel.getSubscriptionVariant().getPrice().doubleValue());
-                }
-
-                if (userSubscriptionModel.getStatus() != null) {
-                    orderSearchResultCRM.setCurrentStatus(userSubscriptionModel.getStatus().toString());
-                }
-
-                if (userSubscriptionModel.getEndDate() != null) {
-                    orderSearchResultCRM.setExpiryDate(userSubscriptionModel.getEndDate());
-                }
-
-                if (userSubscriptionModel.getCreated() != null) {
-                    orderSearchResultCRM.setOrderDate(userSubscriptionModel.getCreated());
-                }
-
-                orderSearchResultCRM.setOrderDetail("");
-                orderSearchResultCRM.setOrderId(userSubscriptionModel.getOrderId());
-
-                if (userSubscriptionModel.getStatus() == StatusEnum.ACTIVE) {
-                    customerCRM.setActiveSubscriptionExists(true);
-                    customerCRM.setSubscriptionStatus(StatusEnum.ACTIVE.toString());
-                    OrderDetailsCRM activeSubscriptionDetails = new OrderDetailsCRM();
-                    activeSubscriptionDetails.setBusiness(userSubscriptionModel.getBusiness().toString());
-                    activeSubscriptionDetails.setChannel(userSubscriptionModel.getChannel().toString());
-                    activeSubscriptionDetails.setPlatform(userSubscriptionModel.getPlatform().toString());
-                    activeSubscriptionDetails.setUserSubscriptionId(userSubscriptionModel.getId().toString());
-                    activeSubscriptionDetails.setOrderId(userSubscriptionModel.getOrderId());
-
-                    if (userSubscriptionModel.getSubscriptionVariant() != null) {
-                        activeSubscriptionDetails.setPlanDurationDays(userSubscriptionModel.getSubscriptionVariant().getDurationDays().toString());
-                        activeSubscriptionDetails.setVariantId(userSubscriptionModel.getSubscriptionVariant().getId().toString());
-                        activeSubscriptionDetails.setSubscriptionPlan(userSubscriptionModel.getSubscriptionVariant().getSubscriptionPlan().getName());
-                        activeSubscriptionDetails.setPlanType(userSubscriptionModel.getSubscriptionVariant().getPlanType().toString());
-                        activeSubscriptionDetails.setPlanID(userSubscriptionModel.getSubscriptionVariant().getSubscriptionPlan().getId().toString());
-                        activeSubscriptionDetails.setPlanPrice(userSubscriptionModel.getSubscriptionVariant().getPrice().toString());
-                    }
-
-                    customerCRM.setActiveSubscriptionDetails(activeSubscriptionDetails);
-                    if (userSubscriptionModel.getEndDate() != null) {
-                        customerCRM.setExpiryDate(userSubscriptionModel.getEndDate());
-                        activeStatus = true;
-                    }
-                    if (userSubscriptionModel.isAutoRenewal()) {
-                        customerCRM.setAutoRenewalStatus(true);
-                        autoDebitOrdersList.add(orderSearchResultCRM);
-                        orderSearchResultCRM.setAutoRenewal(true);
-                        customerCRM.setRenewalMode(userSubscriptionModel.getPaymentMethod());
-                    } else {
-                        customerCRM.setAutoRenewalStatus(false);
-                    }
-                }
-
-                if (userSubscriptionModel.getStatus() == StatusEnum.FUTURE) {
-                    customerCRM.setFutureSubscriptionExists(true);
-                    if (userSubscriptionModel.isAutoRenewal()) {
-                        customerCRM.setAutoRenewalStatus(true);
-                        autoDebitOrdersList.add(orderSearchResultCRM);
-                        orderSearchResultCRM.setAutoRenewal(true);
-                        ;
-                        customerCRM.setRenewalMode(userSubscriptionModel.getPaymentMethod());
-                    } else {
-                        customerCRM.setAutoRenewalStatus(false);
-                    }
-                }
-
-                orderSearchResultCRMList.add(orderSearchResultCRM);
-            }
-        }
-
-        if (!activeStatus) {
-
-            Page<UserSubscriptionModel> userSubscriptionModels = userSubscriptionRepository.findByUserMobileAndUserDeletedFalseAndStatusAndUserDeletedOrderByEndDateDesc(userModel.getMobile(), StatusEnum.EXPIRED, false, new PageRequest(0, 1));
-            List<UserSubscriptionModel> userSubscriptionModelSubList = userSubscriptionModels.getContent();
-            UserSubscriptionModel userSubscriptionModel = userSubscriptionModelSubList.get(0);
-            if (userSubscriptionModel != null) {
-                customerCRM.setSubscriptionStatus(StatusEnum.EXPIRED.toString());
-                if (userSubscriptionModel.getEndDate() != null) {
-                    customerCRM.setExpiryDate(userSubscriptionModel.getEndDate());
-                }
-            }
-        }
-
-
-        orderSearchResultsCRM.setOrderSearchResultsCRM(orderSearchResultCRMList);
-        customerCRM.setOrderSearchResultsCRM(orderSearchResultsCRM);
-
-        autoDebitOrders.setOrderSearchResultsCRM(autoDebitOrdersList);
-        customerCRM.setAutoDebitOrders(autoDebitOrders);
-
-        //customerSearchDTO.setOrderId(userSubscriptionModel.getOrderId());
-        //customerSearchDTO.setOrderAmount(userSubscriptionModel.getSubscriptionVariant().getPrice().toString());
-
-        return customerCRM;
-    }
 
 
     @Override
-    public OrderDetailsCRM getOrderDetailsCRM(OrderDetailsRequest request) {
-        ValidationResponse validationResponse = subscriptionValidationService.validatePreOrderDetailsCRM(request);
-        if (validationResponse.isValid()) {
+    public OrderDetailsCRMResponse getOrderDetailsCRM(OrderDetailsRequest request) {
+    	ValidationResponse validationResponse = subscriptionValidationService.validatePreOrderDetailsCRM(request);
+    	OrderDetailsCRMResponse orderDetailsCRMResponse = new OrderDetailsCRMResponse();
+		OrderDetailsCRM orderDetailsCRM = null;
 
-            OrderDetailsCRM orderDetailsCRM = new OrderDetailsCRM();
+    	if(validationResponse.isValid()){
+        	
+    		String orderId = request.getOrderId();
 
-
-            String orderId = request.getOrderId();
-
-            UserSubscriptionModel userSubscriptionModel = userSubscriptionRepository.findByOrderIdAndDeleted(orderId, false);
-            //userSubscriptionModelList = userSubscriptionRepository.findByUserMobileAndOrderCompletedAndDeleted(userModel.getMobile(), true, false);
-            if (userSubscriptionModel != null) {
-                orderDetailsCRM = convertUserSubscriptionModelToOrderDetailsCRM(userSubscriptionModel);
-            }
-            return orderDetailsCRM;
-
-        } else {
-            return null;
+    			UserSubscriptionModel userSubscriptionModel = userSubscriptionRepository.findByOrderIdAndDeleted(orderId, false);
+            	//userSubscriptionModelList = userSubscriptionRepository.findByUserMobileAndOrderCompletedAndDeleted(userModel.getMobile(), true, false);
+            	if(userSubscriptionModel!=null){
+            		orderDetailsCRM = convertUserSubscriptionModelToOrderDetailsCRM(userSubscriptionModel);
+            	}            
         }
+    	orderDetailsCRMResponse = subscriptionServiceHelper.prepareOrderDetailsResponse(orderDetailsCRMResponse, orderDetailsCRM, validationResponse);
+
+    	return orderDetailsCRMResponse;
 
     }
+    
+    private OrderDetailsCRM convertUserSubscriptionModelToOrderDetailsCRM(UserSubscriptionModel userSubscriptionModel){
+    	OrderDetailsCRM orderDetailsCRM = new OrderDetailsCRM();
+    	try{
+    		UserModel user = userSubscriptionModel.getUser();
+    		orderDetailsCRM.setOrderId(userSubscriptionModel.getOrderId());
 
-    private OrderDetailsCRM convertUserSubscriptionModelToOrderDetailsCRM(UserSubscriptionModel userSubscriptionModel) {
-        OrderDetailsCRM orderDetailsCRM = new OrderDetailsCRM();
-        try {
-            UserModel user = userSubscriptionModel.getUser();
-            orderDetailsCRM.setOrderId(userSubscriptionModel.getOrderId());
+    		
+        	try{
+            	
+        		UserSubscriptionModel userSubscriptionModelDB = userSubscriptionRepository.findByUserMobileAndUserDeletedFalseAndStatusAndDeleted(user.getMobile(), StatusEnum.ACTIVE, false);
+        		Page<UserSubscriptionModel> userSubscriptionModels = userSubscriptionRepository.findByUserMobileAndUserDeletedFalseAndStatusAndDeletedOrderByEndDateDesc(user.getMobile(), StatusEnum.EXPIRED, false, new PageRequest(0,1));
 
-            orderDetailsCRM.setUserSubscriptionId(userSubscriptionModel.getId().toString());
-            if (user != null) {
-                orderDetailsCRM.setSsoId(user.getSsoId());
-                orderDetailsCRM.setName((user.getFirstName() + " " + user.getLastName()).trim());
-                orderDetailsCRM.setMobileNumber(user.getMobile());
-                orderDetailsCRM.setEmailId(user.getEmail());
-            }
-            if (userSubscriptionModel.getSubscriptionVariant() != null) {
-                orderDetailsCRM.setSubscriptionPlan(userSubscriptionModel.getSubscriptionVariant().getDurationDays().toString() + " DAY " + userSubscriptionModel.getSubscriptionVariant().getPlanType().toString());
-                if (userSubscriptionModel.getSubscriptionVariant().getPrice() != null) {
-                    orderDetailsCRM.setAmount(userSubscriptionModel.getSubscriptionVariant().getPrice().doubleValue());
-                    orderDetailsCRM.setBilledAmount(userSubscriptionModel.getSubscriptionVariant().getPrice().toString());
-                    orderDetailsCRM.setRenewalAmount(userSubscriptionModel.getSubscriptionVariant().getPrice().toString());
-                }
+            	if(userSubscriptionModelDB!=null){
+            		orderDetailsCRM.setUserSubscriptionStatus(userSubscriptionModelDB.getStatus().name());
+            	}else if(userSubscriptionModels!=null && userSubscriptionModels.getSize()>0 
+            			&& userSubscriptionModels.getContent().size()>0){
+            		
+            		List<UserSubscriptionModel> userSubscriptionModelList = userSubscriptionModels.getContent();
+            		userSubscriptionModelDB = userSubscriptionModelList.get(0);
+                    if(userSubscriptionModelDB!=null){
+                    	orderDetailsCRM.setUserSubscriptionStatus(userSubscriptionModelDB.getStatus().name());
+                	}
+            	}
+        	}catch(Exception e){
+        	    LOG.error("Exception in fetching user subscriptions: ", e);
+        	}
+        	
+        	if(user.getCreated()!=null){
+        		orderDetailsCRM.setUserCreatedDateValSubs(user.getCreated());	
+        	}
+        	
+    		orderDetailsCRM.setUserSubscriptionId(userSubscriptionModel.getId().toString());
+    		if(user!=null){
+        		orderDetailsCRM.setSsoId(user.getSsoId());
+        		
+            	if(user.getLastName()!=null){
+            		orderDetailsCRM.setName((user.getFirstName()+" "+user.getLastName()).trim());
+            	}else{
+            		orderDetailsCRM.setName(user.getFirstName().trim());
+            	}
+        		orderDetailsCRM.setMobileNumber(user.getMobile());
+        		orderDetailsCRM.setEmailId(user.getEmail());
+    		}
+        	if(userSubscriptionModel.getSubscriptionVariant()!=null){
+            	orderDetailsCRM.setSubscriptionPlan(userSubscriptionModel.getSubscriptionVariant().getDurationDays().toString() + " DAY " + userSubscriptionModel.getSubscriptionVariant().getPlanType().toString());
+            	if(userSubscriptionModel.getSubscriptionVariant().getPrice()!=null){
+                	orderDetailsCRM.setAmount(userSubscriptionModel.getSubscriptionVariant().getPrice().doubleValue());            		
+                	orderDetailsCRM.setBilledAmount(userSubscriptionModel.getSubscriptionVariant().getPrice().toString());
+                	orderDetailsCRM.setRenewalAmount(userSubscriptionModel.getSubscriptionVariant().getPrice().toString());
+            	}
+            	
+            	if(userSubscriptionModel.getSubscriptionVariant().getId()!=null){
+                	orderDetailsCRM.setVariantId(userSubscriptionModel.getSubscriptionVariant().getId().toString());
+            	}
+        	}
+        	if(userSubscriptionModel.getCreated()!=null){
+        		orderDetailsCRM.setOrderDateValSubs(userSubscriptionModel.getCreated());	
+        	}
+        	if(userSubscriptionModel.getEndDate()!=null){
+            	orderDetailsCRM.setRenewalDateValSubs(userSubscriptionModel.getEndDate());
+            	orderDetailsCRM.setExpiryDateValSubs(userSubscriptionModel.getEndDate());
+        	}
 
-                if (userSubscriptionModel.getSubscriptionVariant().getId() != null) {
-                    orderDetailsCRM.setVariantId(userSubscriptionModel.getSubscriptionVariant().getId().toString());
-                }
-            }
-            if (userSubscriptionModel.getCreated() != null) {
-                orderDetailsCRM.setOrderDate(userSubscriptionModel.getCreated());
-            }
-            if (userSubscriptionModel.getEndDate() != null) {
-                orderDetailsCRM.setRenewalDate(userSubscriptionModel.getEndDate());
-                orderDetailsCRM.setExpiryDate(userSubscriptionModel.getEndDate());
-            }
-
-            if (userSubscriptionModel.isAutoRenewal()) {
-                orderDetailsCRM.setAutoRenewal(true);
-            } else {
-                orderDetailsCRM.setAutoRenewal(false);
-            }
-
+        	if(userSubscriptionModel.getStartDate()!=null){
+            	orderDetailsCRM.setStartDateValSubs(userSubscriptionModel.getStartDate());
+        	}
+        	
+        	if(userSubscriptionModel.isAutoRenewal()){
+            	orderDetailsCRM.setAutoRenewal(true);
+            }else{
+            	orderDetailsCRM.setAutoRenewal(false);
+            }        	
+            
             Date date = new Date();
-            if (userSubscriptionModel.getStatus() == StatusEnum.ACTIVE &&
-                    userSubscriptionModel.getEndDate().after(date)) {
+            if(userSubscriptionModel.getStatus()==StatusEnum.ACTIVE &&
+            		userSubscriptionModel.getEndDate().after(date)){
                 orderDetailsCRM.setCurrentStatus("SUBSCRIBED");
-            } else if (userSubscriptionModel.getStatus() == StatusEnum.FUTURE) {
+            }else if(userSubscriptionModel.getStatus()==StatusEnum.FUTURE){
                 orderDetailsCRM.setCurrentStatus("FUTURE SUBSCRIPTION");
-            } else {
-                orderDetailsCRM.setCurrentStatus("EXPIRED");
+            }else{
+            	 orderDetailsCRM.setCurrentStatus("EXPIRED");
             }
-
+            
             return orderDetailsCRM;
 
-        } catch (Exception e) {
+    	}catch(Exception e){
             LOG.error("Exception in convertUserSubscriptionModelToOrderDetailsCRM: ", e);
             return null;
-        }
-
+    	}
+    	
     }
 
+
     @Override
-    public OrderSearchResultsCRM orderSearchCRM(OrderSearchRequest request) {
-        ValidationResponse validationResponse = subscriptionValidationService.validatePreOrderSearchCRM(request);
-        if (validationResponse.isValid()) {
+    public OrderSearchCRMResponse orderSearchCRM(OrderSearchRequest request) {
+    	ValidationResponse validationResponse = subscriptionValidationService.validatePreOrderSearchCRM(request);
+    	OrderSearchCRMResponse orderSearchCRMResponse = new OrderSearchCRMResponse();
+    	if(validationResponse.isValid()){
 
-            OrderSearchResultsCRM orderSearchResultsCRM = new OrderSearchResultsCRM();
-            List<UserSubscriptionModel> userSubscriptionModelList = null;
-
-
-            String subscriptionStatus = request.getSubscriptionStatus();
-            String orderId = request.getOrderId();
+    		OrderSearchResultsCRM orderSearchResultsCRM = new OrderSearchResultsCRM();
+    		List<UserSubscriptionModel> userSubscriptionModelList = null;
+        	
+        	
+    		String subscriptionStatus = request.getSubscriptionStatus();
+            String orderId= request.getOrderId();
             Date fromDate = request.getFromDate();
             Date toDate = request.getToDate();
 
+            
 
-            if (orderId == null && subscriptionStatus == null) {
-                userSubscriptionModelList = userSubscriptionRepository.findByCreatedBetweenAndDeletedFalseAndOrderCompletedTrue(fromDate, toDate);
-
-            }
-
-            if (subscriptionStatus != null) {
-                if (subscriptionStatus.equalsIgnoreCase(StatusEnum.ACTIVE.toString())) {
-                    if (fromDate != null || toDate != null) {
-                        userSubscriptionModelList = userSubscriptionRepository.findByStatusAndCreatedBetweenAndDeletedFalseAndOrderCompletedTrue(StatusEnum.ACTIVE, fromDate != null ? fromDate : new Date(), toDate != null ? toDate : new Date());
-                    } else {
-                        userSubscriptionModelList = userSubscriptionRepository.findByStatusAndDeletedFalseAndOrderCompletedTrue(StatusEnum.ACTIVE);
-                    }
-                } else if (subscriptionStatus.equalsIgnoreCase(StatusEnum.FUTURE.toString())) {
-                    if (fromDate != null || toDate != null) {
-                        userSubscriptionModelList = userSubscriptionRepository.findByStatusAndCreatedBetweenAndDeletedFalseAndOrderCompletedTrue(StatusEnum.FUTURE, fromDate != null ? fromDate : new Date(), toDate != null ? toDate : new Date());
-                    } else {
-                        userSubscriptionModelList = userSubscriptionRepository.findByStatusAndDeletedFalseAndOrderCompletedTrue(StatusEnum.FUTURE);
-                    }
-                } else if (subscriptionStatus.equalsIgnoreCase(StatusEnum.EXPIRED.toString())) {
-                    if (fromDate != null || toDate != null) {
-                        userSubscriptionModelList = userSubscriptionRepository.findByStatusAndCreatedBetweenAndDeletedFalseAndOrderCompletedTrue(StatusEnum.EXPIRED, fromDate != null ? fromDate : new Date(), toDate != null ? toDate : new Date());
-                    } else {
-                        userSubscriptionModelList = userSubscriptionRepository.findByStatusAndDeletedFalseAndOrderCompletedTrue(StatusEnum.EXPIRED);
-                    }
-                }
+            if(orderId==null && subscriptionStatus==null){
+    			userSubscriptionModelList = userSubscriptionRepository.findByCreatedBetweenAndDeletedFalseAndOrderCompletedTrue(fromDate, toDate);	
 
             }
+                        
+            if(subscriptionStatus!=null){
+        		if(subscriptionStatus.equalsIgnoreCase(StatusEnum.ACTIVE.toString())){
+        			if(fromDate!=null || toDate!=null){
+            			userSubscriptionModelList = userSubscriptionRepository.findByStatusAndCreatedBetweenAndDeletedFalseAndOrderCompletedTrue(StatusEnum.ACTIVE, fromDate!=null? fromDate: new Date(), toDate!=null? toDate: new Date());
+        			}else{
+            			userSubscriptionModelList = userSubscriptionRepository.findByStatusAndDeletedFalseAndOrderCompletedTrue(StatusEnum.ACTIVE);	
+        			}
+        		}else if(subscriptionStatus.equalsIgnoreCase(StatusEnum.FUTURE.toString())){
+        			if(fromDate!=null || toDate!=null){
+            			userSubscriptionModelList = userSubscriptionRepository.findByStatusAndCreatedBetweenAndDeletedFalseAndOrderCompletedTrue(StatusEnum.FUTURE, fromDate!=null? fromDate: new Date(), toDate!=null? toDate: new Date());
+        			}else{
+            			userSubscriptionModelList = userSubscriptionRepository.findByStatusAndDeletedFalseAndOrderCompletedTrue(StatusEnum.FUTURE);	
+        			}
+        		}else if(subscriptionStatus.equalsIgnoreCase(StatusEnum.EXPIRED.toString())){
+        			if(fromDate!=null || toDate!=null){
+            			userSubscriptionModelList = userSubscriptionRepository.findByStatusAndCreatedBetweenAndDeletedFalseAndOrderCompletedTrue(StatusEnum.EXPIRED, fromDate!=null? fromDate: new Date(), toDate!=null? toDate: new Date());
+            		}else{
+            			userSubscriptionModelList = userSubscriptionRepository.findByStatusAndDeletedFalseAndOrderCompletedTrue(StatusEnum.EXPIRED);        			            			
+            		}
+        		}
 
-            if (orderId != null) {
-                userSubscriptionModelList = userSubscriptionRepository.findByOrderIdAndDeletedFalseAndOrderCompletedTrue(orderId);
+            }
+            
+            if(orderId!=null){
+    			userSubscriptionModelList = userSubscriptionRepository.findByOrderIdAndDeletedFalseAndOrderCompletedTrue(orderId);	
             }
 
-            List<OrderSearchResultCRM> orderSearchResultCRMList = new ArrayList<OrderSearchResultCRM>();
+    		List<OrderSearchResultCRM> orderSearchResultCRMList = new ArrayList<OrderSearchResultCRM>(); 
             //userSubscriptionModelList = userSubscriptionRepository.findByUserMobileAndOrderCompletedAndDeleted(userModel.getMobile(), true, false);
-            for (UserSubscriptionModel userSubscriptionModel : userSubscriptionModelList) {
-                OrderSearchResultCRM orderSearchResultCRM = convertUserSubscriptionModelToOrderSearchCRM(userSubscriptionModel);
-                orderSearchResultCRMList.add(orderSearchResultCRM);
+            for(UserSubscriptionModel userSubscriptionModel: userSubscriptionModelList){
+            	OrderSearchResultCRM orderSearchResultCRM = convertUserSubscriptionModelToOrderSearchCRM(userSubscriptionModel);
+            	orderSearchResultCRMList.add(orderSearchResultCRM);
             }
             orderSearchResultsCRM.setOrderSearchResultsCRM(orderSearchResultCRMList);
-
-            return orderSearchResultsCRM;
-
-        } else {
-            return null;
+            
+            orderSearchCRMResponse = subscriptionServiceHelper.prepareOrderSearchResponse(orderSearchCRMResponse, orderSearchResultsCRM, validationResponse);
+            return orderSearchCRMResponse;
+            
+        }else{
+        	return null;
         }
-
+        
     }
+    
 
-
-    private OrderSearchResultCRM convertUserSubscriptionModelToOrderSearchCRM(UserSubscriptionModel userSubscriptionModel) {
-        OrderSearchResultCRM orderSearchResultCRM = new OrderSearchResultCRM();
-        try {
-
-            orderSearchResultCRM.setAmount(userSubscriptionModel.getSubscriptionVariant().getPrice().doubleValue());
-            orderSearchResultCRM.setCurrentStatus(userSubscriptionModel.getStatus().toString());
-            orderSearchResultCRM.setExpiryDate(userSubscriptionModel.getEndDate());
-            orderSearchResultCRM.setOrderDate(userSubscriptionModel.getCreated());
-            orderSearchResultCRM.setOrderDetail("");
-            orderSearchResultCRM.setOrderId(userSubscriptionModel.getOrderId());
-
-
+    private OrderSearchResultCRM convertUserSubscriptionModelToOrderSearchCRM(UserSubscriptionModel userSubscriptionModel){
+    	OrderSearchResultCRM orderSearchResultCRM = new OrderSearchResultCRM();
+    	try{
+    		
+    		orderSearchResultCRM.setAmount(userSubscriptionModel.getSubscriptionVariant().getPrice().doubleValue());
+    		orderSearchResultCRM.setCurrentStatus(userSubscriptionModel.getStatus().toString());
+    		orderSearchResultCRM.setExpiryDateVal(userSubscriptionModel.getEndDate());
+    		orderSearchResultCRM.setOrderDateVal(userSubscriptionModel.getCreated());
+    		orderSearchResultCRM.setOrderDetail("");
+    		orderSearchResultCRM.setOrderId(userSubscriptionModel.getOrderId());
+    		
+            
             return orderSearchResultCRM;
 
-        } catch (Exception e) {
+    	}catch(Exception e){
             LOG.error("Exception in convertUserSubscriptionModelToOrderDetailsCRM: ", e);
             return null;
-        }
-
+    	}
+    	
     }
-
+    
     @Override
     @Transactional
     public BackendSubscriptionUserModel saveBackendSubscriptionUser(BackendSubscriptionUserModel user, EventEnum eventEnum) {
@@ -1262,4 +1378,39 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         }
         return user;
     }
+    
+    public PropertyDataGetResponseCRM getPropertyTableData(PropertyDataRequestCRM request){
+
+		PropertyDataGetResponseCRM propertyDataGetResponse = new PropertyDataGetResponseCRM();
+    	
+    	ValidationResponse validationResponse = subscriptionValidationService.validatePreGetCRMProperties(request);
+    	if(validationResponse.isValid()){
+
+    		
+    		Map<PropertyEnum, Object> propertyMap = propertyService.getPropertyTableData();
+    		
+    		propertyDataGetResponse = subscriptionServiceHelper.preparePropertyDataGetResponse(propertyDataGetResponse, propertyMap, validationResponse);
+            return propertyDataGetResponse;
+            
+        }else{
+        	return null;
+        }
+    }
+
+    
+    public GenericResponse updatePropertyTableData(PropertyDataUpdateRequestCRM request){
+
+    	
+    	ValidationResponse validationResponse = subscriptionValidationService.validatePreUpdateCRMProperties(request);
+    	if(validationResponse.isValid()){
+
+    		
+    		GenericResponse propertyUpdateResponse = propertyService.updatePropertyTableData(request);
+            return propertyUpdateResponse;
+            
+        }else{
+        	return null;
+        }
+    }
+    
 }

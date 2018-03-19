@@ -1,31 +1,42 @@
 package com.til.prime.timesSubscription.service.impl;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+import javax.annotation.PostConstruct;
+
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+
 import com.google.common.cache.CacheBuilder;
 import com.til.prime.timesSubscription.convertor.ModelToDTOConvertorUtil;
 import com.til.prime.timesSubscription.dao.ExternalClientRepository;
 import com.til.prime.timesSubscription.dao.SubscriptionPlanRepository;
 import com.til.prime.timesSubscription.dao.SubscriptionPropertyRepository;
+import com.til.prime.timesSubscription.dto.external.GenericResponse;
+import com.til.prime.timesSubscription.dto.external.PropertyDataUpdateRequestCRM;
 import com.til.prime.timesSubscription.dto.external.SubscriptionPlanDTO;
 import com.til.prime.timesSubscription.enums.BusinessEnum;
 import com.til.prime.timesSubscription.enums.CountryEnum;
 import com.til.prime.timesSubscription.enums.PlanTypeEnum;
 import com.til.prime.timesSubscription.enums.PropertyEnum;
 import com.til.prime.timesSubscription.model.ExternalClientModel;
+import com.til.prime.timesSubscription.model.JobModel;
 import com.til.prime.timesSubscription.model.SubscriptionPlanModel;
 import com.til.prime.timesSubscription.model.SubscriptionPropertyModel;
 import com.til.prime.timesSubscription.model.SubscriptionVariantModel;
 import com.til.prime.timesSubscription.service.PropertyService;
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-
-import javax.annotation.PostConstruct;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
+import com.til.prime.timesSubscription.util.ResponseUtil;
 
 @Service
 public class PropertyServiceImpl implements PropertyService {
@@ -139,13 +150,37 @@ public class PropertyServiceImpl implements PropertyService {
     }
 
     @Override
-    public List<SubscriptionPlanModel> getAllPlanModels(BusinessEnum business, CountryEnum country) {
-        if(getProperty(PropertyEnum.SUBSCRIPTION_PLAN_MODELS)==null){
-            reloadAllPlans();
+    public Map<PropertyEnum, Object> getPropertyTableData() {
+    	Map<PropertyEnum, Object> propertyMap = new HashMap<PropertyEnum, Object>(); 
+        for(PropertyEnum propertyEnum: PropertyEnum.CRM_UPDATE_PROPERTIES){
+            SubscriptionPropertyModel subscriptionProperty = subscriptionPropertyRepository.findByKey(propertyEnum);
+            if(subscriptionProperty==null){
+                continue;
+            }
+            propertyMap.put(subscriptionProperty.getKey(), parseValue(subscriptionProperty.getValue(), propertyEnum.getType()));
         }
-        return ((ConcurrentMap<BusinessCountry, List<SubscriptionPlanModel>>) getProperty(PropertyEnum.SUBSCRIPTION_PLAN_MODELS)).get(new BusinessCountry(business, country));
+        return propertyMap;
     }
 
+    
+    @Override
+    public GenericResponse updatePropertyTableData(PropertyDataUpdateRequestCRM request){
+        GenericResponse response = new GenericResponse();
+        SubscriptionPropertyModel subscriptionProperty = subscriptionPropertyRepository.findByKey(request.getKey());
+        if(subscriptionProperty==null){
+            //ResponseUtil.createFailureResponse(response, validationResponse, validationErrorCategory);
+        	return null;
+        }else{
+        	subscriptionProperty.setValue(request.getValue());
+            subscriptionPropertyRepository.save(subscriptionProperty);
+            ResponseUtil.createSuccessResponse(response);
+        }
+        
+        
+        return response;
+    }
+
+    
     private void reloadAllPlans(){
         List<SubscriptionPlanModel> plans = planRepository.findByDeletedFalse();
         propertyMap.putIfAbsent(PropertyEnum.SUBSCRIPTION_PLAN_DTOS, new ConcurrentHashMap<BusinessCountry, List<SubscriptionPlanDTO>>());
@@ -164,6 +199,14 @@ public class PropertyServiceImpl implements PropertyService {
         }
         planDTOMap.putAll(dtoMap);
         planModelMap.putAll(modelMap);
+    }
+    
+    @Override
+    public List<SubscriptionPlanModel> getAllPlanModels(BusinessEnum business, CountryEnum country) {
+        if(getProperty(PropertyEnum.SUBSCRIPTION_PLAN_MODELS)==null){
+            reloadAllPlans();
+        }
+        return ((ConcurrentMap<BusinessCountry, List<SubscriptionPlanModel>>) getProperty(PropertyEnum.SUBSCRIPTION_PLAN_MODELS)).get(new BusinessCountry(business, country));
     }
 
     private Object parseValue(String value, String type){

@@ -8,6 +8,12 @@ public class OrderDetailsCRM {
 
 	private String orderId;
 	private Date orderDate;
+	private Date orderDateValSubs;
+	private Date startDate;
+	private Date startDateValSubs;
+	private Date endDate;
+	private Date endDateValSubs;
+
 	private String currentStatus;
 	private Double amount;
 	private String channelId;
@@ -41,9 +47,11 @@ public class OrderDetailsCRM {
 	private String firstName;
 	private String lastName;
 	private String name;
+	private Date userCreatedDate;
+	private Date userCreatedDateValSubs;
+	private String userSubscriptionStatus;
 
-	
-	private boolean isAutoRenewal;
+	private boolean autoRenewal;
 	private String subscriptionPlan;
 	private String userSubscriptionId;
 	private String variantId;
@@ -58,7 +66,9 @@ public class OrderDetailsCRM {
 	
 	
 	private Date expiryDate;
+	private Date expiryDateValSubs;
 	private Date renewalDate;
+	private Date renewalDateValSubs;
 	private String billedAmount;
 	private String renewalAmount;
 	private String currency;
@@ -308,6 +318,22 @@ public class OrderDetailsCRM {
 		this.name = name;
 	}
 
+	public Date getUserCreatedDate() {
+		return userCreatedDate;
+	}
+
+	public void setUserCreatedDate(Date userCreatedDate) {
+		this.userCreatedDate = userCreatedDate;
+	}
+
+	public Date getUserCreatedDateValSubs() {
+		return userCreatedDateValSubs;
+	}
+
+	public void setUserCreatedDateValSubs(Date userCreatedDateValSubs) {
+		this.userCreatedDateValSubs = userCreatedDateValSubs;
+	}
+
 	public List<CRMRefundDetails> getCrmRefundDetails() {
 		return crmRefundDetails;
 	}
@@ -436,12 +462,20 @@ public class OrderDetailsCRM {
 		this.planDurationDays = planDurationDays;
 	}
 
-	public boolean isAutoRenewal() {
-		return isAutoRenewal;
+	public String getUserSubscriptionStatus() {
+		return userSubscriptionStatus;
 	}
 
-	public void setAutoRenewal(boolean isAutoRenewal) {
-		this.isAutoRenewal = isAutoRenewal;
+	public void setUserSubscriptionStatus(String userSubscriptionStatus) {
+		this.userSubscriptionStatus = userSubscriptionStatus;
+	}
+	
+	public boolean isAutoRenewal() {
+		return autoRenewal;
+	}
+
+	public void setAutoRenewal(boolean autoRenewal) {
+		this.autoRenewal = autoRenewal;
 	}
 
 	public Date getOrderDate() {
@@ -466,6 +500,64 @@ public class OrderDetailsCRM {
 
 	public void setRenewalDate(Date renewalDate) {
 		this.renewalDate = renewalDate;
+	}
+
+	public Date getOrderDateValSubs() {
+		return orderDateValSubs;
+	}
+
+	public void setOrderDateValSubs(Date orderDateValSubs) {
+		this.orderDateValSubs = orderDateValSubs;
+	}
+
+	
+
+	public Date getStartDate() {
+		return startDate;
+	}
+
+	public void setStartDate(Date startDate) {
+		this.startDate = startDate;
+	}
+
+	public Date getStartDateValSubs() {
+		return startDateValSubs;
+	}
+
+	public void setStartDateValSubs(Date startDateValSubs) {
+		this.startDateValSubs = startDateValSubs;
+	}
+
+	public Date getEndDate() {
+		return endDate;
+	}
+
+	public void setEndDate(Date endDate) {
+		this.endDate = endDate;
+	}
+
+	public Date getEndDateValSubs() {
+		return endDateValSubs;
+	}
+
+	public void setEndDateValSubs(Date endDateValSubs) {
+		this.endDateValSubs = endDateValSubs;
+	}
+	
+	public Date getExpiryDateValSubs() {
+		return expiryDateValSubs;
+	}
+
+	public void setExpiryDateValSubs(Date expiryDateValSubs) {
+		this.expiryDateValSubs = expiryDateValSubs;
+	}
+
+	public Date getRenewalDateValSubs() {
+		return renewalDateValSubs;
+	}
+
+	public void setRenewalDateValSubs(Date renewalDateValSubs) {
+		this.renewalDateValSubs = renewalDateValSubs;
 	}
 
 

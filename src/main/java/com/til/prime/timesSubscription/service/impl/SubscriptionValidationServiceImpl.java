@@ -802,8 +802,12 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
         if(request.getUser()!=null){
             PreConditions.notEmpty(request.getUser().getSsoId(), ValidationError.INVALID_SSO_ID, validationResponse);
             validationResponse = updateValid(validationResponse);
+        }
+        
+        if(validationResponse.isValid()){
             validationResponse = validateEncryptionForCustomerDetailsCRM(request, validationResponse);
         }
+        
         return updateValid(validationResponse);
     }
     
@@ -925,4 +929,67 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
         }
         return updateValid(validationResponse);
     }
+    
+    public ValidationResponse validatePreGetCRMProperties(PropertyDataRequestCRM request){
+        ValidationResponse validationResponse = new ValidationResponse();
+        validationResponse = validateEncryptionForGetCRMProperties(request, validationResponse);
+        if(validationResponse.isValid()){
+            PreConditions.notEmpty(request.getTableName(), ValidationError.INVALID_TABLE_NAME, validationResponse);
+        }
+        return updateValid(validationResponse);
+    }
+    
+    private ValidationResponse validateEncryptionForGetCRMProperties(PropertyDataRequestCRM request, ValidationResponse validationResponse) {
+        PreConditions.mustBeEqual(request.getSecretKey(), properties.getProperty(GlobalConstants.PAYMENTS_SECRET_KEY), ValidationError.INVALID_SECRET_KEY, validationResponse);
+        PreConditions.notEmpty(request.getChecksum(), ValidationError.INVALID_CHECKSUM, validationResponse);
+        validationResponse = updateValid(validationResponse);
+        if(validationResponse.isValid()){
+            try {
+                StringBuilder sb = new StringBuilder();
+                sb.append(request.getSecretKey());
+                sb.append(request.getTableName());
+
+                String checksum = checksumService.calculateChecksumHmacSHA256(properties.getProperty(GlobalConstants.PAYMENTS_ENCRYPTION_KEY), sb.toString());
+                PreConditions.mustBeEqual(checksum, request.getChecksum(), ValidationError.INVALID_ENCRYPTION, validationResponse);
+            } catch (Exception e) {
+                validationResponse.getValidationErrorSet().add(ValidationError.INVALID_ENCRYPTION);
+            }
+        }
+        return updateValid(validationResponse);
+    }
+    
+    
+    public ValidationResponse validatePreUpdateCRMProperties(PropertyDataUpdateRequestCRM request){
+        ValidationResponse validationResponse = new ValidationResponse();
+        PreConditions.notEmpty(request.getTableName(), ValidationError.INVALID_TABLE_NAME, validationResponse);
+        PreConditions.notEmpty(request.getKey().toString(), ValidationError.INVALID_KEY_VALUE, validationResponse);
+        PreConditions.notEmpty(request.getValue().toString(), ValidationError.INVALID_UPDATE_VALUE, validationResponse);
+        validationResponse = updateValid(validationResponse);
+        if(validationResponse.isValid()){
+            validationResponse = validateEncryptionForUpdateCRMProperties(request, validationResponse);
+        }
+        return updateValid(validationResponse);
+    }
+
+    private ValidationResponse validateEncryptionForUpdateCRMProperties(PropertyDataUpdateRequestCRM request, ValidationResponse validationResponse) {
+        PreConditions.mustBeEqual(request.getSecretKey(), properties.getProperty(GlobalConstants.PAYMENTS_SECRET_KEY), ValidationError.INVALID_SECRET_KEY, validationResponse);
+        PreConditions.notEmpty(request.getChecksum(), ValidationError.INVALID_CHECKSUM, validationResponse);
+        validationResponse = updateValid(validationResponse);
+        if(validationResponse.isValid()){
+            try {
+                StringBuilder sb = new StringBuilder();
+                sb.append(request.getSecretKey());
+                sb.append(request.getTableName());
+                sb.append(request.getKey());
+                sb.append(request.getValue());
+                
+                String checksum = checksumService.calculateChecksumHmacSHA256(properties.getProperty(GlobalConstants.PAYMENTS_ENCRYPTION_KEY), sb.toString());
+                PreConditions.mustBeEqual(checksum, request.getChecksum(), ValidationError.INVALID_ENCRYPTION, validationResponse);
+            } catch (Exception e) {
+                validationResponse.getValidationErrorSet().add(ValidationError.INVALID_ENCRYPTION);
+            }
+        }
+        return updateValid(validationResponse);
+    }
+    
 }
