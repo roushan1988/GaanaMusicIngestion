@@ -369,7 +369,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
         ValidationResponse validationResponse = new ValidationResponse();
         PreConditions.notNull(request.getUser(), ValidationError.INVALID_USER, validationResponse);
         if(request.getUser()!=null){
-            PreConditions.notEmpty(request.getUser().getMobile(), ValidationError.INVALID_MOBILE, validationResponse);
+            PreConditions.validMobile(request.getUser().getMobile(), ValidationError.INVALID_MOBILE, validationResponse);
         }
         return updateValid(validationResponse);
     }
@@ -379,7 +379,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
         ValidationResponse validationResponse = new ValidationResponse();
         PreConditions.notNull(request.getUser(), ValidationError.INVALID_USER, validationResponse);
         if(request.getUser()!=null){
-            PreConditions.notEmpty(request.getUser().getMobile(), ValidationError.INVALID_MOBILE, validationResponse);
+            PreConditions.validMobile(request.getUser().getMobile(), ValidationError.INVALID_MOBILE, validationResponse);
         }
         PreConditions.notEmpty(request.getOtp(), ValidationError.INVALID_OTP, validationResponse);
         return updateValid(validationResponse);
