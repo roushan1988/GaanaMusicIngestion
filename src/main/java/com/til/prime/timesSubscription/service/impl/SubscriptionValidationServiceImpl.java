@@ -3,8 +3,10 @@ package com.til.prime.timesSubscription.service.impl;
 import com.google.gson.Gson;
 import com.til.prime.timesSubscription.constants.GlobalConstants;
 import com.til.prime.timesSubscription.dto.external.*;
+import com.til.prime.timesSubscription.dto.internal.SSOAuthDTO;
 import com.til.prime.timesSubscription.enums.*;
 import com.til.prime.timesSubscription.model.*;
+import com.til.prime.timesSubscription.service.CacheService;
 import com.til.prime.timesSubscription.service.ChecksumService;
 import com.til.prime.timesSubscription.service.PropertyService;
 import com.til.prime.timesSubscription.service.SubscriptionValidationService;
@@ -33,6 +35,8 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
     private Properties properties;
     @Autowired
     PropertyService propertyService;
+    @Autowired
+    private CacheService cacheService;
 
     @Override
     public ValidationResponse validatePreAllPlans(PlanListRequest request) {
@@ -638,40 +642,51 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
     }
 
     private void validateSSOLogin(String ssoId, String ticketId, String mobile, ValidationResponse validationResponse) {
-        int retryCount = GlobalConstants.API_RETRY_COUNT;
-        LOG.info("In validateLogin with uid "+ssoId+", ticketId "+ticketId);
-        RETRY_LOOP:
-        while(retryCount>0) {
-            try {
-                Gson gson = GlobalConstants.gson;
-                String ssoResponse = getSSOIdForTicketId(ticketId);
-                LOG.info("got sso response for [validateLogin] with ssoId: " + ssoId + ", ticketId: " + ticketId + ", response: " + ssoResponse);
-                SSOValidateResponse ssoValidateResponse = null;
-                try {
-                     ssoValidateResponse = gson.fromJson(ssoResponse, SSOValidateResponse.class);
-                }catch (Exception e){
-                    LOG.info("User Validation Failed From SSO Response [validateLogin] with ssoId: " + ssoId + ", ticketId: " + ticketId + ", response : " + ssoResponse);
-                    validationResponse.addValidationError(ValidationError.INVALID_SSO_CREDENTIALS);
-                    return;
-                }
-                if (ssoId.equals(ssoValidateResponse.getUserId()) && mobile.equals(ssoValidateResponse.getVerifiedMobile())) {
-                    LOG.info("User Validated From SSO Response [validateLogin] with ssoId: " + ssoId + ", ticketId: " + ticketId + ", response:" + ssoResponse);
-                } else {
-                    LOG.info("User Validation Failed From SSO Response [validateLogin] with ssoId: " + ssoId + ", ticketId: " + ticketId + ", response: " + ssoResponse);
-                    validationResponse.addValidationError(ValidationError.INVALID_SSO_CREDENTIALS);
-                }
-            } catch (Exception e) {
-                retryCount--;
-                if(retryCount>0){
-                    retryCount--;
-                    continue RETRY_LOOP;
-                }
-                LOG.error("User Validation Failed From SSO Response [validateLogin] with ssoId: " + ssoId + ", ticketId: " + ticketId
-                        + ", exception: ", e);
-                validationResponse.addValidationError(ValidationError.INVALID_SSO_CREDENTIALS);
-            }
-            updateValid(validationResponse);
+        SSOAuthDTO ssoAuthDTO = cacheService.getAuthCache(mobile);
+        LOG.info("Mobile: " + mobile+ ", SSOAuthDTO: "+ssoAuthDTO);
+        if(ssoAuthDTO!=null && ssoId.equals(ssoAuthDTO.getSsoId()) && ticketId.equals(ssoAuthDTO.getTicketId())){
             return;
+        }else{
+            int retryCount = GlobalConstants.API_RETRY_COUNT;
+            RETRY_LOOP:
+            while(retryCount>0) {
+                try {
+                    LOG.info("Fetching SSO credential data from SSO for mobile: "+mobile+", ticketId: "+ticketId);
+                    Gson gson = GlobalConstants.gson;
+                    String ssoResponse = getSSOIdForTicketId(ticketId);
+                    SSOValidateResponse ssoValidateResponse = null;
+                    try {
+                        ssoValidateResponse = gson.fromJson(ssoResponse, SSOValidateResponse.class);
+                        LOG.info("Mobile: " + mobile+ ", ticketId: "+ticketId+", SSOValidateResponse: "+ssoValidateResponse);
+                    }catch (Exception e){
+                        LOG.error("Exception while fetching SSO credential data from SSO for mobile: "+mobile+", ticketId: "+ticketId);
+                        validationResponse.getValidationErrorSet().add(ValidationError.INVALID_SSO_CREDENTIALS);
+                        return;
+                    }
+                    if (!ssoId.equals(ssoValidateResponse.getUserId()) || !mobile.equals(ssoValidateResponse.getVerifiedMobile())) {
+                        validationResponse.getValidationErrorSet().add(ValidationError.INVALID_SSO_CREDENTIALS);
+                        break RETRY_LOOP;
+                    }else{
+                        //successful validation
+                        LOG.info("Authentication success for mobile: "+mobile+", ticketId: "+ticketId);
+                        SSOAuthDTO ssoAuthDTO1 = new SSOAuthDTO();
+                        ssoAuthDTO1.setSsoId(ssoId);
+                        ssoAuthDTO1.setTicketId(ticketId);
+                        cacheService.updateAuthCache(mobile, ssoAuthDTO1);
+                        break RETRY_LOOP;
+                    }
+                } catch (Exception e) {
+                    retryCount--;
+                    if(retryCount>0){
+                        retryCount--;
+                        continue RETRY_LOOP;
+                    }
+                    LOG.error("Exception for mobile: "+mobile+", ticketId: "+ticketId, e);
+                    validationResponse.getValidationErrorSet().add(ValidationError.INVALID_SSO_CREDENTIALS);
+                }
+                updateValid(validationResponse);
+                return;
+            }
         }
     }
 
