@@ -1,9 +1,6 @@
 package com.til.prime.timesSubscription.enums;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /* Highest priority messages and category are shown in response */
 public enum ValidationError {
@@ -24,8 +21,6 @@ public enum ValidationError {
 	ORDER_ALREADY_COMPLETED(15, "Order Already Completed", 1, 1),
 	INVALID_PLAN_TYPE(16, "Oops! Something went wrong. Please try again.", 1, 1),
 	USER_PLAN_DOES_NOT_QUALIFY(17, "Oops! Something went wrong. Please try again.", 2, 1),
-	OTP_SENDING_ERROR(17, "Oops! Something went wrong. Please try again.", 2, 1),
-	OTP_VERIFICATION_ERROR(17, "Oops! Something went wrong. Please try again.", 2, 1),
 	INVALID_USER_SUBSCRIPTION_ID(18, "Invalid User Subscription Id", 1, 1),
 	INVALID_PAYMENT_METHOD(19, "Invalid Payment Method", 1, 1),
 	INVALID_PAYMENT_REFERENCE(20, "Invalid Payment Reference", 1, 1),
@@ -53,8 +48,16 @@ public enum ValidationError {
 	EMPTY_BACKEND_USER_LIST(42, "Empty backend user list", 1, 1),
 	USER_SUBSCRIPTION_EXPIRED(43, "User Subscription expired", 1, 1),
 	INVALID_TABLE_NAME(44, "Invalid Table Name", 1, 1),
-	INVALID_KEY_VALUE(44, "Invalid Key Value", 1, 1),
-	INVALID_UPDATE_VALUE(44, "Invalid Update Value", 1, 1),
+	INVALID_KEY_VALUE(45, "Invalid Key Value", 1, 1),
+	INVALID_UPDATE_VALUE(46, "Invalid Update Value", 1, 1),
+	OTP_SENDING_ERROR(47, "Oops! Something went wrong. Please try again.", 2, 1),
+	OTP_VERIFICATION_ERROR(48, "Oops! Something went wrong. Please try again.", 2, 1),
+	INVALID_REQUEST(49, "Invalid request", 2, 1),
+	TRANSACTION_ERROR(50, "Transaction error", 2, 1),
+	LIMIT_EXCEEDED(51, "You have exceeded your OTP limit, Please try later", 2, 3),
+	UNAUTHORIZED_ACCESS(52, "You are not authorised to make this request", 2, 1),
+	OTP_EXPIRED(53, "This OTP is expired, Please enter the correct OTP", 2, 3),
+	WRONG_OTP(54, "Please enter the correct OTP", 2, 3),
 	INVALID_USER(1000, "Invalid User", 1, 1),
 	INVALID_CLIENT_ID(1001, "Invalid Client ID", 1, 1),
 	INVALID_CLIENT_SECRET_KEY(1002, "Invalid Client Secret Key", 1, 1),
@@ -63,8 +66,11 @@ public enum ValidationError {
 	BLOCKED_USER(1005, "Oops! Your account is temporarily suspended.", 1, 3),
 	INVALID_ACTIVATION_CODE(1006, "Oops! Your activation code is invalid.", 1, 3),
 	USER_ALREADY_PURCHASED_MULTIPLE_FUTURE_PLANS(1007, "Don't worry! We've got you covered for more than 2 years, Please continue enjoying all your offers and privileges.", 3, 3),
-	INVALID_OTP(1007, "Please enter correct otp.", 1, 2),
+	INVALID_OTP(1007, "Please enter correct otp.", 1, 3),
 	;
+
+	public static final Set<ValidationError> OTP_TOAST_ERRORS = new HashSet<>(Arrays.asList(INVALID_MOBILE, INVALID_REQUEST, TRANSACTION_ERROR, UNAUTHORIZED_ACCESS, OTP_SENDING_ERROR, OTP_VERIFICATION_ERROR));
+	public static final Set<ValidationError> OTP_INLINE_CODES = new HashSet<>(Arrays.asList(LIMIT_EXCEEDED, OTP_EXPIRED, WRONG_OTP, INVALID_OTP));
 
 	public static final Integer maxCategory = 2;
 

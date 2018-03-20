@@ -1,6 +1,7 @@
 package com.til.prime.timesSubscription.service;
 
 import com.til.prime.timesSubscription.dto.external.*;
+import com.til.prime.timesSubscription.dto.internal.OtpStatus;
 import com.til.prime.timesSubscription.dto.internal.RefundInternalResponse;
 import com.til.prime.timesSubscription.enums.*;
 import com.til.prime.timesSubscription.model.*;
@@ -49,6 +50,6 @@ public interface SubscriptionServiceHelper {
     CustomerSearchCRMResponse prepareCustomerSearchCRMResponse(CustomerSearchCRMResponse customerSearchCRMResponse, CustomerSearchDTOs customerSearchDTOs, ValidationResponse validationResponse);
     OtpVerificationResponse prepareOtpVerificationResponse(OtpVerificationResponse response, ValidationResponse validationResponse);
     GenericResponse prepareGenericResponse(GenericResponse response, ValidationResponse validationResponse);
-    boolean sendOtp(String mobile, boolean resend);
-    boolean verifyOtp(String mobile, String otp);
+    OtpStatus sendOtp(String mobile, boolean resend);
+    OtpStatus verifyOtp(String mobile, String otp);
 }

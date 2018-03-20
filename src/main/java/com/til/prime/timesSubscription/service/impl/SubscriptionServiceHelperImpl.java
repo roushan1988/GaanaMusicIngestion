@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import com.til.prime.timesSubscription.constants.GlobalConstants;
 import com.til.prime.timesSubscription.convertor.ModelToDTOConvertorUtil;
 import com.til.prime.timesSubscription.dto.external.*;
+import com.til.prime.timesSubscription.dto.internal.OtpStatus;
 import com.til.prime.timesSubscription.dto.internal.RefundInternalResponse;
 import com.til.prime.timesSubscription.dto.internal.UrlShorteningRequest;
 import com.til.prime.timesSubscription.dto.internal.UrlShorteningResponse;
@@ -481,7 +482,9 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
         if(validationResponse.isValid()){
             response = (OtpVerificationResponse) ResponseUtil.createSuccessResponse(response);
         }else{
-            if(validationResponse.getValidationErrorSet().contains(ValidationError.INVALID_OTP) || validationResponse.getValidationErrorSet().contains(ValidationError.OTP_VERIFICATION_ERROR)){
+            Set<ValidationError> inlineErrors = ValidationError.OTP_INLINE_CODES;
+            inlineErrors.retainAll(validationResponse.getValidationErrorSet());
+            if(CollectionUtils.isNotEmpty(inlineErrors)){
                 response.setType(WebViewTypeEnum.INLINE.getName());
             }else{
                 response.setType(WebViewTypeEnum.TOAST.getName());
@@ -502,7 +505,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
     }
 
     @Override
-    public boolean sendOtp(String mobile, boolean resend){
+    public OtpStatus sendOtp(String mobile, boolean resend){
         int retryCount = GlobalConstants.API_RETRY_COUNT;
         String url = resend? properties.getProperty(GlobalConstants.SSO_RESEND_OTP_URL_KEY) : properties.getProperty(GlobalConstants.SSO_SEND_OTP_URL_KEY);
         RETRY_LOOP:
@@ -515,9 +518,9 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
                 data.put(GlobalConstants.SSO_MOBILE_KEY, mobile);
                 SSOGenericResponse response = httpConnectionUtils.requestWithHeaders(data, headers, url, SSOGenericResponse.class, GlobalConstants.POST);
                 if(response.getCode()==200 && GlobalConstants.SUCCESS.equals(response.getStatus()) && GlobalConstants.OK.equals(response.getMessage())){
-                    return true;
+                    return new OtpStatus(true);
                 }
-                return false;
+                return new OtpStatus(false, response.getMessage());
             }catch (Exception e){
                 retryCount--;
                 if(retryCount>0){
@@ -525,11 +528,11 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
                 }
             }
         }
-        return false;
+        return new OtpStatus(false, ValidationError.OTP_SENDING_ERROR.getErrorMessage());
     }
 
     @Override
-    public boolean verifyOtp(String mobile, String otp){
+    public OtpStatus verifyOtp(String mobile, String otp){
         int retryCount = GlobalConstants.API_RETRY_COUNT;
         RETRY_LOOP:
         while (retryCount>0){
@@ -542,9 +545,9 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
                 data.put(GlobalConstants.SSO_OTP_KEY, otp);
                 SSOGenericResponse response = httpConnectionUtils.requestWithHeaders(data, headers, properties.getProperty(GlobalConstants.SSO_VERIFY_OTP_URL_KEY), SSOGenericResponse.class, GlobalConstants.POST);
                 if(response.getCode()==200 && GlobalConstants.SUCCESS.equals(response.getStatus()) && GlobalConstants.OK.equals(response.getMessage())){
-                    return true;
+                    return new OtpStatus(true);
                 }
-                return false;
+                return new OtpStatus(false, response.getMessage());
             }catch (Exception e){
                 retryCount--;
                 if(retryCount>0){
@@ -552,7 +555,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
                 }
             }
         }
-        return false;
+        return new OtpStatus(false, ValidationError.OTP_VERIFICATION_ERROR.getErrorMessage());
     }
 
     private void updateSubscriptionChecksumForRenewSubscription(RenewSubscriptionRequest request) {

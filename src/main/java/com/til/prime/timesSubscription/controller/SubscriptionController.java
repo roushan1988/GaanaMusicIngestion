@@ -242,7 +242,7 @@ public class SubscriptionController {
     @Loggable
     @RequestMapping(path="/otp/verify", method = RequestMethod.POST)
     @ResponseBody
-    public OtpVerificationResponse sendOtp(@RequestBody OtpVerificationRequest request){
+    public OtpVerificationResponse verifyOtp(@RequestBody OtpVerificationRequest request){
         try {
             return subscriptionService.verifyOtp(request);
         }catch (Exception e){

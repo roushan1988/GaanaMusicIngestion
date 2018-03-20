@@ -5,6 +5,7 @@ import com.til.prime.timesSubscription.constants.RedisConstants;
 import com.til.prime.timesSubscription.convertor.ModelToDTOConvertorUtil;
 import com.til.prime.timesSubscription.dao.*;
 import com.til.prime.timesSubscription.dto.external.*;
+import com.til.prime.timesSubscription.dto.internal.OtpStatus;
 import com.til.prime.timesSubscription.dto.internal.RefundInternalResponse;
 import com.til.prime.timesSubscription.enums.*;
 import com.til.prime.timesSubscription.model.*;
@@ -644,11 +645,10 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     public GenericResponse sendOtp(OtpRequest request) {
         ValidationResponse validationResponse = subscriptionValidationService.validateSendOtp(request);
         GenericResponse response = new GenericResponse();
-        boolean success;
         if (validationResponse.isValid()) {
-            success = subscriptionServiceHelper.sendOtp(request.getUser().getMobile(), request.isResend());
-            if(!success){
-                validationResponse.addValidationError(ValidationError.OTP_SENDING_ERROR);
+            OtpStatus status = subscriptionServiceHelper.sendOtp(request.getUser().getMobile(), request.isResend());
+            if(!status.isSuccess()){
+                validationResponse.addValidationError(ValidationError.valueOf(status.getMessage()));
                 validationResponse.setValid(false);
             }
         }
@@ -660,11 +660,10 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     public OtpVerificationResponse verifyOtp(OtpVerificationRequest request) {
         ValidationResponse validationResponse = subscriptionValidationService.validateVerifyOtp(request);
         OtpVerificationResponse response = new OtpVerificationResponse();
-        boolean success;
         if (validationResponse.isValid()) {
-            success = subscriptionServiceHelper.verifyOtp(request.getUser().getMobile(), request.getOtp());
-            if(!success){
-                validationResponse.addValidationError(ValidationError.OTP_VERIFICATION_ERROR);
+            OtpStatus status = subscriptionServiceHelper.verifyOtp(request.getUser().getMobile(), request.getOtp());
+            if(!status.isSuccess()){
+                validationResponse.addValidationError(ValidationError.valueOf(status.getMessage()));
                 validationResponse.setValid(false);
             }
         }
