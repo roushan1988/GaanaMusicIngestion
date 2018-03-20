@@ -71,7 +71,7 @@ public interface SubscriptionService {
     OrderDetailsCRMResponse getOrderDetailsCRM(OrderDetailsRequest request);
     OrderSearchCRMResponse orderSearchCRM(OrderSearchRequest request);
     GenericResponse sendOtp(OtpRequest request);
-    GenericResponse verifyOtp(OtpVerificationRequest request);
+    OtpVerificationResponse verifyOtp(OtpVerificationRequest request);
     BackendSubscriptionUserModel saveBackendSubscriptionUser(BackendSubscriptionUserModel user, EventEnum eventEnum);
     PropertyDataGetResponseCRM getPropertyTableData(PropertyDataRequestCRM request);
     GenericResponse updatePropertyTableData(PropertyDataUpdateRequestCRM request);

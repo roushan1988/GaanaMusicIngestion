@@ -477,6 +477,21 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
     }
 
     @Override
+    public OtpVerificationResponse prepareOtpVerificationResponse(OtpVerificationResponse response, ValidationResponse validationResponse) {
+        if(validationResponse.isValid()){
+            response = (OtpVerificationResponse) ResponseUtil.createSuccessResponse(response);
+        }else{
+            if(validationResponse.getValidationErrorSet().contains(ValidationError.INVALID_OTP) || validationResponse.getValidationErrorSet().contains(ValidationError.OTP_VERIFICATION_ERROR)){
+                response.setType(WebViewTypeEnum.INLINE.getName());
+            }else{
+                response.setType(WebViewTypeEnum.TOAST.getName());
+            }
+            response = (OtpVerificationResponse) ResponseUtil.createFailureResponse(response, validationResponse, validationResponse.getMaxCategory());
+        }
+        return response;
+    }
+
+    @Override
     public GenericResponse prepareGenericResponse(GenericResponse response, ValidationResponse validationResponse) {
         if(validationResponse.isValid()){
             response = ResponseUtil.createSuccessResponse(response);

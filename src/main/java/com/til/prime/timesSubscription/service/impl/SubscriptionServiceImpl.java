@@ -1,19 +1,16 @@
 package com.til.prime.timesSubscription.service.impl;
 
-import java.math.BigDecimal;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-
-import javax.annotation.Resource;
-import javax.ws.rs.HEAD;
-
+import com.til.prime.timesSubscription.constants.GlobalConstants;
+import com.til.prime.timesSubscription.constants.RedisConstants;
+import com.til.prime.timesSubscription.convertor.ModelToDTOConvertorUtil;
+import com.til.prime.timesSubscription.dao.*;
+import com.til.prime.timesSubscription.dto.external.*;
+import com.til.prime.timesSubscription.dto.internal.RefundInternalResponse;
+import com.til.prime.timesSubscription.enums.*;
+import com.til.prime.timesSubscription.model.*;
+import com.til.prime.timesSubscription.service.*;
+import com.til.prime.timesSubscription.util.TimeUtils;
+import com.til.prime.timesSubscription.util.UniqueIdGeneratorUtil;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -26,95 +23,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.til.prime.timesSubscription.constants.GlobalConstants;
-import com.til.prime.timesSubscription.constants.RedisConstants;
-import com.til.prime.timesSubscription.convertor.ModelToDTOConvertorUtil;
-import com.til.prime.timesSubscription.dao.BackendSubscriptionUserAuditRepository;
-import com.til.prime.timesSubscription.dao.BackendSubscriptionUserRepository;
-import com.til.prime.timesSubscription.dao.SubscriptionPlanRepository;
-import com.til.prime.timesSubscription.dao.SubscriptionVariantRepository;
-import com.til.prime.timesSubscription.dao.UserAuditRepository;
-import com.til.prime.timesSubscription.dao.UserRepository;
-import com.til.prime.timesSubscription.dao.UserSubscriptionAuditRepository;
-import com.til.prime.timesSubscription.dao.UserSubscriptionRepository;
-import com.til.prime.timesSubscription.dto.external.BackendActivationUserDTO;
-import com.til.prime.timesSubscription.dto.external.BackendSubscriptionActivationRequest;
-import com.til.prime.timesSubscription.dto.external.BackendSubscriptionActivationResponse;
-import com.til.prime.timesSubscription.dto.external.BackendSubscriptionRequest;
-import com.til.prime.timesSubscription.dto.external.BackendSubscriptionResponse;
-import com.til.prime.timesSubscription.dto.external.BackendSubscriptionValidationResponse;
-import com.til.prime.timesSubscription.dto.external.BlockUnblockRequest;
-import com.til.prime.timesSubscription.dto.external.CancelSubscriptionRequest;
-import com.til.prime.timesSubscription.dto.external.CancelSubscriptionResponse;
-import com.til.prime.timesSubscription.dto.external.CancelSubscriptionServerRequest;
-import com.til.prime.timesSubscription.dto.external.CheckEligibilityRequest;
-import com.til.prime.timesSubscription.dto.external.CheckStatusRequest;
-import com.til.prime.timesSubscription.dto.external.CheckStatusResponse;
-import com.til.prime.timesSubscription.dto.external.CheckValidVariantRequest;
-import com.til.prime.timesSubscription.dto.external.CustomerCRM;
-import com.til.prime.timesSubscription.dto.external.CustomerDetailsCRMResponse;
-import com.til.prime.timesSubscription.dto.external.CustomerSearchCRMResponse;
-import com.til.prime.timesSubscription.dto.external.CustomerSearchDTO;
-import com.til.prime.timesSubscription.dto.external.CustomerSearchDTOs;
-import com.til.prime.timesSubscription.dto.external.CustomerSearchRequest;
-import com.til.prime.timesSubscription.dto.external.ExtendExpiryRequest;
-import com.til.prime.timesSubscription.dto.external.ExtendExpiryResponse;
-import com.til.prime.timesSubscription.dto.external.GenerateOrderRequest;
-import com.til.prime.timesSubscription.dto.external.GenerateOrderResponse;
-import com.til.prime.timesSubscription.dto.external.GenericRequest;
-import com.til.prime.timesSubscription.dto.external.GenericResponse;
-import com.til.prime.timesSubscription.dto.external.GenericValidationResponse;
-import com.til.prime.timesSubscription.dto.external.InitPurchaseRequest;
-import com.til.prime.timesSubscription.dto.external.InitPurchaseResponse;
-import com.til.prime.timesSubscription.dto.external.OrderDetailsCRM;
-import com.til.prime.timesSubscription.dto.external.OrderDetailsCRMResponse;
-import com.til.prime.timesSubscription.dto.external.OrderDetailsRequest;
-import com.til.prime.timesSubscription.dto.external.OrderSearchCRMResponse;
-import com.til.prime.timesSubscription.dto.external.OrderSearchRequest;
-import com.til.prime.timesSubscription.dto.external.OrderSearchResultCRM;
-import com.til.prime.timesSubscription.dto.external.OrderSearchResultsCRM;
-import com.til.prime.timesSubscription.dto.external.OtpRequest;
-import com.til.prime.timesSubscription.dto.external.OtpVerificationRequest;
-import com.til.prime.timesSubscription.dto.external.PlanListRequest;
-import com.til.prime.timesSubscription.dto.external.PlanListResponse;
-import com.til.prime.timesSubscription.dto.external.PropertyDataGetResponseCRM;
-import com.til.prime.timesSubscription.dto.external.PropertyDataRequestCRM;
-import com.til.prime.timesSubscription.dto.external.PropertyDataUpdateRequestCRM;
-import com.til.prime.timesSubscription.dto.external.PurchaseHistoryRequest;
-import com.til.prime.timesSubscription.dto.external.PurchaseHistoryResponse;
-import com.til.prime.timesSubscription.dto.external.SubmitPurchaseRequest;
-import com.til.prime.timesSubscription.dto.external.SubmitPurchaseResponse;
-import com.til.prime.timesSubscription.dto.external.SubscriptionPlanDTO;
-import com.til.prime.timesSubscription.dto.external.SubscriptionStatusDTO;
-import com.til.prime.timesSubscription.dto.external.TurnOffAutoDebitRequest;
-import com.til.prime.timesSubscription.dto.external.UpdateCacheForMobileRequest;
-import com.til.prime.timesSubscription.dto.external.UserDTO;
-import com.til.prime.timesSubscription.dto.external.UserSubscriptionDTO;
-import com.til.prime.timesSubscription.dto.external.ValidationResponse;
-import com.til.prime.timesSubscription.dto.internal.RefundInternalResponse;
-import com.til.prime.timesSubscription.enums.BusinessEnum;
-import com.til.prime.timesSubscription.enums.CountryEnum;
-import com.til.prime.timesSubscription.enums.EventEnum;
-import com.til.prime.timesSubscription.enums.PlanStatusEnum;
-import com.til.prime.timesSubscription.enums.PlanTypeEnum;
-import com.til.prime.timesSubscription.enums.PropertyEnum;
-import com.til.prime.timesSubscription.enums.StatusEnum;
-import com.til.prime.timesSubscription.enums.ValidationError;
-import com.til.prime.timesSubscription.model.BackendSubscriptionUserAuditModel;
-import com.til.prime.timesSubscription.model.BackendSubscriptionUserModel;
-import com.til.prime.timesSubscription.model.SubscriptionPlanModel;
-import com.til.prime.timesSubscription.model.SubscriptionVariantModel;
-import com.til.prime.timesSubscription.model.UserAuditModel;
-import com.til.prime.timesSubscription.model.UserModel;
-import com.til.prime.timesSubscription.model.UserSubscriptionAuditModel;
-import com.til.prime.timesSubscription.model.UserSubscriptionModel;
-import com.til.prime.timesSubscription.service.CommunicationService;
-import com.til.prime.timesSubscription.service.PropertyService;
-import com.til.prime.timesSubscription.service.SubscriptionService;
-import com.til.prime.timesSubscription.service.SubscriptionServiceHelper;
-import com.til.prime.timesSubscription.service.SubscriptionValidationService;
-import com.til.prime.timesSubscription.util.TimeUtils;
-import com.til.prime.timesSubscription.util.UniqueIdGeneratorUtil;
+import javax.annotation.Resource;
+import java.math.BigDecimal;
+import java.nio.charset.Charset;
+import java.util.*;
 
 @Service
 @Transactional
@@ -745,9 +657,9 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
-    public GenericResponse verifyOtp(OtpVerificationRequest request) {
+    public OtpVerificationResponse verifyOtp(OtpVerificationRequest request) {
         ValidationResponse validationResponse = subscriptionValidationService.validateVerifyOtp(request);
-        GenericResponse response = new GenericResponse();
+        OtpVerificationResponse response = new OtpVerificationResponse();
         boolean success;
         if (validationResponse.isValid()) {
             success = subscriptionServiceHelper.verifyOtp(request.getUser().getMobile(), request.getOtp());
@@ -756,7 +668,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 validationResponse.setValid(false);
             }
         }
-        response = subscriptionServiceHelper.prepareGenericResponse(response, validationResponse);
+        response = subscriptionServiceHelper.prepareOtpVerificationResponse(response, validationResponse);
         return response;
     }
 
