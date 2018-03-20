@@ -57,7 +57,7 @@ public class GenericResponse {
 
 	@Override
 	public String toString() {
-		final StringBuilder sb = new StringBuilder("CouponResponse{");
+		final StringBuilder sb = new StringBuilder("GenericResponse{");
 		sb.append("success=").append(success);
 		sb.append(", responseCode=").append(responseCode);
 		sb.append(", validationErrorCategory=").append(validationErrorCategory);
