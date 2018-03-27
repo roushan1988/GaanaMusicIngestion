@@ -585,9 +585,11 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         String primeId = null;
         if(CollectionUtils.isNotEmpty(userModels)){
             primeId = userModels.get(0).getPrimeId();
+            loop:
             for(UserModel userModel1: userModels){
                 if(!userModel1.isDeleted()){
                     userModel = userModel1;
+                    break loop;
                 }
             }
         }
@@ -763,13 +765,23 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     @Transactional
     public UserModel saveUserModel(UserModel userModel, EventEnum eventEnum, boolean retryForPrimeId) {
         if(retryForPrimeId){
-            int retryCount = GlobalConstants.PRIME_ID_GENERATION_RETRY_COUNT;
             UserModel primeIdModel = userRepository.findFirstByPrimeId(userModel.getPrimeId());
-            retryLoop:
-            while (retryCount > 0 && primeIdModel!=null) {
-                userModel.setPrimeId(UniqueIdGeneratorUtil.generatePrimeId());
-                retryCount--;
-                continue retryLoop;
+            if(primeIdModel!=null){
+                int retryCount = GlobalConstants.PRIME_ID_GENERATION_RETRY_COUNT;
+                retryLoop:
+                while (retryCount > 0 && primeIdModel!=null) {
+                    userModel.setPrimeId(UniqueIdGeneratorUtil.generatePrimeId());
+                    primeIdModel = userRepository.findFirstByPrimeId(userModel.getPrimeId());
+                    if(primeIdModel==null){
+                        break retryLoop;
+                    }
+                    retryCount--;
+                    if(retryCount==0){
+                        LOG.error("Can't create unique PrimeId for mobile: "+userModel.getMobile());
+                        throw new RuntimeException("Can't create unique PrimeId");
+                    }
+                    continue retryLoop;
+                }
             }
         }
         userModel = userRepository.save(userModel);
