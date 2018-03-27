@@ -58,7 +58,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
         userSubscriptionModel.setPlatform(platform);
         userSubscriptionModel.setCreated(new Date());
         if(price.compareTo(BigDecimal.ZERO)<=0 || (crmRequest&&free)){
-            String orderId = UniqueIdGeneratorUtil.generateOrderId(GlobalConstants.ORDER_ID_LENGTH);
+            String orderId = UniqueIdGeneratorUtil.generateOrderId();
             userSubscriptionModel.setOrderId(orderId);
             userSubscriptionModel.setPaymentMethod(GlobalConstants.PAYMENT_METHOD_NA);
             userSubscriptionModel.setPaymentReference(GlobalConstants.PAYMENT_REFERENCE_NA);
@@ -85,7 +85,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
 
     @Override
     public UserSubscriptionModel updateGenerateOrderUserSubscription(GenerateOrderRequest request, UserSubscriptionModel userSubscriptionModel) {
-        String orderId = UniqueIdGeneratorUtil.generateOrderId(GlobalConstants.ORDER_ID_LENGTH);
+        String orderId = UniqueIdGeneratorUtil.generateOrderId();
         userSubscriptionModel.setOrderId(orderId);
         userSubscriptionModel.setPaymentMethod(request.getPaymentMethod());
         return userSubscriptionModel;
@@ -123,6 +123,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
             response.setVariantId(variantModel.getId());
             response.setPaymentRequired(!userSubscriptionModel.isOrderCompleted());
             response.setPaymentAmount(userSubscriptionModel.getSubscriptionVariant().getPrice());
+            response.setPrimeId(userSubscriptionModel.getUser().getPrimeId());
             response = (InitPurchaseResponse) ResponseUtil.createSuccessResponse(response);
         }else{
             response = (InitPurchaseResponse) ResponseUtil.createFailureResponse(response, validationResponse, validationResponse.getMaxCategory());
@@ -351,6 +352,9 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
     public CheckStatusResponse prepareCheckStatusResponse(CheckStatusResponse response, boolean external, SubscriptionStatusDTO subscriptionStatusDTO, ValidationResponse validationResponse) {
         response.setTimesPrimeUser(subscriptionStatusDTO!=null && PlanStatusEnum.ACTIVE_STATUS_CODE_SET.contains(subscriptionStatusDTO.getPlanStatus()));
         response.setSubscriptionStatusDTO(subscriptionStatusDTO);
+        if(external && subscriptionStatusDTO!=null){
+            subscriptionStatusDTO.setPrimeId(null);
+        }
         if(validationResponse.isValid()){
             response = (CheckStatusResponse) ResponseUtil.createSuccessResponse(response);
         }else{
@@ -368,6 +372,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
         userModel.setMobile(request.getUser().getMobile());
         userModel.setEmail(request.getUser().getEmail());
         userModel.setCity(request.getUser().getCity());
+        userModel.setPrimeId(UniqueIdGeneratorUtil.generatePrimeId());
         userModel.setCreated(new Date());
         return userModel;
     }
@@ -380,6 +385,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
         userAuditModel.setFirstName(userModel.getFirstName());
         userAuditModel.setLastName(userModel.getLastName());
         userAuditModel.setMobile(userModel.getMobile());
+        userAuditModel.setPrimeId(userModel.getPrimeId());
         userAuditModel.setEmail(userModel.getEmail());
         userAuditModel.setCity(userModel.getCity());
         userAuditModel.setEvent(eventEnum);

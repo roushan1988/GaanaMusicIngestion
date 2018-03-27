@@ -5,6 +5,7 @@ CREATE TABLE `user`(
   `first_name` varchar(64) NOT NULL,
   `last_name` varchar(64) DEFAULT NULL,
   `mobile` varchar(32) NOT NULL,
+  `prime_id` varchar(32) NOT NULL,
   `email` varchar(32) NOT NULL,
   `sso_id` varchar(64) NOT NULL,
   `city` varchar(32) NOT NULL,
@@ -27,6 +28,7 @@ CREATE TABLE `user_audit`(
   `first_name` varchar(64) NOT NULL,
   `last_name` varchar(64) DEFAULT NULL,
   `mobile` varchar(32) NOT NULL,
+  `prime_id` varchar(32) NOT NULL,
   `email` varchar(32) NOT NULL,
   `sso_id` varchar(64) NOT NULL,
   `city` varchar(32) NOT NULL,
@@ -316,3 +318,6 @@ alter table subscription_plan add INDEX `INDEX_SP_DELETED` (`deleted`);
 alter table subscription_variant add INDEX `INDEX_SV_DELETED` (`deleted`);
 alter table user_subscription add INDEX `INDEX_US_DELETED` (`deleted`);
 alter table job add INDEX `INDEX_JOB_DELETED` (`deleted`);
+
+alter table user add column `prime_id` varchar(32) NOT NULL after mobile;
+alter table user_audit add column `prime_id` varchar(32) NOT NULL after mobile;

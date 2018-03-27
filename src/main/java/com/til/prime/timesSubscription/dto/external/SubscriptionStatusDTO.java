@@ -12,6 +12,7 @@ public class SubscriptionStatusDTO implements Serializable {
     private boolean autoRenewal;
     private String email;
     private String firstName;
+    private String primeId;
 
     public boolean isBlocked() {
         return blocked;
@@ -69,6 +70,14 @@ public class SubscriptionStatusDTO implements Serializable {
         this.firstName = firstName;
     }
 
+    public String getPrimeId() {
+        return primeId;
+    }
+
+    public void setPrimeId(String primeId) {
+        this.primeId = primeId;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("SubscriptionStatusDTO{");
@@ -78,6 +87,7 @@ public class SubscriptionStatusDTO implements Serializable {
         sb.append(", planStatus=").append(planStatus);
         sb.append(", autoRenewal=").append(autoRenewal);
         sb.append(", email='").append(email).append('\'');
+        sb.append(", primeId='").append(primeId).append('\'');
         sb.append('}');
         return sb.toString();
     }

@@ -1,5 +1,6 @@
 package com.til.prime.timesSubscription.util;
 
+import com.til.prime.timesSubscription.constants.GlobalConstants;
 import org.apache.commons.text.CharacterPredicates;
 import org.apache.commons.text.RandomStringGenerator;
 
@@ -11,9 +12,17 @@ public class UniqueIdGeneratorUtil {
     private static final int BASE36_RADIX = 36;
     private static final int CONSECUTIVE_SIMILAR_CHARACTERS = 4;
 
-    public static final String generateOrderId(int length){
+    public static final String generateOrderId(){
+        return generateUniqueIdInConsecutiveSimilarCharactersPattern(GlobalConstants.ORDER_ID_LENGTH, null);
+    }
+
+    public static final String generatePrimeId(){
+        return generateUniqueIdInConsecutiveSimilarCharactersPattern(GlobalConstants.PRIME_ID_LENGTH, null);
+    }
+
+    public static final String generateUniqueIdInConsecutiveSimilarCharactersPattern(int length, Boolean startsWithCharacter){
         StringBuilder sb = new StringBuilder();
-        boolean flag = random.nextBoolean();
+        boolean flag = startsWithCharacter!=null ? startsWithCharacter: random.nextBoolean();
         for(int i=0; i<=((length-1)/CONSECUTIVE_SIMILAR_CHARACTERS); i++){
             if(flag){
                 RandomStringGenerator generator = new RandomStringGenerator.Builder().withinRange('A', 'Z').filteredBy(CharacterPredicates.LETTERS,

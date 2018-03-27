@@ -30,7 +30,8 @@ public enum EventEnum {
     USER_SUBSCRIPTION_SWITCH,
     BACKEND_USER_SUBSCRIPTION_CREATION,
     BACKEND_FREE_TRAIL_ACTIVATION,
-    BACKEND_SUBSCRIPTION_EXTENSION
+    BACKEND_SUBSCRIPTION_EXTENSION,
+    PRIME_ID_GENERATION,
     ;
 
     public static final EventEnum getEventByInitPlanStatus(PlanStatusEnum planStatus){

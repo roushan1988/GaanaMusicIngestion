@@ -5,9 +5,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface UserRepository extends GenericJpaRepository<UserModel, Long> {
     UserModel findByMobileAndDeletedFalse(String mobile);
+    List<UserModel> findByMobile(String mobile);
+    UserModel findByPrimeId(String primeId);
     UserModel findBySsoIdAndDeletedFalse(String ssoId);
     UserModel findByEmailAndDeletedFalse(String email);
     Page<UserModel> findByFirstNameAndLastNameAndDeletedFalse(String firstName, String lastName, Pageable pageable);

@@ -21,10 +21,12 @@ public class GlobalConstants {
     public static final String TICKETID = "ticketId";
     public static final String SITEID = "siteId";
     public static final int ORDER_ID_LENGTH = 16;
+    public static final int PRIME_ID_LENGTH = 16;
     public static final String PAYMENT_REFERENCE_NA = "NA";
     public static final String PAYMENT_METHOD_NA = "NA";
     public static final int API_RETRY_COUNT = 3;
     public static final int DB_RETRY_COUNT = 3;
+    public static final int PRIME_ID_GENERATION_RETRY_COUNT = 10;
     public static final int SINGLE_TRY = 1;
     public static final String VALIDATION_FAILURE = "Certain Validations Failed";
     public static final String EXCEPTION_MESSAGE = "Oops! Something went wrong. Please try again.";

@@ -53,6 +53,7 @@ public class ValidationResponse implements Serializable {
 		if(validationError.getMessagePriority()>maxMessagePriority){
 			message=validationError.getErrorMessage();
 		}
+		setValid(false);
 	}
 
 	@Override

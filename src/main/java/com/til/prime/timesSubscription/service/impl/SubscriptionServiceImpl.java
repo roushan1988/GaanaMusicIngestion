@@ -76,22 +76,24 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         if (validationResponse.isValid()) {
             if (request.getUser() != null) {
                 UserModel userModel = getOrCreateUserWithMobileCheck(request, validationResponse);
-                List<SubscriptionPlanModel> subscriptionPlanModels = null;
-                boolean flag = false;
-                if (request.getPlanId() != null) {
-                    subscriptionPlanModels = subscriptionPlanRepository.findByIdAndBusinessAndCountryAndDeleted(request.getPlanId(), request.getBusiness(), request.getCountry(), false);
-                    flag = true;
-                } else {
-                    subscriptionPlanModels = propertyService.getAllPlanModels(request.getBusiness(), request.getCountry());
-                }
-                subscriptionPlans = new ArrayList<>();
-                if (CollectionUtils.isNotEmpty(subscriptionPlanModels)) {
-                    for (SubscriptionPlanModel subscriptionPlanModel : subscriptionPlanModels) {
-                        if (flag) {
-                            Collections.sort(subscriptionPlanModel.getVariants());
+                if(validationResponse.isValid()){
+                    List<SubscriptionPlanModel> subscriptionPlanModels = null;
+                    boolean flag = false;
+                    if (request.getPlanId() != null) {
+                        subscriptionPlanModels = subscriptionPlanRepository.findByIdAndBusinessAndCountryAndDeleted(request.getPlanId(), request.getBusiness(), request.getCountry(), false);
+                        flag = true;
+                    } else {
+                        subscriptionPlanModels = propertyService.getAllPlanModels(request.getBusiness(), request.getCountry());
+                    }
+                    subscriptionPlans = new ArrayList<>();
+                    if (CollectionUtils.isNotEmpty(subscriptionPlanModels)) {
+                        for (SubscriptionPlanModel subscriptionPlanModel : subscriptionPlanModels) {
+                            if (flag) {
+                                Collections.sort(subscriptionPlanModel.getVariants());
+                            }
+                            UserSubscriptionModel lastUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndBusinessAndOrderCompletedAndDeletedOrderByIdDesc(request.getUser().getMobile(), request.getBusiness(), true, false);
+                            subscriptionPlans.add(ModelToDTOConvertorUtil.getSubscriptionPlanDTO(subscriptionPlanModel, lastUserSubscription));
                         }
-                        UserSubscriptionModel lastUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndBusinessAndOrderCompletedAndDeletedOrderByIdDesc(request.getUser().getMobile(), request.getBusiness(), true, false);
-                        subscriptionPlans.add(ModelToDTOConvertorUtil.getSubscriptionPlanDTO(subscriptionPlanModel, lastUserSubscription));
                     }
                 }
             } else {
@@ -149,7 +151,6 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 userSubscriptionModel = saveUserSubscription(userSubscriptionModel, true, request.getUser().getSsoId(), request.getUser().getTicketId(), eventEnum, userSubscriptionModel.isOrderCompleted());
                 if (userSubscriptionModel.isOrderCompleted()) {
                     if (PlanStatusEnum.FREE_TRIAL.equals(userSubscriptionModel.getPlanStatus())) {
-
                         communicationService.sendFreeTrialSubscriptionSuccessCommunication(userSubscriptionModel);
                     } else {
                         communicationService.sendPaidSubscriptionSuccessCommunication(userSubscriptionModel);
@@ -371,7 +372,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         }
         if (validationResponse.isValid()) {
             userModel.setBlocked(request.isBlockUser());
-            userModel = saveUserModel(userModel, request.isBlockUser() ? EventEnum.USER_BLOCK : EventEnum.USER_UNBLOCK);
+            userModel = saveUserModel(userModel, request.isBlockUser() ? EventEnum.USER_BLOCK : EventEnum.USER_UNBLOCK, false);
             UserSubscriptionModel userSubscriptionModel = userSubscriptionRepository.findByUserMobileAndUserDeletedFalseAndStatusAndOrderCompletedTrue(request.getUser().getMobile(), StatusEnum.ACTIVE);
             updateUserStatus(userSubscriptionModel, userModel);
         }
@@ -544,14 +545,16 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 request.getUser().setEmail(StringUtils.isEmpty(request.getUser().getEmail()) ? backendUser.getEmail() : request.getUser().getEmail());
                 SubscriptionVariantModel variantModel = propertyService.getBackendFreeTrialVariant(BusinessEnum.TIMES_PRIME, CountryEnum.IN);
                 UserModel userModel = getOrCreateUserWithMobileCheck(request, validationResponse);
-                userSubscriptionModel = subscriptionServiceHelper.generateInitPurchaseUserSubscription(request.getUser(), request.getChannel(), request.getPlatform(), PlanTypeEnum.TRIAL, variantModel.getDurationDays(), variantModel, null, userModel, variantModel.getPrice(), false, true);
-                EventEnum eventEnum = EventEnum.getEventForBackendActivation(userSubscriptionModel.getPlanStatus());
-                userSubscriptionModel = saveUserSubscription(userSubscriptionModel, true, request.getUser().getSsoId(), request.getUser().getTicketId(), eventEnum, true);
-                if (userSubscriptionModel.isOrderCompleted()) {
-                    if (PlanStatusEnum.FREE_TRIAL.equals(userSubscriptionModel.getPlanStatus())) {
-                        communicationService.sendFreeTrialSubscriptionSuccessCommunication(userSubscriptionModel);
-                    } else {
-                        communicationService.sendPaidSubscriptionSuccessCommunication(userSubscriptionModel);
+                if(validationResponse.isValid()){
+                    userSubscriptionModel = subscriptionServiceHelper.generateInitPurchaseUserSubscription(request.getUser(), request.getChannel(), request.getPlatform(), PlanTypeEnum.TRIAL, variantModel.getDurationDays(), variantModel, null, userModel, variantModel.getPrice(), false, true);
+                    EventEnum eventEnum = EventEnum.getEventForBackendActivation(userSubscriptionModel.getPlanStatus());
+                    userSubscriptionModel = saveUserSubscription(userSubscriptionModel, true, request.getUser().getSsoId(), request.getUser().getTicketId(), eventEnum, true);
+                    if (userSubscriptionModel.isOrderCompleted()) {
+                        if (PlanStatusEnum.FREE_TRIAL.equals(userSubscriptionModel.getPlanStatus())) {
+                            communicationService.sendFreeTrialSubscriptionSuccessCommunication(userSubscriptionModel);
+                        } else {
+                            communicationService.sendPaidSubscriptionSuccessCommunication(userSubscriptionModel);
+                        }
                     }
                 }
             } else if (lastUserSubscription.getStatus() == StatusEnum.FUTURE) {
@@ -577,17 +580,27 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     @Override
     @Transactional
     public UserModel getOrCreateUserWithMobileCheck(GenericRequest request, ValidationResponse validationResponse) {
-        UserModel userModel = userRepository.findByMobileAndDeletedFalse(request.getUser().getMobile());
+        List<UserModel> userModels = userRepository.findByMobile(request.getUser().getMobile());
+        UserModel userModel = null;
+        String primeId = null;
+        if(CollectionUtils.isNotEmpty(userModels)){
+            primeId = userModels.get(0).getPrimeId();
+            for(UserModel userModel1: userModels){
+                if(!userModel1.isDeleted()){
+                    userModel = userModel1;
+                }
+            }
+        }
         if (userModel == null) {
             userModel = subscriptionServiceHelper.getUser(request);
-            userModel = saveUserModel(userModel, EventEnum.NORMAL_USER_CREATION);
+            userModel = saveUserModel(userModel, EventEnum.NORMAL_USER_CREATION, true);
         } else {
-            if (request.getUser().getSsoId().equals(userModel.getSsoId())) {
-                subscriptionValidationService.validateBlockedUser(userModel, validationResponse);
-            } else {
+            subscriptionValidationService.validateBlockedUser(userModel, validationResponse);
+            if (validationResponse.isValid()) {
                 List<UserSubscriptionModel> relevantUserSubscriptions = userSubscriptionRepository.findByUserMobileAndUserDeletedFalseAndStatusInAndOrderCompletedTrueAndDeletedFalseOrderById(userModel.getMobile(), Arrays.asList(StatusEnum.ACTIVE, StatusEnum.FUTURE));
                 userModel.setIsDelete(true);
-                userModel = saveUserModel(userModel, EventEnum.USER_SUSPENSION);
+                userModel = saveUserModel(userModel, EventEnum.USER_SUSPENSION, false);
+                primeId = userModel.getPrimeId();
                 updateUserDetailsInCache(userModel);
                 if (StringUtils.isNotEmpty(userModel.getEmail())) {
                     if (CollectionUtils.isNotEmpty(relevantUserSubscriptions)) {
@@ -595,7 +608,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                     }
                 }
                 userModel = subscriptionServiceHelper.getUser(request);
-                userModel = saveUserModel(userModel, EventEnum.USER_CREATION_WITH_EXISTING_MOBILE);
+                userModel.setPrimeId(primeId);
+                userModel = saveUserModel(userModel, EventEnum.USER_CREATION_WITH_EXISTING_MOBILE, false);
                 if (CollectionUtils.isNotEmpty(relevantUserSubscriptions)) {
                     for (UserSubscriptionModel model : relevantUserSubscriptions) {
                         model.setUser(userModel);
@@ -627,7 +641,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             } catch (Exception e) {
                 retryCount--;
                 if (retryCount > 0) {
-                    userSubscriptionModel.setOrderId(UniqueIdGeneratorUtil.generateOrderId(GlobalConstants.ORDER_ID_LENGTH));
+                    userSubscriptionModel.setOrderId(UniqueIdGeneratorUtil.generateOrderId());
                     continue retryLoop;
                 }
                 throw e;
@@ -740,13 +754,24 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         }
         statusDTO.setAutoRenewal(userSubscriptionModel.isAutoRenewal());
         statusDTO.setFirstName(userSubscriptionModel.getUser().getFirstName());
+        statusDTO.setPrimeId(userSubscriptionModel.getUser().getPrimeId());
         LOG.info("StatusDTO: " + statusDTO);
         return statusDTO;
     }
 
     @Override
     @Transactional
-    public UserModel saveUserModel(UserModel userModel, EventEnum eventEnum) {
+    public UserModel saveUserModel(UserModel userModel, EventEnum eventEnum, boolean retryForPrimeId) {
+        if(retryForPrimeId){
+            int retryCount = GlobalConstants.PRIME_ID_GENERATION_RETRY_COUNT;
+            UserModel primeIdModel = userRepository.findByPrimeId(userModel.getPrimeId());
+            retryLoop:
+            while (retryCount > 0 && primeIdModel!=null) {
+                userModel.setPrimeId(UniqueIdGeneratorUtil.generatePrimeId());
+                retryCount--;
+                continue retryLoop;
+            }
+        }
         userModel = userRepository.save(userModel);
         UserAuditModel userAuditModel = subscriptionServiceHelper.getUserAudit(userModel, eventEnum);
         userAuditRepository.save(userAuditModel);

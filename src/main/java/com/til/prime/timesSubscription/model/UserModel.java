@@ -12,6 +12,8 @@ public class UserModel extends BaseModel {
     private String lastName;
     @Column(nullable = false)
     private String mobile;
+    @Column(name="prime_id", nullable = false)
+    private String primeId;
     @Column
     private String email;
     @Column(name="sso_id", nullable = false)
@@ -45,6 +47,14 @@ public class UserModel extends BaseModel {
 
     public void setMobile(String mobile) {
         this.mobile = mobile;
+    }
+
+    public String getPrimeId() {
+        return primeId;
+    }
+
+    public void setPrimeId(String primeId) {
+        this.primeId = primeId;
     }
 
     public String getEmail() {
