@@ -779,7 +779,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     public UserModel saveUserModel(UserModel userModel, EventEnum eventEnum, boolean retryForPrimeId) {
         if(retryForPrimeId){
             int retryCount = GlobalConstants.PRIME_ID_GENERATION_RETRY_COUNT;
-            UserModel primeIdModel = userRepository.findByPrimeId(userModel.getPrimeId());
+            UserModel primeIdModel = userRepository.findFirstByPrimeId(userModel.getPrimeId());
             retryLoop:
             while (retryCount > 0 && primeIdModel!=null) {
                 userModel.setPrimeId(UniqueIdGeneratorUtil.generatePrimeId());
