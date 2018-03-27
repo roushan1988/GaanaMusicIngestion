@@ -43,21 +43,6 @@ public class SubscriptionController {
     }
 
     @Loggable
-    @RequestMapping(path="/updateUsers", method = {RequestMethod.GET})
-    @ResponseBody
-    public GenericResponse updateUsers(){
-        try {
-            subscriptionService.updateUsers();
-            GenericResponse response = new GenericResponse();
-            return ResponseUtil.createSuccessResponse(response);
-        }catch (Exception e){
-            LOG.error("Exception in updateUsers: ", e);
-            GenericResponse response = new GenericResponse();
-            return ResponseUtil.createExceptionResponse(response, 10);
-        }
-    }
-
-    @Loggable
     @RequestMapping(path="/initPurchase", method = RequestMethod.POST)
     @ResponseBody
     public InitPurchaseResponse initPurchase(@RequestBody InitPurchaseRequest request){

@@ -45,7 +45,6 @@ import com.til.prime.timesSubscription.model.UserSubscriptionModel;
 
 public interface SubscriptionService {
     PlanListResponse getAllPlans(PlanListRequest request);
-    GenericResponse updateUsers();
     InitPurchaseResponse initPurchasePlan(InitPurchaseRequest request);
     InitPurchaseResponse initPurchasePlan(InitPurchaseRequest request, boolean crmRequest, boolean isFree);
     GenerateOrderResponse generateOrder(GenerateOrderRequest request);
