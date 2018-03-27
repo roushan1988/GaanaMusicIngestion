@@ -116,6 +116,21 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
+    public GenericResponse updateUsers() {
+        List<UserModel> users = userRepository.findAll();
+        for(UserModel userModel: users){
+            UserModel model1 = userRepository.findFirstByMobile(userModel.getMobile());
+            if(StringUtils.isEmpty(model1.getPrimeId())){
+                userModel.setPrimeId(UniqueIdGeneratorUtil.generatePrimeId());
+            }else{
+                userModel.setPrimeId(model1.getPrimeId());
+            }
+            saveUserModel(userModel, EventEnum.PRIME_ID_GENERATION, true);
+        }
+        return null;
+    }
+
+    @Override
     @Transactional
     public InitPurchaseResponse initPurchasePlan(InitPurchaseRequest request) {
         return initPurchasePlan(request, false, false);

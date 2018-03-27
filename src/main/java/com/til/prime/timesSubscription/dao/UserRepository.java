@@ -11,6 +11,7 @@ import java.util.List;
 public interface UserRepository extends GenericJpaRepository<UserModel, Long> {
     UserModel findByMobileAndDeletedFalse(String mobile);
     List<UserModel> findByMobile(String mobile);
+    UserModel findFirstByMobile(String mobile);
     UserModel findByPrimeId(String primeId);
     UserModel findBySsoIdAndDeletedFalse(String ssoId);
     UserModel findByEmailAndDeletedFalse(String email);
