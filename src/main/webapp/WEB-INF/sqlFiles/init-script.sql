@@ -16,6 +16,7 @@ CREATE TABLE `user`(
   PRIMARY KEY (`id`),
   INDEX `INDEX_SSO_ID` (`sso_id`),
   INDEX `INDEX_MOBILE` (`mobile`),
+  INDEX `INDEX_PRIME_ID` (`prime_id`),
   INDEX `INDEX_EMAIL` (`email`),
   INDEX `INDEX_USER_BLOCKED` (`blocked`),
   INDEX `INDEX_USER_DELETED` (`deleted`)
@@ -321,3 +322,4 @@ alter table job add INDEX `INDEX_JOB_DELETED` (`deleted`);
 
 alter table user add column `prime_id` varchar(32) NOT NULL after mobile;
 alter table user_audit add column `prime_id` varchar(32) NOT NULL after mobile;
+alter table user_audit add key `INDEX_PRIME_ID` (`prime_id`);
