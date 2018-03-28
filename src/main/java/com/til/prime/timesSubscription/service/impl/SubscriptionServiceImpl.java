@@ -580,46 +580,36 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     @Override
     @Transactional
     public UserModel getOrCreateUserWithMobileCheck(GenericRequest request, ValidationResponse validationResponse) {
-        List<UserModel> userModels = userRepository.findByMobile(request.getUser().getMobile());
-        UserModel userModel = null;
-        String primeId = null;
-        if(CollectionUtils.isNotEmpty(userModels)){
-            primeId = userModels.get(0).getPrimeId();
-            loop:
-            for(UserModel userModel1: userModels){
-                if(!userModel1.isDeleted()){
-                    userModel = userModel1;
-                    break loop;
-                }
-            }
-        }
+        UserModel userModel = userRepository.findByMobileAndDeletedFalse(request.getUser().getMobile());
         if (userModel == null) {
             userModel = subscriptionServiceHelper.getUser(request);
             userModel = saveUserModel(userModel, EventEnum.NORMAL_USER_CREATION, true);
         } else {
             subscriptionValidationService.validateBlockedUser(userModel, validationResponse);
             if (validationResponse.isValid()) {
-                List<UserSubscriptionModel> relevantUserSubscriptions = userSubscriptionRepository.findByUserMobileAndUserDeletedFalseAndStatusInAndOrderCompletedTrueAndDeletedFalseOrderById(userModel.getMobile(), Arrays.asList(StatusEnum.ACTIVE, StatusEnum.FUTURE));
-                userModel.setIsDelete(true);
-                userModel = saveUserModel(userModel, EventEnum.USER_SUSPENSION, false);
-                primeId = userModel.getPrimeId();
-                updateUserDetailsInCache(userModel);
-                if (StringUtils.isNotEmpty(userModel.getEmail())) {
+                if(!request.getUser().getSsoId().equals(userModel.getSsoId())){
+                    List<UserSubscriptionModel> relevantUserSubscriptions = userSubscriptionRepository.findByUserMobileAndUserDeletedFalseAndStatusInAndOrderCompletedTrueAndDeletedFalseOrderById(userModel.getMobile(), Arrays.asList(StatusEnum.ACTIVE, StatusEnum.FUTURE));
+                    userModel.setIsDelete(true);
+                    userModel = saveUserModel(userModel, EventEnum.USER_SUSPENSION, false);
+                    String primeId = userModel.getPrimeId();
+                    updateUserDetailsInCache(userModel);
+                    if (StringUtils.isNotEmpty(userModel.getEmail())) {
+                        if (CollectionUtils.isNotEmpty(relevantUserSubscriptions)) {
+                            communicationService.sendUserSuspensionCommunication(userModel, relevantUserSubscriptions);
+                        }
+                    }
+                    userModel = subscriptionServiceHelper.getUser(request);
+                    userModel.setPrimeId(primeId);
+                    userModel = saveUserModel(userModel, EventEnum.USER_CREATION_WITH_EXISTING_MOBILE, false);
                     if (CollectionUtils.isNotEmpty(relevantUserSubscriptions)) {
-                        communicationService.sendUserSuspensionCommunication(userModel, relevantUserSubscriptions);
+                        for (UserSubscriptionModel model : relevantUserSubscriptions) {
+                            model.setUser(userModel);
+                            saveUserSubscription(model, false, request.getUser().getSsoId(), request.getUser().getTicketId(), EventEnum.USER_SUBSCRIPTION_SWITCH, true);
+                        }
                     }
+                    updateUserDetailsInCache(userModel);
+                    communicationService.sendUserCreationWithExistingMobileCommunication(userModel, relevantUserSubscriptions);
                 }
-                userModel = subscriptionServiceHelper.getUser(request);
-                userModel.setPrimeId(primeId);
-                userModel = saveUserModel(userModel, EventEnum.USER_CREATION_WITH_EXISTING_MOBILE, false);
-                if (CollectionUtils.isNotEmpty(relevantUserSubscriptions)) {
-                    for (UserSubscriptionModel model : relevantUserSubscriptions) {
-                        model.setUser(userModel);
-                        saveUserSubscription(model, false, request.getUser().getSsoId(), request.getUser().getTicketId(), EventEnum.USER_SUBSCRIPTION_SWITCH, true);
-                    }
-                }
-                updateUserDetailsInCache(userModel);
-                communicationService.sendUserCreationWithExistingMobileCommunication(userModel, relevantUserSubscriptions);
             }
         }
         return userModel;
