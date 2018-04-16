@@ -583,14 +583,14 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         UserModel userModel = userRepository.findByMobileAndDeletedFalse(request.getUser().getMobile());
         if (userModel == null) {
             userModel = subscriptionServiceHelper.getUser(request);
-            userModel = saveUserModel(userModel, EventEnum.NORMAL_USER_CREATION, true);
+            userModel = saveUserModel(userModel, EventEnum.NORMAL_USER_CREATION,true);
         } else {
             subscriptionValidationService.validateBlockedUser(userModel, validationResponse);
             if (validationResponse.isValid()) {
                 if(!request.getUser().getSsoId().equals(userModel.getSsoId())){
                     List<UserSubscriptionModel> relevantUserSubscriptions = userSubscriptionRepository.findByUserMobileAndUserDeletedFalseAndStatusInAndOrderCompletedTrueAndDeletedFalseOrderById(userModel.getMobile(), Arrays.asList(StatusEnum.ACTIVE, StatusEnum.FUTURE));
                     userModel.setIsDelete(true);
-                    userModel = saveUserModel(userModel, EventEnum.USER_SUSPENSION, false);
+                    userModel = saveUserModel(userModel, EventEnum.USER_SUSPENSION,false);
                     String primeId = userModel.getPrimeId();
                     updateUserDetailsInCache(userModel);
                     if (StringUtils.isNotEmpty(userModel.getEmail())) {

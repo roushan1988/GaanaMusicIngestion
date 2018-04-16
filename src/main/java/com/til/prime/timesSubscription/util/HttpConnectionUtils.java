@@ -31,12 +31,13 @@ public class HttpConnectionUtils {
 			switch (method) {
 				case ("GET"):
 					response = restTemplateUtil.getRestTemplate().getForObject(url, clazz);
+					break;
 				case ("POST"):
 					response = restTemplateUtil.getRestTemplate().postForObject(url, data, clazz);
+					break;
 			}
 		}catch (Exception e){
-			logger.info("Got Exception For HttpRequest url " + url +", data: "+data+ " error  "
-					+ e);
+			logger.error("Got Exception For HttpRequest url " + url +", data: "+data, e);
 			throw e;
 		}
 		logger.info("Response for url: "+url+", data: "+data+", response: "+response);
@@ -55,12 +56,13 @@ public class HttpConnectionUtils {
 			switch (method) {
 				case ("GET"):
 					responseEntity = restTemplateUtil.getRestTemplate().exchange(url, HttpMethod.GET, entity, clazz);
+					break;
 				case ("POST"):
 					responseEntity = restTemplateUtil.getRestTemplate().exchange(url, HttpMethod.POST, entity, clazz);
+					break;
 			}
 		}catch (Exception e){
-			logger.info("Got Exception For HttpRequest url " + url +", data: "+data+ " error  "
-					+ e);
+			logger.error("Got Exception For HttpRequest url " + url +", data: "+data, e);
 			throw e;
 		}
 		T response = responseEntity.getBody();

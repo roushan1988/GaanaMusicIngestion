@@ -1,40 +1,41 @@
 package com.til.prime.timesSubscription.dto.internal;
 
 public class UrlShorteningResponse {
-    private String id;
-    private String kind;
-    private String longUrl;
+    private Integer status_code;
+    private String status_txt;
+    private ShortenedUrlData data;
 
-    public String getId() {
-        return id;
+
+    public Integer getStatus_code() {
+        return status_code;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setStatus_code(Integer status_code) {
+        this.status_code = status_code;
     }
 
-    public String getKind() {
-        return kind;
+    public String getStatus_txt() {
+        return status_txt;
     }
 
-    public void setKind(String kind) {
-        this.kind = kind;
+    public void setStatus_txt(String status_txt) {
+        this.status_txt = status_txt;
     }
 
-    public String getLongUrl() {
-        return longUrl;
+    public ShortenedUrlData getData() {
+        return data;
     }
 
-    public void setLongUrl(String longUrl) {
-        this.longUrl = longUrl;
+    public void setData(ShortenedUrlData data) {
+        this.data = data;
     }
 
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("UrlShorteningResponse{");
-        sb.append("id='").append(id).append('\'');
-        sb.append(", kind='").append(kind).append('\'');
-        sb.append(", longUrl='").append(longUrl).append('\'');
+        sb.append("status_code=").append(status_code);
+        sb.append(", status_txt='").append(status_txt).append('\'');
+        sb.append(", data=").append(data);
         sb.append('}');
         return sb.toString();
     }

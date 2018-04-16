@@ -6,16 +6,15 @@ import com.til.prime.timesSubscription.convertor.ModelToDTOConvertorUtil;
 import com.til.prime.timesSubscription.dto.external.*;
 import com.til.prime.timesSubscription.dto.internal.OtpStatus;
 import com.til.prime.timesSubscription.dto.internal.RefundInternalResponse;
-import com.til.prime.timesSubscription.dto.internal.UrlShorteningRequest;
 import com.til.prime.timesSubscription.dto.internal.UrlShorteningResponse;
 import com.til.prime.timesSubscription.enums.*;
 import com.til.prime.timesSubscription.model.*;
 import com.til.prime.timesSubscription.service.ChecksumService;
 import com.til.prime.timesSubscription.service.SubscriptionServiceHelper;
 import com.til.prime.timesSubscription.util.HttpConnectionUtils;
-import com.til.prime.timesSubscription.util.UniqueIdGeneratorUtil;
 import com.til.prime.timesSubscription.util.ResponseUtil;
 import com.til.prime.timesSubscription.util.TimeUtils;
+import com.til.prime.timesSubscription.util.UniqueIdGeneratorUtil;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
@@ -23,8 +22,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-
 import java.math.BigDecimal;
+import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.*;
 
@@ -473,8 +472,9 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
         RETRY_LOOP:
         while(retryCount>0){
             try{
-                UrlShorteningResponse response = httpConnectionUtils.requestForObject(new UrlShorteningRequest(longUrl), properties.getProperty(GlobalConstants.URL_SHORTENING_API_KEY), UrlShorteningResponse.class, GlobalConstants.POST);
-                return response.getId();
+                String response = httpConnectionUtils.request("", properties.getProperty(GlobalConstants.URL_SHORTENING_API_KEY)+URLEncoder.encode(longUrl, GlobalConstants.UTF_8), GlobalConstants.CONTENT_TYPE_JSON, GlobalConstants.GET);
+                UrlShorteningResponse shorteningResponse = GlobalConstants.gson.fromJson(response, UrlShorteningResponse.class);
+                return shorteningResponse.getData().getUrl();
             }catch (Exception e){
                 retryCount--;
                 continue RETRY_LOOP;
