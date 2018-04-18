@@ -138,7 +138,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
             PreConditions.mustBeEqual(request.getPlanType(), variantModel.getPlanType().name(), ValidationError.INVALID_USER_SUBSCRIPTION_DETAILS, validationResponse);
         }
         if(userSubscriptionModel!=null){
-            PreConditions.mustBeFalse(userSubscriptionModel.isOrderCompleted(), ValidationError.INVALID_USER_SUBSCRIPTION_DETAILS, validationResponse);
+            PreConditions.mustBeFalse((userSubscriptionModel.isOrderCompleted() && !request.isRenewal()), ValidationError.INVALID_USER_SUBSCRIPTION_DETAILS, validationResponse);
         }
         PreConditions.mustBeNull(restrictedModel, ValidationError.USER_PLAN_DOES_NOT_QUALIFY, validationResponse);
         return updateValid(validationResponse);

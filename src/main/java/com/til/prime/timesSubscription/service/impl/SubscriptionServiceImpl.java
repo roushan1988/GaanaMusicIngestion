@@ -148,7 +148,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             if (validationResponse.isValid()) {
                 userSubscriptionModel = subscriptionServiceHelper.generateInitPurchaseUserSubscription(request, subscriptionVariantModel, lastUserSubscription, userModel, request.getPrice(), crmRequest, isFree);
                 EventEnum eventEnum = EventEnum.getEventByInitPlanStatus(userSubscriptionModel.getPlanStatus());
-                userSubscriptionModel = saveUserSubscription(userSubscriptionModel, true, request.getUser().getSsoId(), request.getUser().getTicketId(), eventEnum, userSubscriptionModel.isOrderCompleted());
+                userSubscriptionModel = saveUserSubscription(userSubscriptionModel, true, eventEnum, userSubscriptionModel.isOrderCompleted());
                 if (userSubscriptionModel.isOrderCompleted()) {
                     if (PlanStatusEnum.FREE_TRIAL.equals(userSubscriptionModel.getPlanStatus())) {
                         communicationService.sendFreeTrialSubscriptionSuccessCommunication(userSubscriptionModel);
@@ -214,11 +214,11 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             }
             if (useNewSubscription) {
                 newUserSubscriptionModel = subscriptionServiceHelper.updateGenerateOrderUserSubscription(request, newUserSubscriptionModel);
-                newUserSubscriptionModel = saveUserSubscription(newUserSubscriptionModel, true, request.getUser().getSsoId(), request.getUser().getTicketId(), EventEnum.ORDER_ID_GENERATION, false);
+                newUserSubscriptionModel = saveUserSubscription(newUserSubscriptionModel, true, EventEnum.ORDER_ID_GENERATION, false);
 
             } else {
                 userSubscriptionModel = subscriptionServiceHelper.updateGenerateOrderUserSubscription(request, userSubscriptionModel);
-                userSubscriptionModel = saveUserSubscription(userSubscriptionModel, true, request.getUser().getSsoId(), request.getUser().getTicketId(), EventEnum.ORDER_ID_GENERATION, false);
+                userSubscriptionModel = saveUserSubscription(userSubscriptionModel, true, EventEnum.ORDER_ID_GENERATION, false);
             }
         }
         response = subscriptionServiceHelper.prepareGenerateOrderResponse(response, useNewSubscription ? newUserSubscriptionModel : userSubscriptionModel, validationResponse);
@@ -238,7 +238,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         if (validationResponse.isValid()) {
             UserSubscriptionModel lastUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndBusinessAndOrderCompletedAndDeletedOrderByIdDesc(userSubscriptionModel.getUser().getMobile(), userSubscriptionModel.getBusiness(), true, false);
             userSubscriptionModel = subscriptionServiceHelper.updateSubmitPurchaseUserSubscription(request, userSubscriptionModel, lastUserSubscription);
-            userSubscriptionModel = saveUserSubscription(userSubscriptionModel, false, userSubscriptionModel.getUser().getSsoId(), userSubscriptionModel.getTicketId(), userSubscriptionModel.isOrderCompleted() ? EventEnum.PAYMENT_SUCCESS : EventEnum.PAYMENT_FAILURE, true);
+            userSubscriptionModel = saveUserSubscription(userSubscriptionModel, false, userSubscriptionModel.isOrderCompleted() ? EventEnum.PAYMENT_SUCCESS : EventEnum.PAYMENT_FAILURE, true);
             if (userSubscriptionModel.getStatus() == StatusEnum.ACTIVE) {
                 updateUserStatus(userSubscriptionModel, userSubscriptionModel.getUser());
             }
@@ -328,7 +328,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                     refundedAmount.setScale(2, BigDecimal.ROUND_HALF_EVEN);
                 }
                 userSubscriptionModel.setRefundedAmount(refundedAmount);
-                userSubscriptionModel = saveUserSubscription(userSubscriptionModel, false, null, null, serverRequest ? EventEnum.SUBSCRIPTION_SERVER_CANCELLATION : EventEnum.SUBSCRIPTION_APP_CANCELLATION, true);
+                userSubscriptionModel = saveUserSubscription(userSubscriptionModel, false, serverRequest ? EventEnum.SUBSCRIPTION_SERVER_CANCELLATION : EventEnum.SUBSCRIPTION_APP_CANCELLATION, true);
                 updateUserStatus(userSubscriptionModel, userSubscriptionModel.getUser());
                 communicationService.sendSubscriptionCancellationCommunication(userSubscriptionModel);
             } else {
@@ -351,7 +351,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         if (validationResponse.isValid()) {
             for (UserSubscriptionModel userSubscriptionModel : userSubscriptionModelList) {
                 userSubscriptionModel.setAutoRenewal(false);
-                userSubscriptionModel = saveUserSubscription(userSubscriptionModel, false, null, null, EventEnum.SUBSCRIPTION_TURN_OFF_AUTO_DEBIT, !userSubscriptionModel.isSsoCommunicated());
+                userSubscriptionModel = saveUserSubscription(userSubscriptionModel, false, EventEnum.SUBSCRIPTION_TURN_OFF_AUTO_DEBIT, !userSubscriptionModel.isSsoCommunicated());
                 if (userSubscriptionModel.getStatus() == StatusEnum.ACTIVE) {
                     updateUserStatus(userSubscriptionModel, userSubscriptionModel.getUser());
                 }
@@ -394,7 +394,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         if (validationResponse.isValid()) {
             StatusEnum statusEnum = userSubscriptionModel.getStatus();
             userSubscriptionModel = subscriptionServiceHelper.extendSubscription(userSubscriptionModel, request.getExtensionDays());
-            userSubscriptionModel = saveUserSubscription(userSubscriptionModel, false, request.getUser().getSsoId(), request.getUser().getTicketId(), EventEnum.SUBSCRIPTION_TRIAL_EXTENSION, !userSubscriptionModel.getStatus().equals(statusEnum) || !userSubscriptionModel.isSsoCommunicated());
+            userSubscriptionModel = saveUserSubscription(userSubscriptionModel, false, EventEnum.SUBSCRIPTION_TRIAL_EXTENSION, !userSubscriptionModel.getStatus().equals(statusEnum) || !userSubscriptionModel.isSsoCommunicated());
             if (StatusEnum.VALID_USER_STATUS_HISTORY_SET.contains(userSubscriptionModel.getStatus())) {
                 updateUserStatus(userSubscriptionModel, userSubscriptionModel.getUser());
             }
@@ -548,7 +548,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 if(validationResponse.isValid()){
                     userSubscriptionModel = subscriptionServiceHelper.generateInitPurchaseUserSubscription(request.getUser(), request.getChannel(), request.getPlatform(), PlanTypeEnum.TRIAL, variantModel.getDurationDays(), variantModel, null, userModel, variantModel.getPrice(), false, true);
                     EventEnum eventEnum = EventEnum.getEventForBackendActivation(userSubscriptionModel.getPlanStatus());
-                    userSubscriptionModel = saveUserSubscription(userSubscriptionModel, true, request.getUser().getSsoId(), request.getUser().getTicketId(), eventEnum, true);
+                    userSubscriptionModel = saveUserSubscription(userSubscriptionModel, true, eventEnum, true);
                     if (userSubscriptionModel.isOrderCompleted()) {
                         if (PlanStatusEnum.FREE_TRIAL.equals(userSubscriptionModel.getPlanStatus())) {
                             communicationService.sendFreeTrialSubscriptionSuccessCommunication(userSubscriptionModel);
@@ -563,7 +563,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 //extend
                 StatusEnum statusEnum = lastUserSubscription.getStatus();
                 lastUserSubscription = subscriptionServiceHelper.extendSubscription(lastUserSubscription, backendUser.getDurationDays());
-                userSubscriptionModel = saveUserSubscription(lastUserSubscription, false, request.getUser().getSsoId(), request.getUser().getTicketId(), EventEnum.SUBSCRIPTION_TRIAL_EXTENSION, !lastUserSubscription.getStatus().equals(statusEnum) || !lastUserSubscription.isSsoCommunicated());
+                userSubscriptionModel = saveUserSubscription(lastUserSubscription, false, EventEnum.SUBSCRIPTION_TRIAL_EXTENSION, !lastUserSubscription.getStatus().equals(statusEnum) || !lastUserSubscription.isSsoCommunicated());
                 backendUser.setCompleted(true);
                 EventEnum eventEnum = EventEnum.getEventForBackendActivation(userSubscriptionModel.getPlanStatus());
                 saveBackendSubscriptionUser(backendUser, eventEnum);
@@ -604,7 +604,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                     if (CollectionUtils.isNotEmpty(relevantUserSubscriptions)) {
                         for (UserSubscriptionModel model : relevantUserSubscriptions) {
                             model.setUser(userModel);
-                            saveUserSubscription(model, false, request.getUser().getSsoId(), request.getUser().getTicketId(), EventEnum.USER_SUBSCRIPTION_SWITCH, true);
+                            saveUserSubscription(model, false, EventEnum.USER_SUBSCRIPTION_SWITCH, true);
                         }
                     }
                     updateUserDetailsInCache(userModel);
@@ -617,7 +617,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Override
     @Transactional
-    public UserSubscriptionModel saveUserSubscription(UserSubscriptionModel userSubscriptionModel, boolean retryForOrderId, String ssoId, String ticketId, EventEnum event, boolean communicateSSO) {
+    public UserSubscriptionModel saveUserSubscription(UserSubscriptionModel userSubscriptionModel, boolean retryForOrderId,  EventEnum event, boolean communicateSSO) {
         if (communicateSSO && userSubscriptionModel.isOrderCompleted() && StatusEnum.VALID_SSO_COMMUNICATION_STATUS_SET.contains(userSubscriptionModel.getStatus())) {
             userSubscriptionModel = subscriptionServiceHelper.updateSSOStatus(userSubscriptionModel);
         }

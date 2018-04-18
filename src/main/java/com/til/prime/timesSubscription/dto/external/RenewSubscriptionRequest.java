@@ -6,6 +6,7 @@ public class RenewSubscriptionRequest {
     private String orderId;
     private Double price;
     private String platform;
+    private String planType;
     private boolean job = false;
     private String checksum;
 
@@ -65,6 +66,14 @@ public class RenewSubscriptionRequest {
         this.checksum = checksum;
     }
 
+    public String getPlanType() {
+        return planType;
+    }
+
+    public void setPlanType(String planType) {
+        this.planType = planType;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("RenewSubscriptionRequest{");
@@ -72,6 +81,7 @@ public class RenewSubscriptionRequest {
         sb.append(", orderId='").append(orderId).append('\'');
         sb.append(", price=").append(price);
         sb.append(", platform='").append(platform).append('\'');
+        sb.append(", planType='").append(planType).append('\'');
         sb.append(", job=").append(job);
         sb.append(", checksum='").append(checksum).append('\'');
         sb.append('}');

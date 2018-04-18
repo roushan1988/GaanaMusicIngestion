@@ -439,6 +439,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
             renewSubscriptionRequest.setPlatform(PlatformEnum.JOB.name());
             renewSubscriptionRequest.setPrice(userSubscriptionModel.getSubscriptionVariant().getPrice().doubleValue());
             renewSubscriptionRequest.setJob(true);
+            renewSubscriptionRequest.setPlanType(PlanTypeEnum.PAYMENT.name());
             renewSubscriptionRequest.setSecretKey(properties.getProperty(GlobalConstants.PAYMENTS_SECRET_KEY));
             updateSubscriptionChecksumForRenewSubscription(renewSubscriptionRequest);
             PaymentsGenericResponse response = httpConnectionUtils.requestForObject(renewSubscriptionRequest, properties.getProperty(GlobalConstants.PAYMENTS_RENEW_SUBSCRIPTION_URL_KEY), PaymentsGenericResponse.class, GlobalConstants.POST);
