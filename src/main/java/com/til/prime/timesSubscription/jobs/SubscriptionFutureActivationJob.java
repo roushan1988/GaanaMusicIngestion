@@ -13,9 +13,8 @@ import com.til.prime.timesSubscription.model.UserSubscriptionModel;
 import com.til.prime.timesSubscription.service.CommunicationService;
 import com.til.prime.timesSubscription.service.SubscriptionService;
 import com.til.prime.timesSubscription.service.SubscriptionServiceHelper;
-import com.til.prime.timesSubscription.util.TimeUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -49,46 +48,30 @@ public class SubscriptionFutureActivationJob extends AbstractJob {
         AffectedModelDetails<Long> affectedModelDetails = new AffectedModelDetails<>();
         List<Long> affectedModels = new ArrayList<>();
         Date date = new Date();
-        Date later = TimeUtils.addMillisInDate(date, GlobalConstants.MILLIS_IN_A_DAY+900000);
         try {
             JobModel jobModel = jobRepository.findByJobKey(jobKeyEnum);
             jobDetails.setJob(jobModel);
             jobDetails.setStartTime(new Date());
-            Long count = userSubscriptionRepository.countByStatusAndEndDateBetweenAndDeletedFalseAndOrderCompletedTrue(StatusEnum.EXPIRED, date, later);
-            for (Long x = 0l; x <= (Math.max(0l, count - 1) / GlobalConstants.CRON_BATCH_PROCESSING_COUNT); x++) {
-                Page<UserSubscriptionModel> page = userSubscriptionRepository.findByStatusAndEndDateBetweenAndDeletedFalseAndOrderCompletedTrue(StatusEnum.EXPIRED, date, later, new PageRequest(x.intValue(), GlobalConstants.CRON_BATCH_PROCESSING_COUNT.intValue()));
-                List<UserSubscriptionModel> userSubscriptionModelList = page.getContent();
-                if (userSubscriptionModelList != null) {
-                    for (UserSubscriptionModel userSubscriptionModel : userSubscriptionModelList) {
-                        UserSubscriptionModel userSubscriptionModel1 = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndStatusAndStartDateAfterAndDeletedFalseAndOrderCompletedTrueOrderById(
-                                userSubscriptionModel.getUser().getMobile(), StatusEnum.FUTURE, TimeUtils.addMillisInDate(userSubscriptionModel.getEndDate(), -2000));
-                        if(userSubscriptionModel1!=null){
-                            userSubscriptionModel1.setStatus(StatusEnum.ACTIVE);
-                            subscriptionService.saveUserSubscription(userSubscriptionModel1, false, EventEnum.USER_SUBSCRIPTION_ACTIVE, true);
-                            subscriptionService.updateUserStatus(userSubscriptionModel1, userSubscriptionModel1.getUser());
-                            communicationService.sendPaidSubscriptionSuccessCommunication(userSubscriptionModel1);
-                            recordsAffected++;
-                            affectedModels.add(userSubscriptionModel1.getId());
-                        }
-                    }
+            int page = 0;
+            loop1:
+            while(true) {
+                List<UserSubscriptionModel> userSubscriptions = userSubscriptionRepository.findUserSubscriptionsForFutureActivation(date, StatusEnum.ACTIVE, StatusEnum.FUTURE, new PageRequest(page++, GlobalConstants.DEFAULT_PAGE_SIZE));
+                if(CollectionUtils.isEmpty(userSubscriptions)){
+                    break loop1;
                 }
-            }
-            Long count1 = userSubscriptionRepository.countByStatusAndEndDateBeforeAndDeletedFalseAndOrderCompletedTrue(StatusEnum.FUTURE, date);
-            for (Long x = 0l; x <= (Math.max(0l, count1 - 1) / GlobalConstants.CRON_BATCH_PROCESSING_COUNT); x++) {
-                Page<UserSubscriptionModel> page = userSubscriptionRepository.findByStatusAndEndDateBeforeAndDeletedFalseAndOrderCompletedTrue(StatusEnum.FUTURE, date, new PageRequest(x.intValue(), GlobalConstants.CRON_BATCH_PROCESSING_COUNT.intValue()));
-                List<UserSubscriptionModel> userSubscriptionModelList = page.getContent();
-                if (userSubscriptionModelList != null) {
-                    for (UserSubscriptionModel userSubscriptionModel : userSubscriptionModelList) {
-                        Long userCount = userSubscriptionRepository.countByUserMobileAndUserDeletedFalseAndStatusAndDeletedFalseAndOrderCompletedTrue(
-                                userSubscriptionModel.getUser().getMobile(), StatusEnum.ACTIVE);
-                        if(userCount==null || userCount<=0){
-                            userSubscriptionModel.setStatus(StatusEnum.ACTIVE);
-                            subscriptionService.saveUserSubscription(userSubscriptionModel, false, EventEnum.USER_SUBSCRIPTION_ACTIVE, true);
-                            subscriptionService.updateUserStatus(userSubscriptionModel, userSubscriptionModel.getUser());
-                            communicationService.sendPaidSubscriptionSuccessCommunication(userSubscriptionModel);
-                            recordsAffected++;
-                            affectedModels.add(userSubscriptionModel.getId());
+                loop:
+                for (UserSubscriptionModel userSubscriptionModel : userSubscriptions) {
+                    try {
+                        if(userSubscriptionModel.getUser().isDeleted()){
+                            continue loop;
                         }
+                        userSubscriptionModel.setStatus(StatusEnum.ACTIVE);
+                        subscriptionService.saveUserSubscription(userSubscriptionModel, false, EventEnum.USER_SUBSCRIPTION_ACTIVE, true);
+                        communicationService.sendExistingSubscriptionActivationCommunication(userSubscriptionModel);
+                        recordsAffected++;
+                        affectedModels.add(userSubscriptionModel.getId());
+                    }catch (Exception e){
+                        LOG.error("Exception in SubscriptionFutureActivationJob, userSubscription id: "+userSubscriptionModel.getId(), e);
                     }
                 }
             }

@@ -57,11 +57,15 @@ public class SSOCommunicationJob extends AbstractJob {
                     break loop1;
                 }
                 for (UserSubscriptionModel userSubscriptionModel : userSubscriptions) {
-                    userSubscriptionModel = subscriptionServiceHelper.updateSSOStatus(userSubscriptionModel);
-                    if (userSubscriptionModel.isSsoCommunicated()) {
-                        userSubscriptionModel = subscriptionService.saveUserSubscription(userSubscriptionModel, false, EventEnum.SSO_COMMUNICATION, false);
-                        recordsAffected++;
-                        affectedModels.add(userSubscriptionModel);
+                    try{
+                        userSubscriptionModel = subscriptionServiceHelper.updateSSOStatus(userSubscriptionModel);
+                        if (userSubscriptionModel.isSsoCommunicated()) {
+                            userSubscriptionModel = subscriptionService.saveUserSubscription(userSubscriptionModel, false, EventEnum.SSO_COMMUNICATION, false);
+                            recordsAffected++;
+                            affectedModels.add(userSubscriptionModel);
+                        }
+                    }catch (Exception e){
+                        LOG.error("Exception in SSOCommunicationJob, userSubscription id: "+userSubscriptionModel.getId(), e);
                     }
                 }
             }

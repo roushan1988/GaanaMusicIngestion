@@ -239,9 +239,6 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             UserSubscriptionModel lastUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndBusinessAndOrderCompletedAndDeletedOrderByIdDesc(userSubscriptionModel.getUser().getMobile(), userSubscriptionModel.getBusiness(), true, false);
             userSubscriptionModel = subscriptionServiceHelper.updateSubmitPurchaseUserSubscription(request, userSubscriptionModel, lastUserSubscription);
             userSubscriptionModel = saveUserSubscription(userSubscriptionModel, false, userSubscriptionModel.isOrderCompleted() ? EventEnum.PAYMENT_SUCCESS : EventEnum.PAYMENT_FAILURE, true);
-            if (userSubscriptionModel.getStatus() == StatusEnum.ACTIVE) {
-                updateUserStatus(userSubscriptionModel, userSubscriptionModel.getUser());
-            }
             if (userSubscriptionModel.isOrderCompleted()) {
                 if (PlanStatusEnum.SUBSCRIPTION_AUTO_RENEWAL.equals(userSubscriptionModel.getPlanStatus())) {
                     communicationService.sendSubscriptionRenewedCommunication(userSubscriptionModel);
@@ -329,7 +326,6 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 }
                 userSubscriptionModel.setRefundedAmount(refundedAmount);
                 userSubscriptionModel = saveUserSubscription(userSubscriptionModel, false, serverRequest ? EventEnum.SUBSCRIPTION_SERVER_CANCELLATION : EventEnum.SUBSCRIPTION_APP_CANCELLATION, true);
-                updateUserStatus(userSubscriptionModel, userSubscriptionModel.getUser());
                 communicationService.sendSubscriptionCancellationCommunication(userSubscriptionModel);
             } else {
                 validationResponse.addValidationError(ValidationError.PAYMENT_REFUND_ERROR);
@@ -352,9 +348,6 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             for (UserSubscriptionModel userSubscriptionModel : userSubscriptionModelList) {
                 userSubscriptionModel.setAutoRenewal(false);
                 userSubscriptionModel = saveUserSubscription(userSubscriptionModel, false, EventEnum.SUBSCRIPTION_TURN_OFF_AUTO_DEBIT, !userSubscriptionModel.isSsoCommunicated());
-                if (userSubscriptionModel.getStatus() == StatusEnum.ACTIVE) {
-                    updateUserStatus(userSubscriptionModel, userSubscriptionModel.getUser());
-                }
             }
         }
         response = subscriptionServiceHelper.prepareTurnOffAutoDebitResponse(response, validationResponse);
@@ -395,9 +388,6 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             StatusEnum statusEnum = userSubscriptionModel.getStatus();
             userSubscriptionModel = subscriptionServiceHelper.extendSubscription(userSubscriptionModel, request.getExtensionDays());
             userSubscriptionModel = saveUserSubscription(userSubscriptionModel, false, EventEnum.SUBSCRIPTION_TRIAL_EXTENSION, !userSubscriptionModel.getStatus().equals(statusEnum) || !userSubscriptionModel.isSsoCommunicated());
-            if (StatusEnum.VALID_USER_STATUS_HISTORY_SET.contains(userSubscriptionModel.getStatus())) {
-                updateUserStatus(userSubscriptionModel, userSubscriptionModel.getUser());
-            }
             communicationService.sendSubscriptionExpiryExtensionCommunication(userSubscriptionModel);
         }
         response = subscriptionServiceHelper.prepareExtendExpiryResponse(response, userSubscriptionModel, validationResponse);
@@ -567,9 +557,6 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 backendUser.setCompleted(true);
                 EventEnum eventEnum = EventEnum.getEventForBackendActivation(userSubscriptionModel.getPlanStatus());
                 saveBackendSubscriptionUser(backendUser, eventEnum);
-                if (userSubscriptionModel.getStatus() == StatusEnum.ACTIVE) {
-                    updateUserStatus(userSubscriptionModel, userSubscriptionModel.getUser());
-                }
                 communicationService.sendSubscriptionExpiryExtensionCommunication(userSubscriptionModel);
             }
         }
