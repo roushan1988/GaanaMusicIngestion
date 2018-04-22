@@ -34,6 +34,8 @@ public class UserSubscriptionAuditModel extends BaseModel {
     private boolean orderCompleted;
     @Column(name="sso_communicated")
     private boolean ssoCommunicated;
+    @Column(name="status_published")
+    private boolean statusPublished;
     @Column(name="auto_renewal")
     private boolean autoRenewal;
     @Column(name="start_date")
@@ -155,6 +157,14 @@ public class UserSubscriptionAuditModel extends BaseModel {
 
     public void setSsoCommunicated(boolean ssoCommunicated) {
         this.ssoCommunicated = ssoCommunicated;
+    }
+
+    public boolean isStatusPublished() {
+        return statusPublished;
+    }
+
+    public void setStatusPublished(boolean statusPublished) {
+        this.statusPublished = statusPublished;
     }
 
     public boolean isAutoRenewal() {

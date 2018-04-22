@@ -2,6 +2,7 @@ package com.til.prime.timesSubscription.enums;
 
 public enum JobKeyEnum {
     SSO_COMMUNICATION,
+    USER_STATUS_PUBLISH,
     SUBSCRIPTION_RENEWAL,
     SUBSCRIPTION_FUTURE_ACTIVATION,
     SUBSCRIPTION_RENEWAL_REMINDER,

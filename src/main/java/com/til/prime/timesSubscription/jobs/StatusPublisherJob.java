@@ -23,9 +23,9 @@ import java.util.Date;
 import java.util.List;
 
 @Service
-public class SSOCommunicationJob extends AbstractJob {
+public class StatusPublisherJob extends AbstractJob {
 
-    private final JobKeyEnum jobKeyEnum = JobKeyEnum.SSO_COMMUNICATION;
+    private final JobKeyEnum jobKeyEnum = JobKeyEnum.USER_STATUS_PUBLISH;
     @Autowired
     private UserSubscriptionRepository userSubscriptionRepository;
     @Autowired
@@ -52,15 +52,15 @@ public class SSOCommunicationJob extends AbstractJob {
             int page = 0;
             loop1:
             while(true) {
-                List<UserSubscriptionModel> userSubscriptions = userSubscriptionRepository.findUserSubscriptionsForSSOStatusUpdate(StatusEnum.VALID_EXTERNAL_PUBLISH_STATUS_SET, new PageRequest(page++, GlobalConstants.DEFAULT_PAGE_SIZE));
+                List<UserSubscriptionModel> userSubscriptions = userSubscriptionRepository.findUserSubscriptionsForStatusPublish(StatusEnum.VALID_EXTERNAL_PUBLISH_STATUS_SET, new PageRequest(page++, GlobalConstants.DEFAULT_PAGE_SIZE));
                 if(CollectionUtils.isEmpty(userSubscriptions)){
                     break loop1;
                 }
                 for (UserSubscriptionModel userSubscriptionModel : userSubscriptions) {
                     try{
-                        userSubscriptionModel = subscriptionServiceHelper.updateSSOStatus(userSubscriptionModel);
-                        if (userSubscriptionModel.isSsoCommunicated()) {
-                            userSubscriptionModel = subscriptionService.saveUserSubscription(userSubscriptionModel, false, EventEnum.SSO_COMMUNICATION, false);
+                        userSubscriptionModel = subscriptionServiceHelper.publishUserStatus(userSubscriptionModel);
+                        if (userSubscriptionModel.isStatusPublished()) {
+                            userSubscriptionModel = subscriptionService.saveUserSubscription(userSubscriptionModel, false, EventEnum.USER_STATUS_PUBLISH, false);
                             recordsAffected++;
                             affectedModels.add(userSubscriptionModel.getId());
                         }
@@ -85,8 +85,9 @@ public class SSOCommunicationJob extends AbstractJob {
     }
 
     @Override
-    @Scheduled(cron = "${sso.communication.cron}")
+    @Scheduled(cron = "${user.status.publish.cron}")
     public void run() {
         runJob();
     }
 }
+

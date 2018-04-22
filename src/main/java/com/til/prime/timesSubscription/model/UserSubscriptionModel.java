@@ -29,6 +29,8 @@ public class UserSubscriptionModel extends BaseModel {
     private boolean orderCompleted;
     @Column(name="sso_communicated")
     private boolean ssoCommunicated;
+    @Column(name="status_published")
+    private boolean statusPublished;
     @Column(name="start_date")
     private Date startDate;
     @Column(name="end_date")
@@ -146,6 +148,14 @@ public class UserSubscriptionModel extends BaseModel {
 
     public void setSsoCommunicated(boolean ssoCommunicated) {
         this.ssoCommunicated = ssoCommunicated;
+    }
+
+    public boolean isStatusPublished() {
+        return statusPublished;
+    }
+
+    public void setStatusPublished(boolean statusPublished) {
+        this.statusPublished = statusPublished;
     }
 
     public Date getStartDate() {

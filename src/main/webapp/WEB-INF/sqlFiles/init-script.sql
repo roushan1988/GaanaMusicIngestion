@@ -108,6 +108,7 @@ CREATE TABLE `user_subscription` (
   `payment_reference` varchar(128) DEFAULT NULL,
   `order_completed` tinyint(1) NOT NULL,
   `sso_communicated` tinyint(1) NOT NULL,
+  `status_published` tinyint(1) NOT NULL,
   `plan_status` varchar(32) NOT NULL,
   `transaction_status` varchar(32) NOT NULL,
   `subscription_variant_id` int(11) NOT NULL,
@@ -129,6 +130,7 @@ CREATE TABLE `user_subscription` (
   INDEX `INDEX_BUSINESS` (`business`),
   INDEX `INDEX_ORDER_COMPLETED` (`order_completed`),
   INDEX `INDEX_SSO_COMMUNICATED` (`sso_communicated`),
+  INDEX `INDEX_STATUS_PUBLISHED` (`status_published`),
   INDEX `INDEX_START_DATE` (`start_date`),
   INDEX `INDEX_END_DATE` (`end_date`),
   INDEX `INDEX_STATUS` (`status`),
@@ -151,6 +153,7 @@ CREATE TABLE `user_subscription_audit` (
   `payment_reference` varchar(128) DEFAULT NULL,
   `order_completed` tinyint(1) NOT NULL,
   `sso_communicated` tinyint(1) NOT NULL,
+  `status_published` tinyint(1) NOT NULL,
   `plan_status` varchar(32) NOT NULL,
   `transaction_status` varchar(32) NOT NULL,
   `start_date` datetime NOT NULL,
@@ -323,3 +326,8 @@ alter table job add INDEX `INDEX_JOB_DELETED` (`deleted`);
 alter table user add column `prime_id` varchar(32) NOT NULL after mobile;
 alter table user_audit add column `prime_id` varchar(32) NOT NULL after mobile;
 alter table user_audit add key `INDEX_PRIME_ID` (`prime_id`);
+
+ALTER TABLE user_subscription ADD COLUMN `status_published` tinyint(1) NOT NULL after sso_communicated;
+ALTER TABLE user_subscription_audit ADD COLUMN `status_published` tinyint(1) NOT NULL after sso_communicated;
+ALTER TABLE user_subscription ADD INDEX `INDEX_STATUS_PUBLISHED` (`status_published`);
+insert into job values (null, "USER_STATUS_PUBLISH_JOB", "USER_STATUS_PUBLISH", null, now(), now(), false);

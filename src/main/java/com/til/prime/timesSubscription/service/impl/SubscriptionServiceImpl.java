@@ -604,9 +604,14 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Override
     @Transactional
-    public UserSubscriptionModel saveUserSubscription(UserSubscriptionModel userSubscriptionModel, boolean retryForOrderId,  EventEnum event, boolean communicateSSO) {
-        if (communicateSSO && userSubscriptionModel.isOrderCompleted() && StatusEnum.VALID_SSO_COMMUNICATION_STATUS_SET.contains(userSubscriptionModel.getStatus())) {
-            userSubscriptionModel = subscriptionServiceHelper.updateSSOStatus(userSubscriptionModel);
+    public UserSubscriptionModel saveUserSubscription(UserSubscriptionModel userSubscriptionModel, boolean retryForOrderId,  EventEnum event, boolean publishStatus) {
+        if (publishStatus && userSubscriptionModel.isOrderCompleted() && StatusEnum.VALID_EXTERNAL_PUBLISH_STATUS_SET.contains(userSubscriptionModel.getStatus())) {
+            if(!userSubscriptionModel.isSsoCommunicated()) {
+                userSubscriptionModel = subscriptionServiceHelper.updateSSOStatus(userSubscriptionModel);
+            }
+            if(!userSubscriptionModel.isStatusPublished()){
+                userSubscriptionModel = subscriptionServiceHelper.publishUserStatus(userSubscriptionModel);
+            }
         }
         int retryCount = retryForOrderId ? GlobalConstants.DB_RETRY_COUNT : GlobalConstants.SINGLE_TRY;
         retryLoop:
@@ -667,7 +672,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     @Override
     @Transactional
     public void updateUserStatus(UserSubscriptionModel userSubscriptionModel, UserModel userModel) {
-        if (userSubscriptionModel != null && userSubscriptionModel.isOrderCompleted() && StatusEnum.VALID_SSO_COMMUNICATION_STATUS_SET.contains(userSubscriptionModel.getStatus())) {
+        if (userSubscriptionModel != null && userSubscriptionModel.isOrderCompleted() && StatusEnum.VALID_EXTERNAL_PUBLISH_STATUS_SET.contains(userSubscriptionModel.getStatus())) {
             try {
                 LOG.info("Updating user status, userSubscription: " + userSubscriptionModel + ", user: " + userModel);
                 SubscriptionStatusDTO statusDTO = getSubscriptionStatusDTO(userSubscriptionModel, userModel);

@@ -14,7 +14,7 @@ import java.util.List;
  */
 @NoRepositoryBean
 public interface GenericJpaRepository<T, ID extends Serializable> extends JpaRepository<T, ID> {
-    T findById(ID id);
+    T findOneById(ID id);
     Long countByCreatedAfter(Date created);
     List<T> findByCreatedAfter(Date created);
     Page<T> findByCreatedAfter(Pageable pageable, Date created);

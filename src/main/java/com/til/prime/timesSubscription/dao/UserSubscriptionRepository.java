@@ -19,6 +19,8 @@ import java.util.Set;
 public interface UserSubscriptionRepository extends GenericJpaRepository<UserSubscriptionModel, Long> {
     @Query(value="select us from UserSubscriptionModel us where us.ssoCommunicated = false and us.id in (select max(id) from UserSubscriptionModel us1 where us1.orderCompleted = true and us1.status in :statusSet and us1.deleted = false and us1.user.deleted = false group by us1.user)")
     List<UserSubscriptionModel> findUserSubscriptionsForSSOStatusUpdate(@Param("statusSet") Set<StatusEnum> statusSet, Pageable pageable);
+    @Query(value="select us from UserSubscriptionModel us where us.statusPublished = false and us.id in (select max(id) from UserSubscriptionModel us1 where us1.orderCompleted = true and us1.status in :statusSet and us1.deleted = false and us1.user.deleted = false group by us1.user)")
+    List<UserSubscriptionModel> findUserSubscriptionsForStatusPublish(@Param("statusSet") Set<StatusEnum> statusSet, Pageable pageable);
     @Query(value="select us from UserSubscriptionModel us where us.id in (select min(id) from UserSubscriptionModel where order_completed=true and deleted = false and status= :futureStatus and start_date < :currentTime and end_date > :currentTime and user in (select user  FROM UserSubscriptionModel " +
             "where orderCompleted = true and deleted = false GROUP BY user having SUM( CASE WHEN status = :activeStatus THEN 1 ELSE 0 END )=0 and SUM( CASE WHEN status = :futureStatus THEN 1 ELSE 0 END )>0) GROUP BY user)")
     List<UserSubscriptionModel> findUserSubscriptionsForFutureActivation(@Param("currentTime") Date currentTime, @Param("activeStatus") StatusEnum activeStatus, @Param("futureStatus") StatusEnum futureStatus, Pageable pageable);

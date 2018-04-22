@@ -25,6 +25,10 @@ public enum PlanStatusEnum {
         }
     }};
 
+    public static boolean validTimesPrimeUser(int planStatus){
+        return PlanStatusEnum.ACTIVE_STATUS_CODE_SET.contains(planStatus);
+    }
+
     PlanStatusEnum(int code) {
         this.code = code;
     }

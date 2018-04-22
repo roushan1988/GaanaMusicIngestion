@@ -11,6 +11,7 @@ import com.til.prime.timesSubscription.enums.*;
 import com.til.prime.timesSubscription.model.*;
 import com.til.prime.timesSubscription.service.ChecksumService;
 import com.til.prime.timesSubscription.service.SubscriptionServiceHelper;
+import com.til.prime.timesSubscription.service.UserStatusPublisherService;
 import com.til.prime.timesSubscription.util.HttpConnectionUtils;
 import com.til.prime.timesSubscription.util.ResponseUtil;
 import com.til.prime.timesSubscription.util.TimeUtils;
@@ -36,6 +37,8 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
     private Properties properties;
     @Autowired
     private ChecksumService checksumService;
+    @Autowired
+    private UserStatusPublisherService publisherService;
 
     @Override
     public UserSubscriptionModel generateInitPurchaseUserSubscription(InitPurchaseRequest request, SubscriptionVariantModel variantModel, UserSubscriptionModel lastUserSubscription, UserModel userModel, BigDecimal price, boolean crmRequest, boolean free){
@@ -95,6 +98,24 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
         boolean success = communicateSSO(userSubscriptionModel);
         userSubscriptionModel.setSsoCommunicated(success);
         return userSubscriptionModel;
+    }
+
+    @Override
+    public UserSubscriptionModel publishUserStatus(UserSubscriptionModel userSubscriptionModel) {
+        boolean success = publisherService.publishUserStatus(getPublishedUserStatusDTO(userSubscriptionModel));
+        userSubscriptionModel.setStatusPublished(success);
+        return userSubscriptionModel;
+    }
+
+    private PublishedUserStatusDTO getPublishedUserStatusDTO(UserSubscriptionModel userSubscriptionModel){
+        PublishedUserStatusDTO statusDTO = new PublishedUserStatusDTO();
+        statusDTO.setMobile(userSubscriptionModel.getUser().getMobile());
+        statusDTO.setSsoId(userSubscriptionModel.getUser().getSsoId());
+        statusDTO.setPlanStatus(userSubscriptionModel.getPlanStatus().getCode());
+        statusDTO.setExpiry(userSubscriptionModel.getEndDate());
+        statusDTO.setEmail(userSubscriptionModel.getUser().getEmail());
+        statusDTO.setTimesPrimeUser(PlanStatusEnum.validTimesPrimeUser(statusDTO.getPlanStatus()));
+        return statusDTO;
     }
 
     @Override
@@ -268,6 +289,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
         auditModel.setPaymentReference(userSubscriptionModel.getPaymentReference());
         auditModel.setOrderCompleted(userSubscriptionModel.isOrderCompleted());
         auditModel.setSsoCommunicated(userSubscriptionModel.isSsoCommunicated());
+        auditModel.setStatusPublished(userSubscriptionModel.isStatusPublished());
         auditModel.setStartDate(userSubscriptionModel.getStartDate());
         auditModel.setEndDate(userSubscriptionModel.getEndDate());
         auditModel.setPlanStatus(userSubscriptionModel.getPlanStatus());
@@ -349,7 +371,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
 
     @Override
     public CheckStatusResponse prepareCheckStatusResponse(CheckStatusResponse response, boolean external, SubscriptionStatusDTO subscriptionStatusDTO, ValidationResponse validationResponse) {
-        response.setTimesPrimeUser(subscriptionStatusDTO!=null && PlanStatusEnum.ACTIVE_STATUS_CODE_SET.contains(subscriptionStatusDTO.getPlanStatus()));
+        response.setTimesPrimeUser(subscriptionStatusDTO!=null && PlanStatusEnum.validTimesPrimeUser(subscriptionStatusDTO.getPlanStatus()));
         response.setSubscriptionStatusDTO(subscriptionStatusDTO);
         if(external && subscriptionStatusDTO!=null){
             subscriptionStatusDTO.setPrimeId(null);
@@ -633,7 +655,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
         }
         return false;
     }
-    
+
     @Override
     public OrderSearchCRMResponse prepareOrderSearchResponse(OrderSearchCRMResponse orderSearchCRMResponse, OrderSearchResultsCRM orderSearchResultsCRM, ValidationResponse validationResponse) {
         if(validationResponse.isValid()){
