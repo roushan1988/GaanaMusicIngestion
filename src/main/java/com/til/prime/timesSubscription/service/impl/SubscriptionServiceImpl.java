@@ -1141,11 +1141,19 @@ private CustomerCRM convertUserToCustomerCRM(UserModel userModel){
                 	orderDetailsCRM.setAmount(userSubscriptionModel.getSubscriptionVariant().getPrice().doubleValue());            		
                 	orderDetailsCRM.setBilledAmount(userSubscriptionModel.getSubscriptionVariant().getPrice().toString());
                 	orderDetailsCRM.setRenewalAmount(userSubscriptionModel.getSubscriptionVariant().getPrice().toString());
+                	orderDetailsCRM.setPlanPrice(userSubscriptionModel.getSubscriptionVariant().getPrice().toString());
+
             	}
             	
             	if(userSubscriptionModel.getSubscriptionVariant().getId()!=null){
                 	orderDetailsCRM.setVariantId(userSubscriptionModel.getSubscriptionVariant().getId().toString());
             	}
+                orderDetailsCRM.setPlanID(userSubscriptionModel.getSubscriptionVariant().getSubscriptionPlan().getId().toString());
+                orderDetailsCRM.setPlanType(userSubscriptionModel.getSubscriptionVariant().getPlanType().toString());
+                orderDetailsCRM.setBusiness(userSubscriptionModel.getBusiness().toString());
+                orderDetailsCRM.setChannel(userSubscriptionModel.getChannel().toString());
+                orderDetailsCRM.setPlatform(userSubscriptionModel.getPlatform().toString());
+                orderDetailsCRM.setPlanDurationDays(userSubscriptionModel.getSubscriptionVariant().getDurationDays().toString());
         	}
         	if(userSubscriptionModel.getCreated()!=null){
         		orderDetailsCRM.setOrderDateValSubs(userSubscriptionModel.getCreated());	
