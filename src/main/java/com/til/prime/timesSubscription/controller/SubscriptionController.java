@@ -7,6 +7,7 @@ import com.til.prime.timesSubscription.service.PropertyService;
 import com.til.prime.timesSubscription.service.SubscriptionService;
 import com.til.prime.timesSubscription.util.RequestUpdateUtil;
 import com.til.prime.timesSubscription.util.ResponseUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -84,11 +85,19 @@ public class SubscriptionController {
     @Loggable
     @RequestMapping(path="/getPurchaseHistory", method = RequestMethod.GET)
     @ResponseBody
-    public PurchaseHistoryResponse getPurchaseHistory(@CookieValue(value = "ssoId", required = false) String ssoId,
-                                                      @CookieValue(value = "ticketId", required = false) String ticketId,
-                                                      @CookieValue(value = "mobile", required = false) String mobile,
-                                                      @RequestBody PurchaseHistoryRequest request){
+    public PurchaseHistoryResponse getPurchaseHistory(@CookieValue(value = "ssoId") String ssoId,
+                                                      @CookieValue(value = "ticketId") String ticketId,
+                                                      @CookieValue(value = "mobile") String mobile,
+                                                      @RequestParam(value = "business") String business,
+                                                      @RequestParam(value = "currentSubscription", required = false) boolean currentSubscription,
+                                                      @RequestParam(value = "includeDeleted", required = false) boolean includeDeleted){
+        PurchaseHistoryRequest request = new PurchaseHistoryRequest();
         RequestUpdateUtil.updateRequest(request, ssoId, ticketId, mobile);
+        if(StringUtils.isNotEmpty(business)){
+            request.setBusiness(business);
+        }
+        request.setCurrentSubscription(currentSubscription);
+        request.setIncludeDeleted(includeDeleted);
         try {
             return subscriptionService.getPurchaseHistory(request);
         }catch (Exception e){

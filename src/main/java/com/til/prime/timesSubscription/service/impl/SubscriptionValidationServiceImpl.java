@@ -391,6 +391,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
         if(request.getUser()!=null){
             PreConditions.notEmpty(request.getUser().getSsoId(), ValidationError.INVALID_SSO_ID, validationResponse);
             PreConditions.notEmpty(request.getUser().getTicketId(), ValidationError.INVALID_TICKET_ID, validationResponse);
+            PreConditions.notEmpty(request.getUser().getMobile(), ValidationError.INVALID_MOBILE, validationResponse);
             if(StringUtils.isNotEmpty(request.getUser().getSsoId()) && StringUtils.isNotEmpty(request.getUser().getTicketId()) && StringUtils.isNotEmpty(request.getUser().getMobile())){
                 validateSSOLogin(request.getUser().getSsoId(), request.getUser().getTicketId(), request.getUser().getMobile(), validationResponse);
             }
