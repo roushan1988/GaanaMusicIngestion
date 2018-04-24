@@ -31,8 +31,8 @@ public class KafkaConsumerConfig {
     @Bean
     public ConsumerFactory<String, PublishedUserStatusDTO> consumerFactory() {
         Map<String, Object> props = new HashMap<>();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaListenerContainerFactory());
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, "test_consumer1");
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaBrokers);
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, "test_consumer5");
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), new JsonDeserializer<>(PublishedUserStatusDTO.class));
     }
