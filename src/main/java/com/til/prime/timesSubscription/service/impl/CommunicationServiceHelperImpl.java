@@ -118,7 +118,7 @@ public class CommunicationServiceHelperImpl implements CommunicationServiceHelpe
         map.put("firstName", userSubscriptionModel.getUser().getFirstName());
         Map<PlanTypeEnum, BigDecimal> planPrices = userSubscriptionModel.getSubscriptionVariant().getSubscriptionPlan().getVariants().stream().collect(Collectors.toMap(v -> v.getPlanType(), v -> v.getPrice()));
         map.put("subscriptionAmount", String.valueOf(planPrices.get(PlanTypeEnum.TRIAL_WITH_PAYMENT)!=null? planPrices.get(PlanTypeEnum.TRIAL_WITH_PAYMENT) : planPrices.get(PlanTypeEnum.PAYMENT)));
-        map.put("daysRemaining", String.valueOf(days));
+        map.put("daysRemaining", Long.compare(days, 0) == 0 ? "today" : Long.compare(days, 1) == 0 ? "tomorrow" : String.format("in %s days", days));
         smsTask.setContext(map);
         smsTask.setTaskPriority(TaskPriorityEnum.HIGH_PRIORITY);
         return smsTask;
@@ -136,7 +136,7 @@ public class CommunicationServiceHelperImpl implements CommunicationServiceHelpe
         map.put("firstName", userSubscriptionModel.getUser().getFirstName());
         Map<PlanTypeEnum, BigDecimal> planPrices = userSubscriptionModel.getSubscriptionVariant().getSubscriptionPlan().getVariants().stream().collect(Collectors.toMap(v -> v.getPlanType(), v -> v.getPrice()));
         map.put("subscriptionAmount", String.valueOf(planPrices.get(PlanTypeEnum.TRIAL_WITH_PAYMENT)!=null? planPrices.get(PlanTypeEnum.TRIAL_WITH_PAYMENT) : planPrices.get(PlanTypeEnum.PAYMENT)));
-        map.put("daysRemaining", String.valueOf(days));
+        map.put("daysRemaining", Long.compare(days, 0) == 0 ? "today" : Long.compare(days, 1) == 0 ? "tomorrow" : String.format("in %s days", days));
         emailTask.setContext(map);
         emailTask.setTaskPriority(TaskPriorityEnum.HIGH_PRIORITY);
         return emailTask;
