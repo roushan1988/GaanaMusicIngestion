@@ -159,8 +159,9 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
     }
 
     @Override
-    public ValidationResponse validatePostSubmitPurchasePlan(SubmitPurchaseRequest request, UserSubscriptionModel userSubscriptionModel, ValidationResponse validationResponse) {
+    public ValidationResponse validatePostSubmitPurchasePlan(SubmitPurchaseRequest request, UserSubscriptionModel userSubscriptionModel, UserSubscriptionModel conflictingUserSubscription, ValidationResponse validationResponse) {
         PreConditions.notNull(userSubscriptionModel, ValidationError.INVALID_USER_SUBSCRIPTION_DETAILS, validationResponse);
+        PreConditions.mustBeNull(conflictingUserSubscription, ValidationError.INVALID_USER_SUBSCRIPTION_DETAILS, validationResponse);
         if(userSubscriptionModel!=null){
             PreConditions.mustBeFalse(userSubscriptionModel.getUser().isBlocked(), ValidationError.BLOCKED_USER, validationResponse);
             PreConditions.mustBeFalse(userSubscriptionModel.isOrderCompleted(), ValidationError.ORDER_ALREADY_COMPLETED, validationResponse);
