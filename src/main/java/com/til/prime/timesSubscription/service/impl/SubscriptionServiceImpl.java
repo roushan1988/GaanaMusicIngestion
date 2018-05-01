@@ -233,11 +233,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         SubmitPurchaseResponse response = new SubmitPurchaseResponse();
         if (validationResponse.isValid()) {
             userSubscriptionModel = userSubscriptionRepository.findByOrderIdAndSubscriptionVariantIdAndDeleted(request.getOrderId(), request.getVariantId(), false);
-            UserSubscriptionModel conflictingUserSubscription = null;
-            if(userSubscriptionModel!=null) {
-                conflictingUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndDeletedFalseAndOrderCompletedTrueAndStartDateBefore(request.getUser().getMobile(), userSubscriptionModel.getEndDate());
-            }
-            validationResponse = subscriptionValidationService.validatePostSubmitPurchasePlan(request, userSubscriptionModel, conflictingUserSubscription, validationResponse);
+            validationResponse = subscriptionValidationService.validatePostSubmitPurchasePlan(request, userSubscriptionModel, validationResponse);
         }
         if (validationResponse.isValid()) {
             UserSubscriptionModel lastUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndBusinessAndOrderCompletedAndDeletedOrderByIdDesc(userSubscriptionModel.getUser().getMobile(), userSubscriptionModel.getBusiness(), true, false);

@@ -1,12 +1,36 @@
 package com.til.prime.timesSubscription.service;
 
-import com.til.prime.timesSubscription.dto.external.*;
+import java.util.List;
+
+import com.til.prime.timesSubscription.dto.external.BackendSubscriptionActivationRequest;
+import com.til.prime.timesSubscription.dto.external.BackendSubscriptionRequest;
+import com.til.prime.timesSubscription.dto.external.BackendSubscriptionValidationResponse;
+import com.til.prime.timesSubscription.dto.external.BlockUnblockRequest;
+import com.til.prime.timesSubscription.dto.external.CancelSubscriptionRequest;
+import com.til.prime.timesSubscription.dto.external.CheckEligibilityRequest;
+import com.til.prime.timesSubscription.dto.external.CheckStatusRequest;
+import com.til.prime.timesSubscription.dto.external.CheckValidVariantRequest;
+import com.til.prime.timesSubscription.dto.external.CustomerSearchRequest;
+import com.til.prime.timesSubscription.dto.external.ExtendExpiryRequest;
+import com.til.prime.timesSubscription.dto.external.GenerateOrderRequest;
+import com.til.prime.timesSubscription.dto.external.GenericRequest;
+import com.til.prime.timesSubscription.dto.external.InitPurchaseRequest;
+import com.til.prime.timesSubscription.dto.external.OrderDetailsRequest;
+import com.til.prime.timesSubscription.dto.external.OrderSearchRequest;
+import com.til.prime.timesSubscription.dto.external.OtpRequest;
+import com.til.prime.timesSubscription.dto.external.OtpVerificationRequest;
+import com.til.prime.timesSubscription.dto.external.PlanListRequest;
+import com.til.prime.timesSubscription.dto.external.PropertyDataRequestCRM;
+import com.til.prime.timesSubscription.dto.external.PropertyDataUpdateRequestCRM;
+import com.til.prime.timesSubscription.dto.external.PurchaseHistoryRequest;
+import com.til.prime.timesSubscription.dto.external.SubmitPurchaseRequest;
+import com.til.prime.timesSubscription.dto.external.TurnOffAutoDebitRequest;
+import com.til.prime.timesSubscription.dto.external.UpdateCacheForMobileRequest;
+import com.til.prime.timesSubscription.dto.external.ValidationResponse;
 import com.til.prime.timesSubscription.model.BackendSubscriptionUserModel;
 import com.til.prime.timesSubscription.model.SubscriptionVariantModel;
 import com.til.prime.timesSubscription.model.UserModel;
 import com.til.prime.timesSubscription.model.UserSubscriptionModel;
-
-import java.util.List;
 
 public interface SubscriptionValidationService {
     ValidationResponse validatePreAllPlans(PlanListRequest request);
@@ -16,7 +40,7 @@ public interface SubscriptionValidationService {
     ValidationResponse validatePreGenerateOrder(GenerateOrderRequest request);
     ValidationResponse validatePostGenerateOrder(GenerateOrderRequest request, SubscriptionVariantModel variantModel, UserSubscriptionModel userSubscriptionModel, UserSubscriptionModel restrictedModel, ValidationResponse validationResponse);
     ValidationResponse validatePreSubmitPurchasePlan(SubmitPurchaseRequest request);
-    ValidationResponse validatePostSubmitPurchasePlan(SubmitPurchaseRequest request, UserSubscriptionModel userSubscriptionModel, UserSubscriptionModel conflictingUserSubscription, ValidationResponse validationResponse);
+    ValidationResponse validatePostSubmitPurchasePlan(SubmitPurchaseRequest request, UserSubscriptionModel userSubscriptionModel, ValidationResponse validationResponse);
     ValidationResponse validatePurchaseHistory(PurchaseHistoryRequest request);
     ValidationResponse validatePreCancelSubscription(CancelSubscriptionRequest request, boolean serverRequest);
     ValidationResponse validatePostCancelSubscription(CancelSubscriptionRequest request, UserSubscriptionModel userSubscriptionModel, ValidationResponse validationResponse);
