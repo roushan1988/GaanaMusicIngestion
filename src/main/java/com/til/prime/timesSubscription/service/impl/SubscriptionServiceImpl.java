@@ -974,7 +974,7 @@ private CustomerCRM convertUserToCustomerCRM(UserModel userModel){
 	
 	List<UserSubscriptionModel> userSubscriptionModelList = userModel.getUserSubscriptions();
 	for(UserSubscriptionModel userSubscriptionModel: userSubscriptionModelList){
-		if(userSubscriptionModel.isOrderCompleted() && !userSubscriptionModel.isDeleted()){
+		if(!userSubscriptionModel.isDeleted()){
         	OrderSearchResultCRM orderSearchResultCRM = new OrderSearchResultCRM();
         	
             
@@ -1220,35 +1220,35 @@ private CustomerCRM convertUserToCustomerCRM(UserModel userModel){
             
 
             if(orderId==null && subscriptionStatus==null){
-    			userSubscriptionModelList = userSubscriptionRepository.findByCreatedBetweenAndDeletedFalseAndOrderCompletedTrue(fromDate, toDate);	
+    			userSubscriptionModelList = userSubscriptionRepository.findByCreatedBetweenAndDeletedFalse(fromDate, toDate);	
 
             }
                         
             if(subscriptionStatus!=null){
         		if(subscriptionStatus.equalsIgnoreCase(StatusEnum.ACTIVE.toString())){
         			if(fromDate!=null || toDate!=null){
-            			userSubscriptionModelList = userSubscriptionRepository.findByStatusAndCreatedBetweenAndDeletedFalseAndOrderCompletedTrue(StatusEnum.ACTIVE, fromDate!=null? fromDate: new Date(), toDate!=null? toDate: new Date());
+            			userSubscriptionModelList = userSubscriptionRepository.findByStatusAndCreatedBetweenAndDeletedFalse(StatusEnum.ACTIVE, fromDate!=null? fromDate: new Date(), toDate!=null? toDate: new Date());
         			}else{
-            			userSubscriptionModelList = userSubscriptionRepository.findByStatusAndDeletedFalseAndOrderCompletedTrue(StatusEnum.ACTIVE);	
+            			userSubscriptionModelList = userSubscriptionRepository.findByStatusAndDeletedFalse(StatusEnum.ACTIVE);	
         			}
         		}else if(subscriptionStatus.equalsIgnoreCase(StatusEnum.FUTURE.toString())){
         			if(fromDate!=null || toDate!=null){
-            			userSubscriptionModelList = userSubscriptionRepository.findByStatusAndCreatedBetweenAndDeletedFalseAndOrderCompletedTrue(StatusEnum.FUTURE, fromDate!=null? fromDate: new Date(), toDate!=null? toDate: new Date());
+            			userSubscriptionModelList = userSubscriptionRepository.findByStatusAndCreatedBetweenAndDeletedFalse(StatusEnum.FUTURE, fromDate!=null? fromDate: new Date(), toDate!=null? toDate: new Date());
         			}else{
-            			userSubscriptionModelList = userSubscriptionRepository.findByStatusAndDeletedFalseAndOrderCompletedTrue(StatusEnum.FUTURE);	
+            			userSubscriptionModelList = userSubscriptionRepository.findByStatusAndDeletedFalse(StatusEnum.FUTURE);	
         			}
         		}else if(subscriptionStatus.equalsIgnoreCase(StatusEnum.EXPIRED.toString())){
         			if(fromDate!=null || toDate!=null){
-            			userSubscriptionModelList = userSubscriptionRepository.findByStatusAndCreatedBetweenAndDeletedFalseAndOrderCompletedTrue(StatusEnum.EXPIRED, fromDate!=null? fromDate: new Date(), toDate!=null? toDate: new Date());
+            			userSubscriptionModelList = userSubscriptionRepository.findByStatusAndCreatedBetweenAndDeletedFalse(StatusEnum.EXPIRED, fromDate!=null? fromDate: new Date(), toDate!=null? toDate: new Date());
             		}else{
-            			userSubscriptionModelList = userSubscriptionRepository.findByStatusAndDeletedFalseAndOrderCompletedTrue(StatusEnum.EXPIRED);        			            			
+            			userSubscriptionModelList = userSubscriptionRepository.findByStatusAndDeletedFalse(StatusEnum.EXPIRED);        			            			
             		}
         		}
 
             }
             
             if(orderId!=null){
-    			userSubscriptionModelList = userSubscriptionRepository.findByOrderIdAndDeletedFalseAndOrderCompletedTrue(orderId);	
+    			userSubscriptionModelList = userSubscriptionRepository.findByOrderIdAndDeletedFalse(orderId);	
             }
 
     		List<OrderSearchResultCRM> orderSearchResultCRMList = new ArrayList<OrderSearchResultCRM>(); 
