@@ -469,7 +469,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         if (vw != null) {
             statusDTO = (SubscriptionStatusDTO) vw.get();
         }
-        if (statusDTO == null && updateCache) { //cache update step
+//        if (statusDTO == null && updateCache) { //cache update step
+        if (statusDTO == null) { //cache update step
             LOG.info("Into cache update step");
             UserSubscriptionModel userSubscriptionModel = null;
             userSubscriptionModel = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndStatusInAndDeletedFalseAndOrderCompletedTrueOrderByIdDesc(request.getUser().getMobile(), StatusEnum.VALID_USER_STATUS_HISTORY_SET);
