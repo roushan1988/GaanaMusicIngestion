@@ -743,6 +743,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         }
         statusDTO.setAutoRenewal(userSubscriptionModel.isAutoRenewal());
         statusDTO.setFirstName(userSubscriptionModel.getUser().getFirstName());
+        statusDTO.setLastName(userSubscriptionModel.getUser().getLastName());
         statusDTO.setPrimeId(userSubscriptionModel.getUser().getPrimeId());
         LOG.info("StatusDTO: " + statusDTO);
         return statusDTO;
