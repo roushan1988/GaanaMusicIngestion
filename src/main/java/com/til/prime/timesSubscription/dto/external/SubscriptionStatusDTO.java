@@ -8,6 +8,7 @@ public class SubscriptionStatusDTO implements Serializable {
     private boolean blocked;
     private Date startDate;
     private Date endDate;
+    private Date lastEndDate;
     private int planStatus;
     private boolean autoRenewal;
     private String email;
@@ -83,9 +84,18 @@ public class SubscriptionStatusDTO implements Serializable {
         return lastName;
     }
 
+    public Date getLastEndDate() {
+        return lastEndDate;
+    }
+
+    public void setLastEndDate(Date lastEndDate) {
+        this.lastEndDate = lastEndDate;
+    }
+
     public void setLastName(String lastName) {
         this.lastName = lastName;
     }
+
 
     @Override
     public String toString() {

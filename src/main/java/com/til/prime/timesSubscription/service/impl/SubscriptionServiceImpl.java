@@ -679,11 +679,12 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     public void updateUserStatus(UserSubscriptionModel userSubscriptionModel, UserModel userModel) {
         if (userSubscriptionModel != null && userSubscriptionModel.isOrderCompleted() && StatusEnum.VALID_EXTERNAL_PUBLISH_STATUS_SET.contains(userSubscriptionModel.getStatus())) {
             try {
-                LOG.info("Updating user status, userSubscription: " + userSubscriptionModel + ", user: " + userModel);
-                SubscriptionStatusDTO statusDTO = getSubscriptionStatusDTO(userSubscriptionModel, userModel);
                 if (userSubscriptionModel.getStatus() == StatusEnum.FUTURE) {
                     return;
                 }
+                LOG.info("Updating user status, userSubscription: " + userSubscriptionModel + ", user: " + userModel);
+                UserSubscriptionModel lastUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndStatusInAndDeletedFalseAndOrderCompletedTrueOrderByIdDesc(userSubscriptionModel.getUser().getMobile(), StatusEnum.VALID_TURN_OFF_DEBIT_STATUS_SET);
+                SubscriptionStatusDTO statusDTO = getSubscriptionStatusDTO(userSubscriptionModel, userModel, lastUserSubscription.getEndDate());
                 String mobile = userSubscriptionModel.getUser().getMobile();
                 LOG.info("Status DTO: " + statusDTO);
                 cacheManager.getCache(RedisConstants.PRIME_STATUS_CACHE_KEY).put(mobile, statusDTO);
@@ -707,7 +708,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         }
     }
 
-    private SubscriptionStatusDTO getSubscriptionStatusDTO(UserSubscriptionModel userSubscriptionModel, UserModel userModel) {
+    private SubscriptionStatusDTO getSubscriptionStatusDTO(UserSubscriptionModel userSubscriptionModel, UserModel userModel, Date lastEndDate) {
         LOG.info("UserSubscription: " + userSubscriptionModel);
         LOG.info("User: " + userModel);
         SubscriptionStatusDTO statusDTO = new SubscriptionStatusDTO();
@@ -723,6 +724,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         StatusEnum status = userSubscriptionModel.getStatus();
         statusDTO.setStartDate(userSubscriptionModel.getStartDate());
         statusDTO.setEndDate(userSubscriptionModel.getEndDate());
+        statusDTO.setLastEndDate(lastEndDate);
         statusDTO.setBlocked(userSubscriptionModel.getUser().isBlocked());
         if (status == StatusEnum.EXPIRED) {
             if (userSubscriptionModel.getPlanStatus() == PlanStatusEnum.SUBSCRIPTION || userSubscriptionModel.getPlanStatus() == PlanStatusEnum.SUBSCRIPTION_AUTO_RENEWAL) {
