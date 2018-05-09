@@ -103,6 +103,7 @@ public class SubscriptionStatusDTO implements Serializable {
         sb.append("blocked=").append(blocked);
         sb.append(", startDate=").append(startDate);
         sb.append(", endDate=").append(endDate);
+        sb.append(", lastEndDate=").append(lastEndDate);
         sb.append(", planStatus=").append(planStatus);
         sb.append(", autoRenewal=").append(autoRenewal);
         sb.append(", email='").append(email).append('\'');
