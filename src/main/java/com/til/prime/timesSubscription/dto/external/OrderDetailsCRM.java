@@ -14,7 +14,10 @@ public class OrderDetailsCRM {
 	private Date endDate;
 	private Date endDateValSubs;
 
-	private String currentStatus;
+	private String subscriptionStatus;
+	private String subscriptionTransactionStatus;
+	private String paymentStatus;
+
 	private Double amount;
 	private String channelId;
 	private String ip;
@@ -51,6 +54,8 @@ public class OrderDetailsCRM {
 	private Date userCreatedDateValSubs;
 	private String userSubscriptionStatus;
 
+	private boolean orderCompleted;
+
 	private boolean autoRenewal;
 	private String subscriptionPlan;
 	private String userSubscriptionId;
@@ -86,12 +91,28 @@ public class OrderDetailsCRM {
 		this.orderId = orderId;
 	}
 
-	public String getCurrentStatus() {
-		return currentStatus;
+	public String getSubscriptionStatus() {
+		return subscriptionStatus;
 	}
 
-	public void setCurrentStatus(String currentStatus) {
-		this.currentStatus = currentStatus;
+	public void setSubscriptionStatus(String subscriptionStatus) {
+		this.subscriptionStatus = subscriptionStatus;
+	}
+
+	public String getSubscriptionTransactionStatus() {
+		return subscriptionTransactionStatus;
+	}
+
+	public void setSubscriptionTransactionStatus(
+			String subscriptionTransactionStatus) {
+		this.subscriptionTransactionStatus = subscriptionTransactionStatus;
+	}
+	public String getPaymentStatus() {
+		return paymentStatus;
+	}
+
+	public void setPaymentStatus(String paymentStatus) {
+		this.paymentStatus = paymentStatus;
 	}
 
 	public Double getAmount() {
@@ -468,6 +489,14 @@ public class OrderDetailsCRM {
 
 	public void setUserSubscriptionStatus(String userSubscriptionStatus) {
 		this.userSubscriptionStatus = userSubscriptionStatus;
+	}
+	
+	public boolean isOrderCompleted() {
+		return orderCompleted;
+	}
+
+	public void setOrderCompleted(boolean orderCompleted) {
+		this.orderCompleted = orderCompleted;
 	}
 	
 	public boolean isAutoRenewal() {
