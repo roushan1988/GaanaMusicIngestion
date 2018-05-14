@@ -39,6 +39,8 @@ public interface UserSubscriptionRepository extends GenericJpaRepository<UserSub
     UserSubscriptionModel findFirstByUserMobileAndUserDeletedFalseAndOrderCompletedAndStartDateBeforeAndEndDateAfter(String mobile, boolean orderCompleted, Date date, Date date2);
     UserSubscriptionModel findFirstByUserMobileAndUserDeletedFalseAndDeletedFalseAndOrderCompletedTrueAndEndDateAfter(String mobile, Date date);
     UserSubscriptionModel findFirstByUserMobileAndUserDeletedFalseAndBusinessAndOrderCompletedAndDeletedOrderByIdDesc(String mobile, BusinessEnum business, boolean orderCompleted, boolean deleted);
+    UserSubscriptionModel findFirstByUserMobileAndUserDeletedFalseAndBusinessAndStatusInAndOrderCompletedTrueAndDeletedFalseOrderByIdDesc(String mobile, BusinessEnum business, Set<StatusEnum> statusEnums);
+    List<UserSubscriptionModel> findByUserMobileAndUserDeletedFalseAndBusinessAndStatusInAndOrderCompletedTrueAndDeletedFalseOrderByIdDesc(String mobile, BusinessEnum business, Set<StatusEnum> statusEnums);
     Long countByStatusAndEndDateBeforeAndDeletedFalseAndOrderCompletedTrue(StatusEnum status, Date date);
     Page<UserSubscriptionModel> findByStatusAndEndDateBeforeAndDeletedFalseAndOrderCompletedTrue(StatusEnum status, Date date, Pageable pageable);
     Page<UserSubscriptionModel> findByStatusAndEndDateBetweenAndDeletedFalseAndOrderCompletedTrue(StatusEnum status, Date date1, Date date2, Pageable pageable);

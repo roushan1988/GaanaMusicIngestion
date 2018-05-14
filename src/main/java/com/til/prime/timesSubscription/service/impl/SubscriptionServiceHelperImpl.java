@@ -319,6 +319,15 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
     }
 
     @Override
+    public BigDecimal calculateRefundAmount(List<UserSubscriptionModel> userSubscriptionModelList) {
+        BigDecimal price = BigDecimal.ZERO;
+        for(UserSubscriptionModel userSubscriptionModel: userSubscriptionModelList){
+            price.add(calculateRefundAmount(userSubscriptionModel));
+        }
+        return price;
+    }
+
+    @Override
     public UserSubscriptionModel extendSubscription(UserSubscriptionModel userSubscriptionModel, Long extensionDays) {
         Date newEndDate = TimeUtils.addDaysInDate(userSubscriptionModel.getEndDate(), extensionDays.intValue());
         userSubscriptionModel.setEndDate(newEndDate);

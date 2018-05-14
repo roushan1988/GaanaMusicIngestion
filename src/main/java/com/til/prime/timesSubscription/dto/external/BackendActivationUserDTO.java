@@ -1,5 +1,7 @@
 package com.til.prime.timesSubscription.dto.external;
 
+import com.til.prime.timesSubscription.enums.BusinessEnum;
+
 import java.util.Objects;
 
 public class BackendActivationUserDTO {
@@ -11,6 +13,7 @@ public class BackendActivationUserDTO {
     private boolean forceActivation;
     private boolean success;
     private String message;
+    private BusinessEnum business = BusinessEnum.TIMES_PRIME;
 
     public String getMobile() {
         return mobile;
@@ -76,6 +79,14 @@ public class BackendActivationUserDTO {
         this.message = message;
     }
 
+    public BusinessEnum getBusiness() {
+        return business;
+    }
+
+    public void setBusiness(BusinessEnum business) {
+        this.business = business;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -89,7 +100,6 @@ public class BackendActivationUserDTO {
 
     @Override
     public int hashCode() {
-
         return Objects.hash(mobile, email, firstName, lastName);
     }
 
@@ -104,6 +114,7 @@ public class BackendActivationUserDTO {
         sb.append(", forceActivation=").append(forceActivation);
         sb.append(", success=").append(success);
         sb.append(", message='").append(message).append('\'');
+        sb.append(", business=").append(business);
         sb.append('}');
         return sb.toString();
     }

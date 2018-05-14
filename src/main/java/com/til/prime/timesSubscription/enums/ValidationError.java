@@ -58,6 +58,7 @@ public enum ValidationError {
 	UNAUTHORIZED_ACCESS(52, "You are not authorised to make this request", 2, 1),
 	OTP_EXPIRED(53, "This OTP is expired, Please enter the correct OTP", 2, 3),
 	WRONG_OTP(54, "Please enter the correct OTP", 2, 3),
+	INVALID_CANCELLATION(55, "Please cancel the last future subscription first", 1, 3),
 	INVALID_USER(1000, "Invalid User", 1, 1),
 	INVALID_CLIENT_ID(1001, "Invalid Client ID", 1, 1),
 	INVALID_CLIENT_SECRET_KEY(1002, "Invalid Client Secret Key", 1, 1),

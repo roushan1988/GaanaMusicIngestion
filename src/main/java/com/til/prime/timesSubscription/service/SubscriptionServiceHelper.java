@@ -31,6 +31,7 @@ public interface SubscriptionServiceHelper {
     BackendSubscriptionActivationResponse prepareBackendSubscriptionActivationResponse(BackendSubscriptionActivationResponse response, UserSubscriptionModel userSubscription, ValidationResponse validationResponse);
     UserSubscriptionAuditModel getUserSubscriptionAuditModel(UserSubscriptionModel userSubscriptionModel, EventEnum event);
     BigDecimal calculateRefundAmount(UserSubscriptionModel userSubscriptionModel);
+    BigDecimal calculateRefundAmount(List<UserSubscriptionModel> userSubscriptionModelList);
     UserSubscriptionModel extendSubscription(UserSubscriptionModel userSubscriptionModel, Long extensionDays);
     ExtendExpiryResponse prepareExtendExpiryResponse(ExtendExpiryResponse response, UserSubscriptionModel userSubscriptionModel, ValidationResponse validationResponse);
     GenericValidationResponse prepareCheckEligibilityResponse(GenericValidationResponse response, ValidationResponse validationResponse, boolean validExecution);

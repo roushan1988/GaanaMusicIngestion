@@ -140,7 +140,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 restrictedUsageUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndBusinessAndSubscriptionVariantPlanTypeAndOrderCompletedAndDeletedOrderByIdDesc(
                         request.getUser().getMobile(), business, planType, true, false);
             }
-            lastUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndBusinessAndOrderCompletedAndDeletedOrderByIdDesc(request.getUser().getMobile(), business, true, false);
+            lastUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndBusinessAndStatusInAndOrderCompletedTrueAndDeletedFalseOrderByIdDesc(request.getUser().getMobile(), business, StatusEnum.VALID_INIT_STATUS_SET);
             validationResponse = subscriptionValidationService.validatePostInitPurchasePlan(request, subscriptionVariantModel, restrictedUsageUserSubscription, lastUserSubscription, crmRequest, validationResponse);
         }
         if (validationResponse.isValid()) {
@@ -298,10 +298,14 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     public CancelSubscriptionResponse cancelSubscription(CancelSubscriptionRequest request, boolean serverRequest) {
         ValidationResponse validationResponse = subscriptionValidationService.validatePreCancelSubscription(request, serverRequest);
         UserSubscriptionModel userSubscriptionModel = null;
+        UserSubscriptionModel lastRelevantSubscription = null;
         CancelSubscriptionResponse response = new CancelSubscriptionResponse();
         if (validationResponse.isValid()) {
             userSubscriptionModel = userSubscriptionRepository.findByIdAndOrderIdAndSubscriptionVariantIdAndDeleted(request.getUserSubscriptionId(), request.getOrderId(), request.getVariantId(), false);
-            validationResponse = subscriptionValidationService.validatePostCancelSubscription(request, userSubscriptionModel, validationResponse);
+            if(userSubscriptionModel!=null) {
+                lastRelevantSubscription = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndBusinessAndStatusInAndOrderCompletedTrueAndDeletedFalseOrderByIdDesc(userSubscriptionModel.getUser().getMobile(), userSubscriptionModel.getBusiness(), StatusEnum.VALID_CANCEL_STATUS_SET);
+            }
+            validationResponse = subscriptionValidationService.validatePostCancelSubscription(request, userSubscriptionModel, lastRelevantSubscription, validationResponse);
         }
         BigDecimal refundedAmount = null;
         if (validationResponse.isValid()) {
@@ -323,13 +327,21 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             }
             if (refundResponse.isSuccess()) {
                 userSubscriptionModel.setIsDelete(true);
-                userSubscriptionModel.setStatus(StatusEnum.CANCELLED);
+                StatusEnum previousStatus = userSubscriptionModel.getStatus();
+                userSubscriptionModel.setStatus(previousStatus==StatusEnum.ACTIVE? StatusEnum.ACTIVE_CANCELLED: StatusEnum.CANCELLED);
                 if (refundResponse.getRefundedAmount() != null) {
                     refundedAmount = new BigDecimal(refundResponse.getRefundedAmount());
                     refundedAmount.setScale(2, BigDecimal.ROUND_HALF_EVEN);
                 }
                 userSubscriptionModel.setRefundedAmount(refundedAmount);
-                userSubscriptionModel = saveUserSubscription(userSubscriptionModel, false, serverRequest ? EventEnum.SUBSCRIPTION_SERVER_CANCELLATION : EventEnum.SUBSCRIPTION_APP_CANCELLATION, true);
+                EventEnum eventEnum = (serverRequest ? EventEnum.SUBSCRIPTION_SERVER_CANCELLATION : EventEnum.SUBSCRIPTION_APP_CANCELLATION);
+                if(previousStatus==StatusEnum.ACTIVE && eventEnum==EventEnum.SUBSCRIPTION_SERVER_CANCELLATION){
+                    eventEnum = EventEnum.SUBSCRIPTION_SERVER_ACTIVE_CANCELLATION;
+                }
+                if(previousStatus==StatusEnum.ACTIVE && eventEnum==EventEnum.SUBSCRIPTION_APP_CANCELLATION){
+                    eventEnum = EventEnum.SUBSCRIPTION_APP_ACTIVE_CANCELLATION;
+                }
+                userSubscriptionModel = saveUserSubscription(userSubscriptionModel, false, eventEnum, true);
                 communicationService.sendSubscriptionCancellationCommunication(userSubscriptionModel);
             } else {
                 validationResponse.addValidationError(ValidationError.PAYMENT_REFUND_ERROR);
@@ -680,11 +692,18 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         if (userSubscriptionModel != null && userSubscriptionModel.isOrderCompleted() && StatusEnum.VALID_EXTERNAL_PUBLISH_STATUS_SET.contains(userSubscriptionModel.getStatus())) {
             try {
                 if (userSubscriptionModel.getStatus() == StatusEnum.FUTURE) {
+                    Cache.ValueWrapper vw = cacheManager.getCache(RedisConstants.PRIME_STATUS_CACHE_KEY).get(userModel.getMobile());
+                    SubscriptionStatusDTO statusDTO = null;
+                    if (vw != null) {
+                        statusDTO = (SubscriptionStatusDTO) vw.get();
+                        statusDTO.setLastEndDate(userSubscriptionModel.getEndDate());
+                        cacheManager.getCache(RedisConstants.PRIME_STATUS_CACHE_KEY).put(userSubscriptionModel.getUser().getMobile(), statusDTO);
+                    }
                     return;
                 }
                 LOG.info("Updating user status, userSubscription: " + userSubscriptionModel + ", user: " + userModel);
-                UserSubscriptionModel lastUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndStatusInAndDeletedFalseAndOrderCompletedTrueOrderByIdDesc(userSubscriptionModel.getUser().getMobile(), StatusEnum.VALID_TURN_OFF_DEBIT_STATUS_SET);
-                SubscriptionStatusDTO statusDTO = getSubscriptionStatusDTO(userSubscriptionModel, userModel, lastUserSubscription.getEndDate());
+                UserSubscriptionModel lastUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndStatusInAndDeletedFalseAndOrderCompletedTrueOrderByIdDesc(userSubscriptionModel.getUser().getMobile(), StatusEnum.VALID_END_DATE_DISPLAY_STATUS_SET);
+                SubscriptionStatusDTO statusDTO = getSubscriptionStatusDTO(userSubscriptionModel, userModel, lastUserSubscription.getStatus()==StatusEnum.ACTIVE_CANCELLED? lastUserSubscription.getUpdated(): lastUserSubscription.getEndDate());
                 String mobile = userSubscriptionModel.getUser().getMobile();
                 LOG.info("Status DTO: " + statusDTO);
                 cacheManager.getCache(RedisConstants.PRIME_STATUS_CACHE_KEY).put(mobile, statusDTO);

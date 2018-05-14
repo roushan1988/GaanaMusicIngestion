@@ -203,11 +203,14 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
     }
 
     @Override
-    public ValidationResponse validatePostCancelSubscription(CancelSubscriptionRequest request, UserSubscriptionModel userSubscriptionModel, ValidationResponse validationResponse) {
+    public ValidationResponse validatePostCancelSubscription(CancelSubscriptionRequest request, UserSubscriptionModel userSubscriptionModel, UserSubscriptionModel lastRelevantSubscription, ValidationResponse validationResponse) {
         PreConditions.notNull(userSubscriptionModel, ValidationError.INVALID_USER_SUBSCRIPTION_ID, validationResponse);
-        if(userSubscriptionModel!=null){
+        PreConditions.notNull(lastRelevantSubscription, ValidationError.INVALID_USER_SUBSCRIPTION_ID, validationResponse);
+        if(userSubscriptionModel!=null && lastRelevantSubscription!=null){
+            PreConditions.mustBeTrue(userSubscriptionModel.getId().equals(lastRelevantSubscription.getId()), ValidationError.INVALID_CANCELLATION, validationResponse);
             PreConditions.notAfter(new Date(), userSubscriptionModel.getEndDate(), ValidationError.ALREADY_EXPIRED, validationResponse);
             PreConditions.mustBeFalse(userSubscriptionModel.getUser().isBlocked(), ValidationError.BLOCKED_USER, validationResponse);
+            PreConditions.mustBeTrue(StatusEnum.VALID_CANCEL_STATUS_SET.contains(userSubscriptionModel.getStatus()), ValidationError.INVALID_USER_SUBSCRIPTION_ID, validationResponse);
         }
         return updateValid(validationResponse);
     }

@@ -19,7 +19,7 @@ public interface SubscriptionValidationService {
     ValidationResponse validatePostSubmitPurchasePlan(SubmitPurchaseRequest request, UserSubscriptionModel userSubscriptionModel, UserSubscriptionModel conflictingUserSubscription, ValidationResponse validationResponse);
     ValidationResponse validatePurchaseHistory(PurchaseHistoryRequest request);
     ValidationResponse validatePreCancelSubscription(CancelSubscriptionRequest request, boolean serverRequest);
-    ValidationResponse validatePostCancelSubscription(CancelSubscriptionRequest request, UserSubscriptionModel userSubscriptionModel, ValidationResponse validationResponse);
+    ValidationResponse validatePostCancelSubscription(CancelSubscriptionRequest request, UserSubscriptionModel userSubscriptionModel, UserSubscriptionModel lastRelevantSubscription, ValidationResponse validationResponse);
     ValidationResponse validatePreTurnOffAutoDebit(TurnOffAutoDebitRequest request);
     ValidationResponse validatePreBlockUnblockUser(BlockUnblockRequest request);
     ValidationResponse validatePostBlockUnblockUser(BlockUnblockRequest request, UserModel userModel, ValidationResponse validationResponse);
