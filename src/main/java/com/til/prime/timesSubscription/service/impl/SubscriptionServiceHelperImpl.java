@@ -483,6 +483,9 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
 
     @Override
     public final RefundInternalResponse refundPayment(String orderId, Double refundAmount, boolean forceAmount){
+        if (Double.compare(refundAmount, 0d)==0) {
+            return new RefundInternalResponse(true, refundAmount);
+        }
         try{
             PaymentsRefundRequest refundRequest = new PaymentsRefundRequest();
             refundRequest.setAmount(refundAmount);

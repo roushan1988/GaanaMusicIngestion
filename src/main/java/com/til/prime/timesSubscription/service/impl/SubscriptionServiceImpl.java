@@ -321,12 +321,9 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             } else {
                 refundAmount = BigDecimal.ZERO;
             }
-            RefundInternalResponse refundResponse = null;
-            if (refundAmount.compareTo(BigDecimal.ZERO) > 0) {
-                refundResponse = subscriptionServiceHelper.refundPayment(userSubscriptionModel.getOrderId(), refundAmount.doubleValue(), forceAmount);
-            }
+            RefundInternalResponse refundResponse = subscriptionServiceHelper.refundPayment(userSubscriptionModel.getOrderId(), refundAmount.doubleValue(), forceAmount);
             if (refundResponse.isSuccess()) {
-                userSubscriptionModel.setIsDelete(true);
+                //userSubscriptionModel.setIsDelete(true);
                 StatusEnum previousStatus = userSubscriptionModel.getStatus();
                 userSubscriptionModel.setStatus(previousStatus==StatusEnum.ACTIVE? StatusEnum.ACTIVE_CANCELLED: StatusEnum.CANCELLED);
                 if (refundResponse.getRefundedAmount() != null) {
