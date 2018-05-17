@@ -25,6 +25,7 @@ public class UserStatusPublisherServiceImpl implements UserStatusPublisherServic
     public boolean publishUserStatus(PublishedUserStatusDTO msg) {
         try{
             kafkaTemplate.send(kafkaTopic, msg);
+            LOG.info("Message published, topic: "+kafkaTopic+", message: "+msg);
             return true;
         }catch (Exception e){
             LOG.error("Exception while publishing message: "+msg, e);
