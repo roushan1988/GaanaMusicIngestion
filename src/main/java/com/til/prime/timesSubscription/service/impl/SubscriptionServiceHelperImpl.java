@@ -680,7 +680,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
     }
     
     @Override
-    public PropertyDataGetResponseCRM preparePropertyDataGetResponse(PropertyDataGetResponseCRM propertyDataGetResponseCRM, Map<PropertyEnum, Object> propertyMap, ValidationResponse validationResponse){
+    public PropertyDataGetResponseCRM preparePropertyDataGetResponse(PropertyDataGetResponseCRM propertyDataGetResponseCRM, Map<PropertyEnum, String> propertyMap, ValidationResponse validationResponse){
         if(validationResponse.isValid()){
         	propertyDataGetResponseCRM.setSubscription_property_data(propertyMap);
         	propertyDataGetResponseCRM = (PropertyDataGetResponseCRM) ResponseUtil.createSuccessResponse(propertyDataGetResponseCRM);

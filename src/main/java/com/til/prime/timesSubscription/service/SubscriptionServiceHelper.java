@@ -45,7 +45,7 @@ public interface SubscriptionServiceHelper {
     RefundInternalResponse refundPayment(String orderId, Double refundAmount, boolean forceAmount);
     String shortenUrl(String longUrl);
     OrderSearchCRMResponse prepareOrderSearchResponse(OrderSearchCRMResponse response, OrderSearchResultsCRM orderSearchResultsCRM, ValidationResponse validationResponse);
-    PropertyDataGetResponseCRM preparePropertyDataGetResponse(PropertyDataGetResponseCRM response, Map<PropertyEnum, Object> propertyMap, ValidationResponse validationResponse);
+    PropertyDataGetResponseCRM preparePropertyDataGetResponse(PropertyDataGetResponseCRM response, Map<PropertyEnum, String> propertyMap, ValidationResponse validationResponse);
     GenericResponse prepareUpdateCacheResponse(GenericResponse response, ValidationResponse validationResponse);
     OrderDetailsCRMResponse prepareOrderDetailsResponse(OrderDetailsCRMResponse orderDetailsCRMResponse, OrderDetailsCRM orderDetailsCRM, ValidationResponse validationResponse);
     CustomerDetailsCRMResponse prepareCustomerDetailsResponse(CustomerDetailsCRMResponse customerDetailsCRMResponse, CustomerCRM customerCRM, ValidationResponse validationResponse);

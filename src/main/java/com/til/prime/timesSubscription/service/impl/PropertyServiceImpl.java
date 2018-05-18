@@ -1,23 +1,5 @@
 package com.til.prime.timesSubscription.service.impl;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
-import javax.annotation.PostConstruct;
-
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-
 import com.google.common.cache.CacheBuilder;
 import com.til.prime.timesSubscription.convertor.ModelToDTOConvertorUtil;
 import com.til.prime.timesSubscription.dao.ExternalClientRepository;
@@ -31,12 +13,22 @@ import com.til.prime.timesSubscription.enums.CountryEnum;
 import com.til.prime.timesSubscription.enums.PlanTypeEnum;
 import com.til.prime.timesSubscription.enums.PropertyEnum;
 import com.til.prime.timesSubscription.model.ExternalClientModel;
-import com.til.prime.timesSubscription.model.JobModel;
 import com.til.prime.timesSubscription.model.SubscriptionPlanModel;
 import com.til.prime.timesSubscription.model.SubscriptionPropertyModel;
 import com.til.prime.timesSubscription.model.SubscriptionVariantModel;
 import com.til.prime.timesSubscription.service.PropertyService;
 import com.til.prime.timesSubscription.util.ResponseUtil;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.PostConstruct;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Service
 public class PropertyServiceImpl implements PropertyService {
@@ -150,14 +142,14 @@ public class PropertyServiceImpl implements PropertyService {
     }
 
     @Override
-    public Map<PropertyEnum, Object> getPropertyTableData() {
-    	Map<PropertyEnum, Object> propertyMap = new HashMap<PropertyEnum, Object>(); 
+    public Map<PropertyEnum, String> getPropertyTableData() {
+    	Map<PropertyEnum, String> propertyMap = new HashMap<>();
         for(PropertyEnum propertyEnum: PropertyEnum.CRM_UPDATE_PROPERTIES){
             SubscriptionPropertyModel subscriptionProperty = subscriptionPropertyRepository.findByKey(propertyEnum);
             if(subscriptionProperty==null){
                 continue;
             }
-            propertyMap.put(subscriptionProperty.getKey(), parseValue(subscriptionProperty.getValue(), propertyEnum.getType()));
+            propertyMap.put(subscriptionProperty.getKey(), subscriptionProperty.getValue());
         }
         return propertyMap;
     }

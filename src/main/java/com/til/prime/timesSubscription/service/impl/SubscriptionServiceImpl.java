@@ -1387,7 +1387,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     	if(validationResponse.isValid()){
 
     		
-    		Map<PropertyEnum, Object> propertyMap = propertyService.getPropertyTableData();
+    		Map<PropertyEnum, String> propertyMap = propertyService.getPropertyTableData();
     		
     		propertyDataGetResponse = subscriptionServiceHelper.preparePropertyDataGetResponse(propertyDataGetResponse, propertyMap, validationResponse);
             return propertyDataGetResponse;
