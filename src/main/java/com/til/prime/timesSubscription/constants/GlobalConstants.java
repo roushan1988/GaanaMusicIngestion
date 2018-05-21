@@ -70,7 +70,7 @@ public class GlobalConstants {
     public static final String BACKEND_ACTIVATION_EMAIL_CTA_KEY = "backend.activation.email.cta.key";
     public static final String URL_SHORTENING_API_KEY = "url.shortening.api";
     public static final String PRIME_BACKEND_ACTIVATION_URL_KEY = "prime.backend.activation.url";
-    public static final String PRIME_COMM_FROM_NAME = "TimesPrime";
+    public static final String PRIME_COMM_FROM_NAME = "Times Prime";
     public static final String PRIME_COMM_FROM_EMAIL = "info@timesprime.com";
 
     public static final String FREE_TRAIL_ACTIVATION_SMS_TEMPLATE_KEY = "free.trail.activation.sms.key";
