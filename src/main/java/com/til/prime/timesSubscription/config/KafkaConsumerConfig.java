@@ -1,9 +1,13 @@
 package com.til.prime.timesSubscription.config;
 
+import com.til.prime.timesSubscription.constants.GlobalConstants;
 import com.til.prime.timesSubscription.dto.external.PublishedUserStatusDTO;
+import org.apache.kafka.clients.CommonClientConfigs;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.kafka.common.config.SaslConfigs;
+import org.apache.kafka.common.security.plain.PlainSaslServer;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,12 +32,18 @@ public class KafkaConsumerConfig {
     @Value("${kafka.brokers}")
     private String kafkaBrokers;
 
+    @Value("${kafka.jaas.config}")
+    private String jaasConfig;
+
     @Bean
     public ConsumerFactory<String, PublishedUserStatusDTO> consumerFactory() {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaBrokers);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, "test_consumer5");
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
+        props.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, GlobalConstants.SASL_PLAINTEXT);
+        props.put(SaslConfigs.SASL_MECHANISM, PlainSaslServer.PLAIN_MECHANISM);
+        props.put(SaslConfigs.SASL_JAAS_CONFIG, jaasConfig);
         return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), new JsonDeserializer<>(PublishedUserStatusDTO.class));
     }
 

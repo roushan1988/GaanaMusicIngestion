@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 
 public class GlobalConstants {
     public static final Integer DEFAULT_PAGE_SIZE = 100;
+    public static final String SASL_PLAINTEXT = "SASL_PLAINTEXT";
+    public static final String ACK_ALL = "all";
     public static final int MILLIS_IN_AN_HOUR = 3600000;
     public static final int MILLIS_IN_A_DAY = 24*3600000;
     public static final String UTF_8 = "UTF-8";
