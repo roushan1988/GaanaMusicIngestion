@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class CommunicationServiceHelperImpl implements CommunicationServiceHelper {
-    private static final SimpleDateFormat SDF = new SimpleDateFormat("dd-MM-yyyy");
+    private static final SimpleDateFormat SDF = new SimpleDateFormat("dd-MMM-yyyy");
     @Resource(name = "config_properties")
     private Properties properties;
 
