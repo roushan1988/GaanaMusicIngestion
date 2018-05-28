@@ -23,14 +23,16 @@ public class UserStatusPublisherServiceImpl implements UserStatusPublisherServic
 
     @Override
     public boolean publishUserStatus(PublishedUserStatusDTO msg) {
-        try{
-            kafkaTemplate.send(kafkaTopic, msg).get();
-            LOG.info("Message published, topic: "+kafkaTopic+", message: "+msg);
-            return true;
-        }catch (Exception e){
-            LOG.error("Exception while publishing message: "+msg, e);
-            return false;
-        }
+//        try{
+//            LOG.info("Reached here");
+//            kafkaTemplate.send(kafkaTopic, msg).get();
+//            LOG.info("Message published, topic: "+kafkaTopic+", message: "+msg);
+//            return true;
+//        }catch (Exception e){
+//            LOG.error("Exception while publishing message: "+msg, e);
+//            return false;
+//        }
+        return true;
     }
 
     /*Below is only sample demo code, this system is not doing any consumption of kafka messages*/
