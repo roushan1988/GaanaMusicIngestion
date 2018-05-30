@@ -8,10 +8,7 @@ import com.til.prime.timesSubscription.model.SubscriptionPlanModel;
 import com.til.prime.timesSubscription.model.SubscriptionVariantModel;
 import com.til.prime.timesSubscription.model.UserSubscriptionModel;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class ModelToDTOConvertorUtil {
 
@@ -38,6 +35,7 @@ public class ModelToDTOConvertorUtil {
                 }
             }
             Collections.sort(dto.getVariants());
+            dto.setVariants(Arrays.asList(dto.getVariants().get(0)));
         }
         return dto;
     }
