@@ -27,11 +27,9 @@ public class ModelToDTOConvertorUtil {
         SubscriptionPlanDTO dto = new SubscriptionPlanDTO();
         dto.setPlanId(model.getId());
         dto.setName(model.getName());
-        dto.setDescription(model.getName());
         dto.setBusiness(model.getBusiness());
         dto.setCurrency(model.getCurrency());
         dto.setCountry(model.getCountry());
-        dto.setFamily(model.getFamily().name());
         if(model.getVariants()!=null){
             dto.setVariants(new ArrayList<>());
             for(SubscriptionVariantModel variantModel: model.getVariants()){

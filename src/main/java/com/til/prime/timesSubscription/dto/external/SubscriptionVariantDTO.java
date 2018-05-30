@@ -6,7 +6,6 @@ import java.math.BigDecimal;
 
 public class SubscriptionVariantDTO implements Comparable<SubscriptionVariantDTO> {
     private Long variantId;
-    private String name;
     private PlanTypeEnum planType;
     private BigDecimal price;
     private Long durationInDays;
@@ -14,7 +13,6 @@ public class SubscriptionVariantDTO implements Comparable<SubscriptionVariantDTO
 
     public SubscriptionVariantDTO(Long variantId, String name, PlanTypeEnum planType, BigDecimal price, Long durationInDays, boolean recurring) {
         this.variantId = variantId;
-        this.name = name;
         this.planType = planType;
         this.price = price;
         this.durationInDays = durationInDays;
@@ -27,14 +25,6 @@ public class SubscriptionVariantDTO implements Comparable<SubscriptionVariantDTO
 
     public void setVariantId(Long variantId) {
         this.variantId = variantId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public PlanTypeEnum getPlanType() {
@@ -72,8 +62,7 @@ public class SubscriptionVariantDTO implements Comparable<SubscriptionVariantDTO
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("SubscriptionVariantDTO{");
-        sb.append("name='").append(name).append('\'');
-        sb.append(", planType=").append(planType);
+        sb.append("planType=").append(planType);
         sb.append(", variantId=").append(variantId);
         sb.append(", price=").append(price);
         sb.append(", durationInDays=").append(durationInDays);
