@@ -28,6 +28,7 @@ import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -589,14 +590,15 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             subscriptionValidationService.validateBlockedUser(userModel, validationResponse);
             if (validationResponse.isValid()) {
                 if(!request.getUser().getSsoId().equals(userModel.getSsoId())){
-                    List<UserSubscriptionModel> relevantUserSubscriptions = userSubscriptionRepository.findByUserMobileAndUserDeletedFalseAndStatusInAndOrderCompletedTrueAndDeletedFalseOrderById(userModel.getMobile(), Arrays.asList(StatusEnum.ACTIVE, StatusEnum.FUTURE));
+                    List<UserSubscriptionModel> relevantUserSubscriptions = userSubscriptionRepository.findByUserMobileAndUserDeletedFalseAndOrderCompletedTrueAndDeletedFalseOrderById(userModel.getMobile());
+                    List<UserSubscriptionModel> relevantActiveAndFutureSubscriptions = relevantUserSubscriptions.stream().filter(us -> StatusEnum.VALID_WORKING_STATUS_SET.contains(us.getStatus())).collect(Collectors.toList());
                     userModel.setIsDelete(true);
                     userModel = saveUserModel(userModel, EventEnum.USER_SUSPENSION,false);
                     String primeId = userModel.getPrimeId();
                     updateUserDetailsInCache(userModel);
                     if (StringUtils.isNotEmpty(userModel.getEmail())) {
-                        if (CollectionUtils.isNotEmpty(relevantUserSubscriptions)) {
-                            communicationService.sendUserSuspensionCommunication(userModel, relevantUserSubscriptions);
+                        if (CollectionUtils.isNotEmpty(relevantActiveAndFutureSubscriptions)) {
+                            communicationService.sendUserSuspensionCommunication(userModel, relevantActiveAndFutureSubscriptions);
                         }
                     }
                     userModel = subscriptionServiceHelper.getUser(request);
@@ -609,7 +611,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                         }
                     }
                     updateUserDetailsInCache(userModel);
-                    communicationService.sendUserCreationWithExistingMobileCommunication(userModel, relevantUserSubscriptions);
+                    communicationService.sendUserCreationWithExistingMobileCommunication(userModel, relevantActiveAndFutureSubscriptions);
                 }
             }
         }
