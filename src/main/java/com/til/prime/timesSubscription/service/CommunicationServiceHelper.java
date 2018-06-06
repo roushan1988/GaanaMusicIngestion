@@ -15,6 +15,11 @@ public interface CommunicationServiceHelper {
 
     EmailTask getBackendActivationEmailTask(BackendSubscriptionUserModel user);
 
+    SMSTask getCancelSubscriptionSMSTask(UserSubscriptionModel userSubscriptionModel);
+
+    EmailTask getCancelSubscriptionEmailTask(UserSubscriptionModel userSubscriptionModel);
+
+
     SMSTask getFreeTrialSubscriptionSMSTask(UserSubscriptionModel userSubscriptionModel);
 
     EmailTask getFreeTrialSubscriptionEmailTask(UserSubscriptionModel userSubscriptionModel);

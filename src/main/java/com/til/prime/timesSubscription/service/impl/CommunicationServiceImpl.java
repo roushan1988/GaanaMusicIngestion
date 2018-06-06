@@ -62,6 +62,13 @@ public class CommunicationServiceImpl implements CommunicationService {
     @Override
     public void sendSubscriptionCancellationCommunication(UserSubscriptionModel userSubscription) {
 
+        SMSTask smsTask = helper.getCancelSubscriptionSMSTask(userSubscription);
+        queueService.pushToSMSQueue(smsTask);
+
+        if (StringUtils.isNotEmpty(userSubscription.getUser().getEmail())) {
+            EmailTask emailTask = helper.getCancelSubscriptionEmailTask(userSubscription);
+            queueService.pushToEmailQueue(emailTask);
+        }
     }
 
     @Override

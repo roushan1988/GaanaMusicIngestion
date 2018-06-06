@@ -79,6 +79,40 @@ public class CommunicationServiceHelperImpl implements CommunicationServiceHelpe
     }
 
     @Override
+    public SMSTask getCancelSubscriptionSMSTask(UserSubscriptionModel userSubscriptionModel) {
+        SMSTask smsTask = new SMSTask();
+        smsTask.setMobileNumber(userSubscriptionModel.getUser().getMobile());
+        smsTask.setPartnerId(GlobalConstants.PARTNER_ID_FOR_COMMUNICATION);
+        smsTask.setTemplateKey(properties.getProperty(GlobalConstants.SUBSCRIPTION_CANCELLED_SMS_TEMPLATE_KEY));
+        Map<String, String> map = Maps.newHashMap();
+        map.put("firstName", userSubscriptionModel.getUser().getFirstName());
+        map.put("startDate", SDF.format(userSubscriptionModel.getStartDate()));
+        map.put("endDate", SDF.format(userSubscriptionModel.getEndDate()));
+        map.put("refundAmount", String.valueOf(userSubscriptionModel.getRefundedAmount()));
+        smsTask.setContext(map);
+        smsTask.setTaskPriority(TaskPriorityEnum.HIGH_PRIORITY);
+        return smsTask;
+    }
+
+    @Override
+    public EmailTask getCancelSubscriptionEmailTask(UserSubscriptionModel userSubscriptionModel) {
+        EmailTask emailTask = new EmailTask();
+        emailTask.setTemplateKey(properties.getProperty(GlobalConstants.SUBSCRIPTION_CANCELLED_EMAIL_TEMPLATE_KEY));
+        emailTask.setPartnerId(GlobalConstants.PARTNER_ID_FOR_COMMUNICATION);
+        emailTask.setEmailId(userSubscriptionModel.getUser().getEmail());
+        emailTask.setFromName(GlobalConstants.PRIME_COMM_FROM_NAME);
+        emailTask.setFromEmail(GlobalConstants.PRIME_COMM_FROM_EMAIL);
+        Map<String, String> map = Maps.newHashMap();
+        map.put("firstName", userSubscriptionModel.getUser().getFirstName());
+        map.put("startDate", SDF.format(userSubscriptionModel.getStartDate()));
+        map.put("endDate", SDF.format(userSubscriptionModel.getEndDate()));
+        map.put("refundAmount", String.valueOf(userSubscriptionModel.getRefundedAmount()));
+        emailTask.setContext(map);
+        emailTask.setTaskPriority(TaskPriorityEnum.HIGH_PRIORITY);
+        return emailTask;
+    }
+
+    @Override
     public SMSTask getFreeTrialSubscriptionSMSTask(UserSubscriptionModel userSubscriptionModel) {
         SMSTask smsTask = new SMSTask();
         smsTask.setMobileNumber(userSubscriptionModel.getUser().getMobile());
