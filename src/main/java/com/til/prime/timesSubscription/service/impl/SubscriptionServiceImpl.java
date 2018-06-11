@@ -652,7 +652,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
 
     public void updateUserStatus(UserSubscriptionModel userSubscriptionModel) {
-        updateUserStatus(userSubscriptionModel, null);
+        updateUserStatus(userSubscriptionModel, userSubscriptionModel.getUser());
     }
 
     @Override
