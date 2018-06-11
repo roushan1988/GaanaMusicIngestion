@@ -189,6 +189,11 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
         ValidationResponse validationResponse = new ValidationResponse();
         if(!serverRequest){
             validationResponse = validateCredentials(request, validationResponse);
+        }else{
+            PreConditions.notNull(request.getUser(), ValidationError.INVALID_USER, validationResponse);
+            if(request.getUser()!=null) {
+                PreConditions.notEmpty(request.getUser().getMobile(), ValidationError.INVALID_MOBILE, validationResponse);
+            }
         }
         if(validationResponse.isValid()){
             PreConditions.notNull(request.getUserSubscriptionId(), ValidationError.INVALID_USER_SUBSCRIPTION_ID, validationResponse);

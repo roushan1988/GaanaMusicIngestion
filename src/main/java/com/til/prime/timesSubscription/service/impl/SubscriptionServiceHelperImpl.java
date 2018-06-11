@@ -114,6 +114,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
         statusDTO.setPlanStatus(userSubscriptionModel.getPlanStatus().getCode());
         statusDTO.setExpiry(userSubscriptionModel.getEndDate());
         statusDTO.setEmail(userSubscriptionModel.getUser().getEmail());
+        statusDTO.setAutoRenewal(userSubscriptionModel.isAutoRenewal());
         statusDTO.setTimesPrimeUser(PlanStatusEnum.validTimesPrimeUser(statusDTO.getPlanStatus()));
         return statusDTO;
     }

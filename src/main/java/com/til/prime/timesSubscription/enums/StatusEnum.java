@@ -16,6 +16,7 @@ public enum StatusEnum {
     public static Set<StatusEnum> VALID_INIT_STATUS_SET = Sets.newHashSet(StatusEnum.EXPIRED, StatusEnum.ACTIVE, StatusEnum.FUTURE);
     public static Set<StatusEnum> VALID_USER_STATUS_HISTORY_SET = Sets.newHashSet(StatusEnum.ACTIVE, StatusEnum.EXPIRED, StatusEnum.CANCELLED, StatusEnum.ACTIVE_CANCELLED);
     public static Set<StatusEnum> VALID_EXTERNAL_PUBLISH_STATUS_SET = Sets.newHashSet(StatusEnum.ACTIVE, StatusEnum.EXPIRED, StatusEnum.CANCELLED, StatusEnum.ACTIVE_CANCELLED);
+    public static Set<StatusEnum> VALID_CACHE_UPDATE_SET = Sets.newHashSet(StatusEnum.ACTIVE, StatusEnum.EXPIRED, StatusEnum.CANCELLED, StatusEnum.ACTIVE_CANCELLED, StatusEnum.FUTURE);
 
     public static StatusEnum getStatusForUserSubscription(UserSubscriptionModel userSubscriptionModel, Date currentDate){
         return getStatusForUserSubscription(userSubscriptionModel.getStartDate(), userSubscriptionModel.getEndDate(), currentDate);

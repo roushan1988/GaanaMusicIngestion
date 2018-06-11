@@ -688,7 +688,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     @Override
     @Transactional
     public void updateUserStatus(UserSubscriptionModel userSubscriptionModel, UserModel userModel) {
-        if (userSubscriptionModel != null && userSubscriptionModel.isOrderCompleted() && StatusEnum.VALID_EXTERNAL_PUBLISH_STATUS_SET.contains(userSubscriptionModel.getStatus())) {
+        if (userSubscriptionModel != null && userSubscriptionModel.isOrderCompleted() && StatusEnum.VALID_CACHE_UPDATE_SET.contains(userSubscriptionModel.getStatus())) {
             try {
                 if (userSubscriptionModel.getStatus() == StatusEnum.FUTURE) {
                     Cache.ValueWrapper vw = cacheManager.getCache(RedisConstants.PRIME_STATUS_CACHE_KEY).get(userModel.getMobile());

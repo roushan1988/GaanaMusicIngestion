@@ -12,6 +12,7 @@ public class PublishedUserStatusDTO implements Serializable {
     private Date expiry;
     private int planStatus;
     private String email;
+    private boolean autoRenewal;
 
     public String getMobile() {
         return mobile;
@@ -61,6 +62,14 @@ public class PublishedUserStatusDTO implements Serializable {
         this.email = email;
     }
 
+    public boolean isAutoRenewal() {
+        return autoRenewal;
+    }
+
+    public void setAutoRenewal(boolean autoRenewal) {
+        this.autoRenewal = autoRenewal;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("PublishedUserStatusDTO{");
@@ -69,6 +78,7 @@ public class PublishedUserStatusDTO implements Serializable {
         sb.append(", timesPrimeUser=").append(timesPrimeUser);
         sb.append(", expiry=").append(expiry);
         sb.append(", planStatus=").append(planStatus);
+        sb.append(", autoRenewal=").append(autoRenewal);
         sb.append(", email='").append(email).append('\'');
         sb.append('}');
         return sb.toString();
