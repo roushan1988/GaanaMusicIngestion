@@ -10,6 +10,7 @@ import com.til.prime.timesSubscription.model.BackendSubscriptionUserModel;
 import com.til.prime.timesSubscription.model.UserModel;
 import com.til.prime.timesSubscription.model.UserSubscriptionModel;
 import com.til.prime.timesSubscription.service.CommunicationServiceHelper;
+import com.til.prime.timesSubscription.util.GenericUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -19,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.stream.Collectors;
+
+import static com.til.prime.timesSubscription.util.GenericUtils.formatAmountRemoveRedundantZeroes;
 
 @Service
 public class CommunicationServiceHelperImpl implements CommunicationServiceHelper {
@@ -88,7 +91,7 @@ public class CommunicationServiceHelperImpl implements CommunicationServiceHelpe
         map.put("firstName", userSubscriptionModel.getUser().getFirstName());
         map.put("startDate", SDF.format(userSubscriptionModel.getStartDate()));
         map.put("endDate", SDF.format(userSubscriptionModel.getEndDate()));
-        map.put("refundAmount", String.valueOf(userSubscriptionModel.getRefundedAmount()));
+        map.put("refundAmount", formatAmountRemoveRedundantZeroes(userSubscriptionModel.getRefundedAmount()));
         smsTask.setContext(map);
         smsTask.setTaskPriority(TaskPriorityEnum.HIGH_PRIORITY);
         return smsTask;
@@ -106,7 +109,7 @@ public class CommunicationServiceHelperImpl implements CommunicationServiceHelpe
         map.put("firstName", userSubscriptionModel.getUser().getFirstName());
         map.put("startDate", SDF.format(userSubscriptionModel.getStartDate()));
         map.put("endDate", SDF.format(userSubscriptionModel.getEndDate()));
-        map.put("refundAmount", String.valueOf(userSubscriptionModel.getRefundedAmount()));
+        map.put("refundAmount", formatAmountRemoveRedundantZeroes(userSubscriptionModel.getRefundedAmount()));
         emailTask.setContext(map);
         emailTask.setTaskPriority(TaskPriorityEnum.HIGH_PRIORITY);
         return emailTask;
@@ -151,7 +154,7 @@ public class CommunicationServiceHelperImpl implements CommunicationServiceHelpe
         Map<String, String> map = Maps.newHashMap();
         map.put("firstName", userSubscriptionModel.getUser().getFirstName());
         Map<PlanTypeEnum, BigDecimal> planPrices = userSubscriptionModel.getSubscriptionVariant().getSubscriptionPlan().getVariants().stream().collect(Collectors.toMap(v -> v.getPlanType(), v -> v.getPrice()));
-        map.put("subscriptionAmount", String.valueOf(planPrices.get(PlanTypeEnum.TRIAL_WITH_PAYMENT)!=null? planPrices.get(PlanTypeEnum.TRIAL_WITH_PAYMENT) : planPrices.get(PlanTypeEnum.PAYMENT)));
+        map.put("subscriptionAmount", formatAmountRemoveRedundantZeroes(planPrices.get(PlanTypeEnum.TRIAL_WITH_PAYMENT)!=null? planPrices.get(PlanTypeEnum.TRIAL_WITH_PAYMENT) : planPrices.get(PlanTypeEnum.PAYMENT)));
         map.put("daysRemaining", Long.compare(days, 0) == 0 ? "today" : Long.compare(days, 1) == 0 ? "tomorrow" : String.format("in %s days", days));
         smsTask.setContext(map);
         smsTask.setTaskPriority(TaskPriorityEnum.HIGH_PRIORITY);
@@ -169,7 +172,7 @@ public class CommunicationServiceHelperImpl implements CommunicationServiceHelpe
         Map<String, String> map = Maps.newHashMap();
         map.put("firstName", userSubscriptionModel.getUser().getFirstName());
         Map<PlanTypeEnum, BigDecimal> planPrices = userSubscriptionModel.getSubscriptionVariant().getSubscriptionPlan().getVariants().stream().collect(Collectors.toMap(v -> v.getPlanType(), v -> v.getPrice()));
-        map.put("subscriptionAmount", String.valueOf(planPrices.get(PlanTypeEnum.TRIAL_WITH_PAYMENT)!=null? planPrices.get(PlanTypeEnum.TRIAL_WITH_PAYMENT) : planPrices.get(PlanTypeEnum.PAYMENT)));
+        map.put("subscriptionAmount", formatAmountRemoveRedundantZeroes(planPrices.get(PlanTypeEnum.TRIAL_WITH_PAYMENT)!=null? planPrices.get(PlanTypeEnum.TRIAL_WITH_PAYMENT) : planPrices.get(PlanTypeEnum.PAYMENT)));
         map.put("daysRemaining", Long.compare(days, 0) == 0 ? "today" : Long.compare(days, 1) == 0 ? "tomorrow" : String.format("in %s days", days));
         emailTask.setContext(map);
         emailTask.setTaskPriority(TaskPriorityEnum.HIGH_PRIORITY);
@@ -186,9 +189,9 @@ public class CommunicationServiceHelperImpl implements CommunicationServiceHelpe
         map.put("firstName", userSubscriptionModel.getUser().getFirstName());
         Map<PlanTypeEnum, BigDecimal> planPrices = userSubscriptionModel.getSubscriptionVariant().getSubscriptionPlan().getVariants().stream().collect(Collectors.toMap(v -> v.getPlanType(), v -> v.getPrice()));
         if (PlanTypeEnum.TRIAL.equals(userSubscriptionModel.getSubscriptionVariant().getSubscriptionPlan())) {
-            map.put("subscriptionAmount", String.valueOf(planPrices.get(PlanTypeEnum.TRIAL_WITH_PAYMENT)!=null? planPrices.get(PlanTypeEnum.TRIAL_WITH_PAYMENT) : planPrices.get(PlanTypeEnum.PAYMENT)));
+            map.put("subscriptionAmount", formatAmountRemoveRedundantZeroes(planPrices.get(PlanTypeEnum.TRIAL_WITH_PAYMENT)!=null? planPrices.get(PlanTypeEnum.TRIAL_WITH_PAYMENT) : planPrices.get(PlanTypeEnum.PAYMENT)));
         } else {
-            map.put("subscriptionAmount", String.valueOf(planPrices.get(PlanTypeEnum.PAYMENT)));
+            map.put("subscriptionAmount", formatAmountRemoveRedundantZeroes(planPrices.get(PlanTypeEnum.PAYMENT)));
         }
         smsTask.setContext(map);
         smsTask.setTaskPriority(TaskPriorityEnum.HIGH_PRIORITY);
@@ -207,9 +210,9 @@ public class CommunicationServiceHelperImpl implements CommunicationServiceHelpe
         map.put("firstName", userSubscriptionModel.getUser().getFirstName());
         Map<PlanTypeEnum, BigDecimal> planPrices = userSubscriptionModel.getSubscriptionVariant().getSubscriptionPlan().getVariants().stream().collect(Collectors.toMap(v -> v.getPlanType(), v -> v.getPrice()));
         if (PlanTypeEnum.TRIAL.equals(userSubscriptionModel.getSubscriptionVariant().getSubscriptionPlan())) {
-            map.put("subscriptionAmount", String.valueOf(planPrices.get(PlanTypeEnum.TRIAL_WITH_PAYMENT!=null? planPrices.get(PlanTypeEnum.TRIAL_WITH_PAYMENT) : planPrices.get(PlanTypeEnum.PAYMENT))));
+            map.put("subscriptionAmount", formatAmountRemoveRedundantZeroes(planPrices.get(PlanTypeEnum.TRIAL_WITH_PAYMENT!=null? planPrices.get(PlanTypeEnum.TRIAL_WITH_PAYMENT) : planPrices.get(PlanTypeEnum.PAYMENT))));
         } else {
-            map.put("subscriptionAmount", String.valueOf(planPrices.get(PlanTypeEnum.PAYMENT)));
+            map.put("subscriptionAmount", formatAmountRemoveRedundantZeroes(planPrices.get(PlanTypeEnum.PAYMENT)));
         }
         emailTask.setContext(map);
         emailTask.setTaskPriority(TaskPriorityEnum.HIGH_PRIORITY);
@@ -345,7 +348,7 @@ public class CommunicationServiceHelperImpl implements CommunicationServiceHelpe
         smsTask.setTemplateKey(properties.getProperty(GlobalConstants.SUBSCRIPTION_EXPIRED_SMS_TEMPLATE_KEY));
         Map<String, String> map = Maps.newHashMap();
         map.put("firstName", userSubscriptionModel.getUser().getFirstName());
-        map.put("renewalAmount", String.valueOf(userSubscriptionModel.getSubscriptionVariant().getPrice()));
+        map.put("renewalAmount", formatAmountRemoveRedundantZeroes(userSubscriptionModel.getSubscriptionVariant().getPrice()));
         smsTask.setContext(map);
         smsTask.setTaskPriority(TaskPriorityEnum.HIGH_PRIORITY);
         return smsTask;
@@ -361,7 +364,7 @@ public class CommunicationServiceHelperImpl implements CommunicationServiceHelpe
         emailTask.setFromEmail(GlobalConstants.PRIME_COMM_FROM_EMAIL);
         Map<String, String> map = Maps.newHashMap();
         map.put("firstName", userSubscriptionModel.getUser().getFirstName());
-        map.put("renewalAmount", String.valueOf(userSubscriptionModel.getSubscriptionVariant().getPrice()));
+        map.put("renewalAmount", formatAmountRemoveRedundantZeroes(userSubscriptionModel.getSubscriptionVariant().getPrice()));
         emailTask.setContext(map);
         emailTask.setTaskPriority(TaskPriorityEnum.HIGH_PRIORITY);
         return emailTask;
@@ -375,7 +378,7 @@ public class CommunicationServiceHelperImpl implements CommunicationServiceHelpe
         Map<String, String> map = Maps.newHashMap();
         map.put("firstName", userSubscriptionModel.getUser().getFirstName());
         map.put("endDate", SDF.format(userSubscriptionModel.getEndDate()));
-        map.put("renewalAmount", String.valueOf(userSubscriptionModel.getSubscriptionVariant().getPrice()));
+        map.put("renewalAmount", formatAmountRemoveRedundantZeroes(userSubscriptionModel.getSubscriptionVariant().getPrice()));
         smsTask.setTemplateKey(properties.getProperty(GlobalConstants.SUBSCRIPTION_EXPIRY_REMINDER_SMS_TEMPLATE_KEY));
         if(autoDebit){
             smsTask.setTemplateKey(properties.getProperty(GlobalConstants.SUBSCRIPTION_EXPIRY_AUTO_DEBIT_REMINDER_SMS_TEMPLATE_KEY));
@@ -396,7 +399,7 @@ public class CommunicationServiceHelperImpl implements CommunicationServiceHelpe
         Map<String, String> map = Maps.newHashMap();
         map.put("firstName", userSubscriptionModel.getUser().getFirstName());
         map.put("endDate", SDF.format(userSubscriptionModel.getEndDate()));
-        map.put("renewalAmount", String.valueOf(userSubscriptionModel.getSubscriptionVariant().getPrice()));
+        map.put("renewalAmount", formatAmountRemoveRedundantZeroes(userSubscriptionModel.getSubscriptionVariant().getPrice()));
 
         emailTask.setTemplateKey(properties.getProperty(GlobalConstants.SUBSCRIPTION_EXPIRY_REMINDER_EMAIL_TEMPLATE_KEY));
         if(autoDebit){

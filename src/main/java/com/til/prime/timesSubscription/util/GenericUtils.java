@@ -2,6 +2,7 @@ package com.til.prime.timesSubscription.util;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.math.BigDecimal;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -25,4 +26,21 @@ public class GenericUtils {
         }
         return false;
     }
+
+    public static String formatAmountRemoveRedundantZeroes(BigDecimal amount) {
+        if (amount == null) {
+            return null;
+        }
+        BigDecimal fractionalPart = amount.remainder(BigDecimal.ONE);
+        if (fractionalPart.compareTo(BigDecimal.ZERO) == 0) {
+            return String.valueOf(amount.toBigInteger());
+        } else {
+            return String.valueOf(amount.setScale(2, BigDecimal.ROUND_HALF_EVEN));
+        }
+    }
+
+
+
+
+
 }
