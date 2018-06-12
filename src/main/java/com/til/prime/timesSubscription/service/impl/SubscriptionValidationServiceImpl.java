@@ -223,14 +223,12 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
     @Override
     public ValidationResponse validatePreTurnOffAutoDebit(TurnOffAutoDebitRequest request) {
         ValidationResponse validationResponse = new ValidationResponse();
-        if(validationResponse.isValid()){
-            PreConditions.notEmpty(request.getSecretKey(), ValidationError.INVALID_SECRET_KEY, validationResponse);
-            PreConditions.notNull(request.getUser(), ValidationError.INVALID_USER, validationResponse);
-            if(request.getUser()!=null){
-                PreConditions.notEmpty(request.getUser().getMobile(), ValidationError.INVALID_MOBILE, validationResponse);
-            }
-            validationResponse = updateValid(validationResponse);
+        PreConditions.notEmpty(request.getSecretKey(), ValidationError.INVALID_SECRET_KEY, validationResponse);
+        PreConditions.notNull(request.getUser(), ValidationError.INVALID_USER, validationResponse);
+        if(request.getUser()!=null){
+            PreConditions.notEmpty(request.getUser().getMobile(), ValidationError.INVALID_MOBILE, validationResponse);
         }
+        validationResponse = updateValid(validationResponse);
         if(validationResponse.isValid()){
             validationResponse = validateEncryptionForTurnOffAutoDebit(request, validationResponse);
         }
@@ -716,15 +714,16 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
     @Override
     public ValidationResponse validatePreUpdateCacheForMobile(GenericRequest request){
         ValidationResponse validationResponse = new ValidationResponse();
+        PreConditions.notNull(request.getUser(), ValidationError.INVALID_USER, validationResponse);
         if(request.getUser()!=null){
             PreConditions.notEmpty(request.getUser().getMobile(), ValidationError.INVALID_MOBILE, validationResponse);
             validationResponse = updateValid(validationResponse);
-            validationResponse = validateEncryptionForUpdateCacheForMobile(request, validationResponse);
+            validationResponse = validateEncryptionForGenericCRMRequestWithMobile(request, validationResponse);
         }
         return updateValid(validationResponse);
     }
     
-    private ValidationResponse validateEncryptionForUpdateCacheForMobile(GenericRequest request, ValidationResponse validationResponse) {
+    private ValidationResponse validateEncryptionForGenericCRMRequestWithMobile(GenericRequest request, ValidationResponse validationResponse) {
         PreConditions.mustBeEqual(request.getSecretKey(), properties.getProperty(GlobalConstants.PAYMENTS_SECRET_KEY), ValidationError.INVALID_SECRET_KEY, validationResponse);
         PreConditions.notEmpty(request.getChecksum(), ValidationError.INVALID_CHECKSUM, validationResponse);
         validationResponse = updateValid(validationResponse);
@@ -754,6 +753,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
     @Override
     public ValidationResponse validatePreCustomerSearchCRM(CustomerSearchRequest request){
         ValidationResponse validationResponse = new ValidationResponse();
+        PreConditions.notNull(request.getUser(), ValidationError.INVALID_USER, validationResponse);
         if(request.getUser()!=null){
             validationResponse = validateEncryptionForCustomerSearchCRM(request, validationResponse);
         }
@@ -808,7 +808,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
     @Override
     public ValidationResponse validatePreCustomerDetailsCRM(CustomerSearchRequest request){
         ValidationResponse validationResponse = new ValidationResponse();
-        
+        PreConditions.notNull(request.getUser(), ValidationError.INVALID_USER, validationResponse);
         if(request.getUser()!=null){
             PreConditions.notEmpty(request.getUser().getSsoId(), ValidationError.INVALID_SSO_ID, validationResponse);
             validationResponse = updateValid(validationResponse);
