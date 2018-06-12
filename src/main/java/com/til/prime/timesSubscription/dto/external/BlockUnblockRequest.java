@@ -2,7 +2,6 @@ package com.til.prime.timesSubscription.dto.external;
 
 public class BlockUnblockRequest extends GenericRequest {
     private boolean blockUser = true;
-    private String checksum;
 
     public boolean isBlockUser() {
         return blockUser;
@@ -10,14 +9,6 @@ public class BlockUnblockRequest extends GenericRequest {
 
     public void setBlockUser(boolean blockUser) {
         this.blockUser = blockUser;
-    }
-
-    public String getChecksum() {
-        return checksum;
-    }
-
-    public void setChecksum(String checksum) {
-        this.checksum = checksum;
     }
 
     @Override

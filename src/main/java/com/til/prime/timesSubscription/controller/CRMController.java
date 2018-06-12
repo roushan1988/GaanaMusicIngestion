@@ -1,5 +1,6 @@
 package com.til.prime.timesSubscription.controller;
 
+import com.til.prime.timesSubscription.dto.external.*;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -10,27 +11,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.til.prime.timesSubscription.aspect.Loggable;
 import com.til.prime.timesSubscription.dao.UserSubscriptionRepository;
-import com.til.prime.timesSubscription.dto.external.BlockUnblockRequest;
-import com.til.prime.timesSubscription.dto.external.CRMInitPurchaseRequest;
-import com.til.prime.timesSubscription.dto.external.CancelSubscriptionResponse;
-import com.til.prime.timesSubscription.dto.external.CancelSubscriptionServerRequest;
-import com.til.prime.timesSubscription.dto.external.CustomerDetailsCRMResponse;
-import com.til.prime.timesSubscription.dto.external.CustomerSearchCRMResponse;
-import com.til.prime.timesSubscription.dto.external.CustomerSearchRequest;
-import com.til.prime.timesSubscription.dto.external.ExtendExpiryRequest;
-import com.til.prime.timesSubscription.dto.external.ExtendExpiryResponse;
-import com.til.prime.timesSubscription.dto.external.GenericResponse;
-import com.til.prime.timesSubscription.dto.external.InitPurchaseResponse;
-import com.til.prime.timesSubscription.dto.external.OrderDetailsCRMResponse;
-import com.til.prime.timesSubscription.dto.external.OrderDetailsRequest;
-import com.til.prime.timesSubscription.dto.external.OrderSearchCRMResponse;
-import com.til.prime.timesSubscription.dto.external.OrderSearchRequest;
-import com.til.prime.timesSubscription.dto.external.PropertyDataGetResponseCRM;
-import com.til.prime.timesSubscription.dto.external.PropertyDataRequestCRM;
-import com.til.prime.timesSubscription.dto.external.PropertyDataUpdateRequestCRM;
-import com.til.prime.timesSubscription.dto.external.PurchaseHistoryRequest;
-import com.til.prime.timesSubscription.dto.external.PurchaseHistoryResponse;
-import com.til.prime.timesSubscription.dto.external.UpdateCacheForMobileRequest;
 import com.til.prime.timesSubscription.service.PropertyService;
 import com.til.prime.timesSubscription.service.SubscriptionService;
 import com.til.prime.timesSubscription.util.ResponseUtil;
@@ -120,7 +100,7 @@ public class CRMController {
     @Loggable
     @RequestMapping(path="/server/updateCacheForMobile", method = RequestMethod.POST)
     @ResponseBody
-    public GenericResponse updateCacheForMobile(@RequestBody UpdateCacheForMobileRequest request){
+    public GenericResponse updateCacheForMobile(@RequestBody GenericRequest request){
         try {
         	return subscriptionService.updateCacheForMobile(request);
         }catch (Exception e){

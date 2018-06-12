@@ -4,7 +4,6 @@ import java.util.List;
 
 public class BackendSubscriptionRequest extends GenericRequest {
     private List<BackendActivationUserDTO> userList;
-    private String checksum;
 
     public List<BackendActivationUserDTO> getUserList() {
         return userList;
@@ -14,11 +13,14 @@ public class BackendSubscriptionRequest extends GenericRequest {
         this.userList = userList;
     }
 
-    public String getChecksum() {
-        return checksum;
-    }
-
-    public void setChecksum(String checksum) {
-        this.checksum = checksum;
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("BackendSubscriptionRequest{");
+        sb.append("userList=").append(userList);
+        sb.append(", user=").append(user);
+        sb.append(", secretKey='").append(secretKey).append('\'');
+        sb.append(", checksum='").append(checksum).append('\'');
+        sb.append('}');
+        return sb.toString();
     }
 }

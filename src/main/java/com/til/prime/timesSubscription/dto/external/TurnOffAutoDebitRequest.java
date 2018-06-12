@@ -3,16 +3,7 @@ package com.til.prime.timesSubscription.dto.external;
 import com.til.prime.timesSubscription.enums.BusinessEnum;
 
 public class TurnOffAutoDebitRequest extends GenericRequest {
-    private String checksum;
     private BusinessEnum business = BusinessEnum.TIMES_PRIME;
-
-    public String getChecksum() {
-        return checksum;
-    }
-
-    public void setChecksum(String checksum) {
-        this.checksum = checksum;
-    }
 
     public BusinessEnum getBusiness() {
         return business;

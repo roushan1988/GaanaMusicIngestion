@@ -7,7 +7,6 @@ public class CheckValidVariantRequest extends GenericRequest {
     private Long variantId;
     private String variantName;
     private BusinessEnum business = BusinessEnum.TIMES_PRIME;
-    private String checksum;
 
     public Long getPlanId() {
         return planId;
@@ -31,14 +30,6 @@ public class CheckValidVariantRequest extends GenericRequest {
 
     public void setVariantName(String variantName) {
         this.variantName = variantName;
-    }
-
-    public String getChecksum() {
-        return checksum;
-    }
-
-    public void setChecksum(String checksum) {
-        this.checksum = checksum;
     }
 
     public BusinessEnum getBusiness() {

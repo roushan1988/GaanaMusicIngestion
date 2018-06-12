@@ -799,7 +799,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
-    public GenericResponse updateCacheForMobile(UpdateCacheForMobileRequest request) {
+    public GenericResponse updateCacheForMobile(GenericRequest request) {
     	ValidationResponse validationResponse = subscriptionValidationService.validatePreUpdateCacheForMobile(request);
         GenericResponse response = new GenericResponse();
         UserSubscriptionModel userSubscriptionModel = null;

@@ -11,7 +11,6 @@ public class SubmitPurchaseRequest extends GenericRequest {
     private BigDecimal price;
     private String paymentReference;
     private boolean autoRenewal;
-    private String checksum;
     private boolean autoRenewalJob = false;
 
     public Long getUserSubscriptionId() {
@@ -76,14 +75,6 @@ public class SubmitPurchaseRequest extends GenericRequest {
 
     public void setAutoRenewal(boolean autoRenewal) {
         this.autoRenewal = autoRenewal;
-    }
-
-    public String getChecksum() {
-        return checksum;
-    }
-
-    public void setChecksum(String checksum) {
-        this.checksum = checksum;
     }
 
     public boolean isAutoRenewalJob() {

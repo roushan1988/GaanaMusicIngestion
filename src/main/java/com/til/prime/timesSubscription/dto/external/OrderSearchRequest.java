@@ -4,7 +4,6 @@ import java.util.Date;
 
 public class OrderSearchRequest extends GenericRequest {
 	private String orderId;
-    private String checksum;
     private String subscriptionStatus;
     private String start;
     private Integer count;
@@ -50,14 +49,6 @@ public class OrderSearchRequest extends GenericRequest {
 	public void setToDate(Date toDate) {
 		this.toDate = toDate;
 	}
-
-	public String getChecksum() {
-        return checksum;
-    }
-
-    public void setChecksum(String checksum) {
-        this.checksum = checksum;
-    }
 
 	public String getOrderId() {
 		return orderId;

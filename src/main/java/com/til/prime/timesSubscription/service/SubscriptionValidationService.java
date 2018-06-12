@@ -42,7 +42,7 @@ public interface SubscriptionValidationService {
     ValidationResponse validateEncryptionForCheckStatus(CheckStatusRequest request, ValidationResponse validationResponse, boolean external);
     ValidationResponse validateEncryptionForValidVariant(CheckValidVariantRequest request, ValidationResponse validationResponse);
     ValidationResponse validateBlockedUser(UserModel userModel, ValidationResponse validationResponse);
-    ValidationResponse validatePreUpdateCacheForMobile(UpdateCacheForMobileRequest request);
+    ValidationResponse validatePreUpdateCacheForMobile(GenericRequest request);
     ValidationResponse validatePostUpdateCacheForMobile(UserSubscriptionModel userSubscriptionModel, ValidationResponse validationResponse);
     ValidationResponse validatePreCustomerSearchCRM(CustomerSearchRequest request);
     //ValidationResponse validatePostCustomerSearchCRM(UserSubscriptionModel userSubscriptionModel, ValidationResponse validationResponse);

@@ -16,7 +16,6 @@ public class GenerateOrderRequest extends GenericRequest {
     private boolean duplicate = true;
     private boolean job;
     private String platform;
-    private String checksum;
 
     public Long getUserSubscriptionId() {
         return userSubscriptionId;
@@ -120,14 +119,6 @@ public class GenerateOrderRequest extends GenericRequest {
 
     public void setPlatform(String platform) {
         this.platform = platform;
-    }
-
-    public String getChecksum() {
-        return checksum;
-    }
-
-    public void setChecksum(String checksum) {
-        this.checksum = checksum;
     }
 
     @Override

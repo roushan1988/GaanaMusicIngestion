@@ -1,17 +1,8 @@
 package com.til.prime.timesSubscription.dto.external;
 
 public class CustomerSearchRequest extends GenericRequest {
-    private String checksum;
     private int page;
     private int pageSize=100;
-
-    public String getChecksum() {
-        return checksum;
-    }
-
-    public void setChecksum(String checksum) {
-        this.checksum = checksum;
-    }
 
     public int getPage() {
         return page;

@@ -1,17 +1,8 @@
 package com.til.prime.timesSubscription.dto.external;
 
 public class CancelSubscriptionServerRequest extends CancelSubscriptionRequest {
-    private String checksum;
     private Double refundAmount;
     private boolean refund;
-
-    public String getChecksum() {
-        return checksum;
-    }
-
-    public void setChecksum(String checksum) {
-        this.checksum = checksum;
-    }
 
     public Double getRefundAmount() {
         return refundAmount;

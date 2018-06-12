@@ -714,7 +714,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
     }
     
     @Override
-    public ValidationResponse validatePreUpdateCacheForMobile(UpdateCacheForMobileRequest request){
+    public ValidationResponse validatePreUpdateCacheForMobile(GenericRequest request){
         ValidationResponse validationResponse = new ValidationResponse();
         if(request.getUser()!=null){
             PreConditions.notEmpty(request.getUser().getMobile(), ValidationError.INVALID_MOBILE, validationResponse);
@@ -724,7 +724,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
         return updateValid(validationResponse);
     }
     
-    private ValidationResponse validateEncryptionForUpdateCacheForMobile(UpdateCacheForMobileRequest request, ValidationResponse validationResponse) {
+    private ValidationResponse validateEncryptionForUpdateCacheForMobile(GenericRequest request, ValidationResponse validationResponse) {
         PreConditions.mustBeEqual(request.getSecretKey(), properties.getProperty(GlobalConstants.PAYMENTS_SECRET_KEY), ValidationError.INVALID_SECRET_KEY, validationResponse);
         PreConditions.notEmpty(request.getChecksum(), ValidationError.INVALID_CHECKSUM, validationResponse);
         validationResponse = updateValid(validationResponse);

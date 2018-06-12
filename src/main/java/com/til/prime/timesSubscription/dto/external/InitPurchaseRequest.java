@@ -11,7 +11,6 @@ public class InitPurchaseRequest extends GenericRequest {
     protected String business;
     protected String channel;
     protected String platform;
-    protected String checksum;
 
     public Long getPlanId() {
         return planId;
@@ -75,14 +74,6 @@ public class InitPurchaseRequest extends GenericRequest {
 
     public void setPlatform(String platform) {
         this.platform = platform;
-    }
-
-    public String getChecksum() {
-        return checksum;
-    }
-
-    public void setChecksum(String checksum) {
-        this.checksum = checksum;
     }
 
     @Override

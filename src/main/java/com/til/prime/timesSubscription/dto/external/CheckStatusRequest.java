@@ -4,7 +4,6 @@ import com.til.prime.timesSubscription.enums.BusinessEnum;
 
 public class CheckStatusRequest extends GenericRequest {
     private String clientId;
-    private String checksum;
     private BusinessEnum business = BusinessEnum.TIMES_PRIME;
 
     public String getClientId() {
@@ -13,14 +12,6 @@ public class CheckStatusRequest extends GenericRequest {
 
     public void setClientId(String clientId) {
         this.clientId = clientId;
-    }
-
-    public String getChecksum() {
-        return checksum;
-    }
-
-    public void setChecksum(String checksum) {
-        this.checksum = checksum;
     }
 
     public BusinessEnum getBusiness() {
