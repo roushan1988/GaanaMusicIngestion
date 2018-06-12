@@ -5,4 +5,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface UserAuditRepository extends GenericJpaRepository<UserAuditModel, Long> {
+    void deleteByUserId(Long userId);
 }

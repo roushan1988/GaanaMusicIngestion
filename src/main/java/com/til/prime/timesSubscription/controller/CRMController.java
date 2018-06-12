@@ -1,5 +1,6 @@
 package com.til.prime.timesSubscription.controller;
 
+import com.til.prime.timesSubscription.constants.GlobalConstants;
 import com.til.prime.timesSubscription.dto.external.*;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -208,6 +209,22 @@ public class CRMController {
             GenericResponse response = new GenericResponse();
             return ResponseUtil.createExceptionResponse(response, 10);
 		}
+    }
+
+    @Loggable
+    @RequestMapping(path="/deleteUser", method = RequestMethod.POST)
+    @ResponseBody
+    public GenericResponse deleteUser(@RequestBody GenericRequest request){
+        if(GlobalConstants.USER_DELETION_ALLOWED_ENVIRONMENTS.contains(System.getProperty(GlobalConstants.ENVIRONMENT))){
+            try {
+                return subscriptionService.deleteUser(request);
+            } catch (Exception e) {
+                LOG.error("Exception in deleteUser: ", e);
+                GenericResponse response = new GenericResponse();
+                return ResponseUtil.createExceptionResponse(response, 10);
+            }
+        }
+        return ResponseUtil.createExceptionResponse(new GenericResponse(), 10);
     }
     
 }

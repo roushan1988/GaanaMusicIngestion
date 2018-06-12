@@ -19,6 +19,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -800,7 +801,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Override
     public GenericResponse updateCacheForMobile(GenericRequest request) {
-    	ValidationResponse validationResponse = subscriptionValidationService.validatePreUpdateCacheForMobile(request);
+    	ValidationResponse validationResponse = subscriptionValidationService.validatePreUpdateGenericCRMRequestWithMobile(request);
         GenericResponse response = new GenericResponse();
         UserSubscriptionModel userSubscriptionModel = null;
 
@@ -1414,5 +1415,35 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         	return null;
         }
     }
-    
+
+    @Override
+    @Transactional(rollbackFor = {DataIntegrityViolationException.class, Exception.class})
+    public GenericResponse deleteUser(GenericRequest request) {
+        ValidationResponse validationResponse = subscriptionValidationService.validatePreUpdateGenericCRMRequestWithMobile(request);
+        GenericResponse response = new GenericResponse();
+        if (validationResponse.isValid()) {
+            try{
+                List<UserModel> users = userRepository.findByMobile(request.getUser().getMobile());
+                if(CollectionUtils.isNotEmpty(users)) {
+                    List<Long> userIdList = users.stream().map(UserModel::getId).collect(Collectors.toList());
+                    for (Long userId : userIdList) {
+                        userSubscriptionAuditRepository.deleteByUserId(userId);
+                        userAuditRepository.deleteByUserId(userId);
+                    }
+                    for (UserModel userModel : users) {
+                        userSubscriptionRepository.deleteByUser(userModel);
+                        userRepository.delete(userModel);
+                    }
+                }else{
+                    validationResponse.addValidationError(ValidationError.INVALID_USER);
+                }
+            }catch (Exception e){
+                LOG.error("Exception", e);
+                throw e;
+            }
+        }
+        response = subscriptionServiceHelper.prepareGenericResponse(response, validationResponse);
+        return response;
+    }
+
 }

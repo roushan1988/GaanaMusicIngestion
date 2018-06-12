@@ -38,4 +38,5 @@ public interface SubscriptionService {
     BackendSubscriptionUserModel saveBackendSubscriptionUser(BackendSubscriptionUserModel user, EventEnum eventEnum);
     PropertyDataGetResponseCRM getPropertyTableData(PropertyDataRequestCRM request);
     GenericResponse updatePropertyTableData(PropertyDataUpdateRequestCRM request);
+    GenericResponse deleteUser(GenericRequest request);
 }

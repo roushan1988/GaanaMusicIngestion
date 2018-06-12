@@ -2,8 +2,13 @@ package com.til.prime.timesSubscription.constants;
 
 import com.google.gson.Gson;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class GlobalConstants {
     public static final Integer DEFAULT_PAGE_SIZE = 100;
+    public static final String ENVIRONMENT = "env";
+    public static final List<String> USER_DELETION_ALLOWED_ENVIRONMENTS = Arrays.asList("dev", "stage", "qa", "preprod");
     public static final String SASL_PLAINTEXT = "SASL_PLAINTEXT";
     public static final String ACK_ALL = "all";
     public static final int MILLIS_IN_AN_HOUR = 3600000;

@@ -230,7 +230,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
         }
         validationResponse = updateValid(validationResponse);
         if(validationResponse.isValid()){
-            validationResponse = validateEncryptionForTurnOffAutoDebit(request, validationResponse);
+            validationResponse = validateEncryptionForGenericCRMRequestWithMobile(request, validationResponse);
         }
         return updateValid(validationResponse);
     }
@@ -578,23 +578,6 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
         return updateValid(validationResponse);
     }
 
-    private ValidationResponse validateEncryptionForTurnOffAutoDebit(TurnOffAutoDebitRequest request, ValidationResponse validationResponse) {
-        PreConditions.mustBeEqual(request.getSecretKey(), properties.getProperty(GlobalConstants.PAYMENTS_SECRET_KEY), ValidationError.INVALID_SECRET_KEY, validationResponse);
-        PreConditions.notEmpty(request.getChecksum(), ValidationError.INVALID_CHECKSUM, validationResponse);
-        validationResponse = updateValid(validationResponse);
-        if(validationResponse.isValid()){
-            try {
-                StringBuilder sb = new StringBuilder();
-                sb.append(request.getSecretKey()).append(request.getUser().getMobile());
-                String checksum = checksumService.calculateChecksumHmacSHA256(properties.getProperty(GlobalConstants.PAYMENTS_ENCRYPTION_KEY), sb.toString());
-                PreConditions.mustBeEqual(checksum, request.getChecksum(), ValidationError.INVALID_ENCRYPTION, validationResponse);
-            } catch (Exception e) {
-                validationResponse.addValidationError(ValidationError.INVALID_ENCRYPTION);
-            }
-        }
-        return updateValid(validationResponse);
-    }
-
     private ValidationResponse validateEncryptionForBlockUnblockUser(BlockUnblockRequest request, ValidationResponse validationResponse) {
         PreConditions.mustBeEqual(request.getSecretKey(), properties.getProperty(GlobalConstants.PAYMENTS_SECRET_KEY), ValidationError.INVALID_SECRET_KEY, validationResponse);
         PreConditions.notEmpty(request.getChecksum(), ValidationError.INVALID_CHECKSUM, validationResponse);
@@ -712,7 +695,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
     }
     
     @Override
-    public ValidationResponse validatePreUpdateCacheForMobile(GenericRequest request){
+    public ValidationResponse validatePreUpdateGenericCRMRequestWithMobile(GenericRequest request){
         ValidationResponse validationResponse = new ValidationResponse();
         PreConditions.notNull(request.getUser(), ValidationError.INVALID_USER, validationResponse);
         if(request.getUser()!=null){

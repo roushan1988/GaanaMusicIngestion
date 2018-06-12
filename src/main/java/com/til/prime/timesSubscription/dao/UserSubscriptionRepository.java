@@ -3,6 +3,7 @@ package com.til.prime.timesSubscription.dao;
 import com.til.prime.timesSubscription.enums.BusinessEnum;
 import com.til.prime.timesSubscription.enums.PlanTypeEnum;
 import com.til.prime.timesSubscription.enums.StatusEnum;
+import com.til.prime.timesSubscription.model.UserModel;
 import com.til.prime.timesSubscription.model.UserSubscriptionModel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -65,4 +66,5 @@ public interface UserSubscriptionRepository extends GenericJpaRepository<UserSub
     UserSubscriptionModel findByUserMobileAndUserDeletedFalseAndStatusAndOrderCompletedTrue(String mobile, StatusEnum statusEnum);
     UserSubscriptionModel findByUserMobileAndUserDeletedFalseAndStatusAndDeleted(String mobile, StatusEnum status, boolean deleted);
     Long countByUserMobileAndUserDeletedFalseAndStatusAndDeletedFalseAndOrderCompletedTrue(String mobile, StatusEnum statusEnum);
+    void deleteByUser(UserModel userModel);
 }
