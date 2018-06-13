@@ -7,6 +7,8 @@ import java.util.Set;
 public enum PlanTypeEnum {
     TRIAL(1), TRIAL_WITH_PAYMENT(2), PAYMENT(3);
 
+    public static final Set<PlanTypeEnum> TRAIL_PLAN_TYPES = new HashSet<>(Arrays.asList(TRIAL, TRIAL_WITH_PAYMENT));
+
     PlanTypeEnum(int order) {
         this.order = order;
     }

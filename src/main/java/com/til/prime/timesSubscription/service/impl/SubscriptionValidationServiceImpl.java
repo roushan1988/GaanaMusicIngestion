@@ -86,6 +86,9 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
             PreConditions.mustBeEqual(request.getPlanType(), variantModel.getPlanType().name(), ValidationError.INVALID_PLAN_TYPE, validationResponse);
         }
         if(lastUserSubscription!=null){
+            if(PlanTypeEnum.TRAIL_PLAN_TYPES.contains(lastUserSubscription.getSubscriptionVariant().getPlanType())){
+                PreConditions.mustBeFalse(lastUserSubscription.getSubscriptionVariant().getPlanType()==PlanTypeEnum.valueOf(request.getPlanType()), ValidationError.INVALID_PLAN_TYPE, validationResponse);
+            }
             PreConditions.notGreater(lastUserSubscription.getSubscriptionVariant().getPlanType().getOrder(), PlanTypeEnum.valueOf(request.getPlanType()).getOrder(), ValidationError.INVALID_PLAN_TYPE, validationResponse);
             PreConditions.notAfter(lastUserSubscription.getEndDate(), TimeUtils.addDaysInDate(new Date(), GlobalConstants.MAX_DAYS_DIFF_FOR_NEW_SUBSCRIPTION_PURCHASE), ValidationError.USER_ALREADY_PURCHASED_MULTIPLE_FUTURE_PLANS, validationResponse);
             PreConditions.mustBeFalse(lastUserSubscription.getUser().isBlocked(), ValidationError.BLOCKED_USER, validationResponse);
@@ -210,6 +213,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
     @Override
     public ValidationResponse validatePostCancelSubscription(CancelSubscriptionRequest request, UserSubscriptionModel userSubscriptionModel, UserSubscriptionModel lastRelevantSubscription, ValidationResponse validationResponse) {
         PreConditions.notNull(userSubscriptionModel, ValidationError.INVALID_USER_SUBSCRIPTION_ID, validationResponse);
+        PreConditions.mustBeFalse(PlanTypeEnum.TRAIL_PLAN_TYPES.contains(userSubscriptionModel.getSubscriptionVariant().getPlanType()), ValidationError.SUBSCRIPTION_NOT_CANCELLABLE, validationResponse);
         PreConditions.notNull(lastRelevantSubscription, ValidationError.INVALID_USER_SUBSCRIPTION_ID, validationResponse);
         if(userSubscriptionModel!=null && lastRelevantSubscription!=null){
             PreConditions.mustBeTrue(userSubscriptionModel.getId().equals(lastRelevantSubscription.getId()), ValidationError.INVALID_CANCELLATION, validationResponse);
