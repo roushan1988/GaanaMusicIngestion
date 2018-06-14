@@ -9,7 +9,7 @@ import java.util.List;
 @Entity
 @Table(name="subscription_variant")
 public class SubscriptionVariantModel extends BaseModel implements Comparable<SubscriptionVariantModel> {
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "subscription_plan_id", nullable = false)
     private SubscriptionPlanModel subscriptionPlan;
     @Column

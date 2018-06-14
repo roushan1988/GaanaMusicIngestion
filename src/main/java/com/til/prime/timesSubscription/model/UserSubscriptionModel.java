@@ -11,12 +11,12 @@ import java.util.Date;
 @Entity
 @Table(name="user_subscription")
 public class UserSubscriptionModel extends BaseModel {
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private UserModel user;
     @Column(name="ticket_id")
     private String ticketId;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "subscription_variant_id", nullable = false)
     private SubscriptionVariantModel subscriptionVariant;
     @Column(name="order_id")

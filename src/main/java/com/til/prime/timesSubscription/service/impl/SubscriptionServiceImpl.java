@@ -22,6 +22,7 @@ import org.springframework.cache.CacheManager;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -622,22 +623,13 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     @Override
     @Transactional
     public UserSubscriptionModel saveUserSubscription(UserSubscriptionModel userSubscriptionModel, boolean retryForOrderId,  EventEnum event, boolean publishStatus) {
-        if (publishStatus && userSubscriptionModel.isOrderCompleted() && StatusEnum.VALID_EXTERNAL_PUBLISH_STATUS_SET.contains(userSubscriptionModel.getStatus())) {
-            if(!userSubscriptionModel.isSsoCommunicated()) {
-                userSubscriptionModel = subscriptionServiceHelper.updateSSOStatus(userSubscriptionModel);
-            }
-            if(!userSubscriptionModel.isStatusPublished()){
-                userSubscriptionModel = subscriptionServiceHelper.publishUserStatus(userSubscriptionModel);
-            }
-        }
         int retryCount = retryForOrderId ? GlobalConstants.DB_RETRY_COUNT : GlobalConstants.SINGLE_TRY;
         retryLoop:
         while (retryCount > 0) {
             try {
                 userSubscriptionModel = userSubscriptionRepository.save(userSubscriptionModel);
-                UserSubscriptionAuditModel auditModel = subscriptionServiceHelper.getUserSubscriptionAuditModel(userSubscriptionModel, event);
-                auditModel = userSubscriptionAuditRepository.save(auditModel);
                 updateUserStatus(userSubscriptionModel);
+                saveUserSubscriptionAuditWithExternalUpdatesAsync(userSubscriptionModel, event, publishStatus);
                 break retryLoop;
             } catch (Exception e) {
                 retryCount--;
@@ -651,6 +643,23 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         return userSubscriptionModel;
     }
 
+    @Async
+    @Override
+    public void saveUserSubscriptionAuditWithExternalUpdatesAsync(UserSubscriptionModel userSubscriptionModel, EventEnum event, boolean publishStatus){
+        if (publishStatus && userSubscriptionModel.isOrderCompleted() && StatusEnum.VALID_EXTERNAL_PUBLISH_STATUS_SET.contains(userSubscriptionModel.getStatus())) {
+            if(!userSubscriptionModel.isSsoCommunicated()) {
+                userSubscriptionModel = subscriptionServiceHelper.updateSSOStatus(userSubscriptionModel);
+            }
+            if(!userSubscriptionModel.isStatusPublished()){
+                userSubscriptionModel = subscriptionServiceHelper.publishUserStatus(userSubscriptionModel);
+            }
+            if(userSubscriptionModel.isSsoCommunicated() || userSubscriptionModel.isStatusPublished()){
+                userSubscriptionModel = userSubscriptionRepository.save(userSubscriptionModel);
+            }
+        }
+        UserSubscriptionAuditModel auditModel = subscriptionServiceHelper.getUserSubscriptionAuditModel(userSubscriptionModel, event);
+        auditModel = userSubscriptionAuditRepository.save(auditModel);
+    }
 
     public void updateUserStatus(UserSubscriptionModel userSubscriptionModel) {
         updateUserStatus(userSubscriptionModel, userSubscriptionModel.getUser());
