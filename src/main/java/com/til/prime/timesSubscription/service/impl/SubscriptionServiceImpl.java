@@ -1434,6 +1434,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                         userSubscriptionRepository.deleteByUser(userModel);
                         userRepository.delete(userModel);
                     }
+                    cacheManager.getCache(RedisConstants.PRIME_STATUS_CACHE_KEY).evict(request.getUser().getMobile());
+                    cacheManager.getCache(RedisConstants.SSO_AUTH_CACHE_KEY).evict(request.getUser().getMobile());
                 }else{
                     validationResponse.addValidationError(ValidationError.INVALID_USER);
                 }
