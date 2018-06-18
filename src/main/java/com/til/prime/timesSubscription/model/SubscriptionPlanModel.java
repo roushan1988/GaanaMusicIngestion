@@ -1,6 +1,8 @@
 package com.til.prime.timesSubscription.model;
 
 import com.til.prime.timesSubscription.enums.*;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
 import java.util.List;
@@ -25,6 +27,7 @@ public class SubscriptionPlanModel extends BaseModel {
     @Enumerated(EnumType.STRING)
     private PlanFamilyEnum family;
     @OneToMany(mappedBy = "subscriptionPlan", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @Fetch(FetchMode.SUBSELECT)
     private List<SubscriptionVariantModel> variants;
 
     public String getName() {
