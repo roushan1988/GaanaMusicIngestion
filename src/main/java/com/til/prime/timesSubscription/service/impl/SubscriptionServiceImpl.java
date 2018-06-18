@@ -698,7 +698,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     @Override
     @Transactional
     public void updateUserStatus(UserSubscriptionModel userSubscriptionModel, UserModel userModel) {
-        if (userSubscriptionModel != null && userSubscriptionModel.isOrderCompleted() && StatusEnum.VALID_CACHE_UPDATE_SET.contains(userSubscriptionModel.getStatus())) {
+        if (userSubscriptionModel != null && userSubscriptionModel.isOrderCompleted() && StatusEnum.VALID_CACHE_UPDATE_WITH_LAST_END_DATE_SET.contains(userSubscriptionModel.getStatus())) {
             try {
                 if (userSubscriptionModel.getStatus() == StatusEnum.FUTURE) {
                     Cache.ValueWrapper vw = cacheManager.getCache(RedisConstants.PRIME_STATUS_CACHE_KEY).get(userModel.getMobile());
@@ -708,6 +708,16 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                         statusDTO.setLastEndDate(userSubscriptionModel.getEndDate());
                         cacheManager.getCache(RedisConstants.PRIME_STATUS_CACHE_KEY).put(userSubscriptionModel.getUser().getMobile(), statusDTO);
                     }
+                    return;
+                }
+                if (userSubscriptionModel.getStatus() == StatusEnum.CANCELLED) {
+                    LOG.info("Updating user status for future cancellation of userSubscription: " + userSubscriptionModel + ", user: " + userModel);
+                    UserSubscriptionModel lastUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndStatusInAndDeletedFalseAndOrderCompletedTrueOrderByIdDesc(userSubscriptionModel.getUser().getMobile(), StatusEnum.VALID_END_DATE_DISPLAY_STATUS_SET);
+                    UserSubscriptionModel lastActiveUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndStatusInAndDeletedFalseAndOrderCompletedTrueOrderByIdDesc(userSubscriptionModel.getUser().getMobile(), StatusEnum.VALID_EXPIRY_STATUS_SET);
+                    SubscriptionStatusDTO statusDTO = getSubscriptionStatusDTO(lastActiveUserSubscription, userModel, lastUserSubscription.getStatus()==StatusEnum.ACTIVE_CANCELLED? lastUserSubscription.getUpdated(): lastUserSubscription.getEndDate());
+                    String mobile = userSubscriptionModel.getUser().getMobile();
+                    LOG.info("Status DTO: " + statusDTO);
+                    cacheManager.getCache(RedisConstants.PRIME_STATUS_CACHE_KEY).put(mobile, statusDTO);
                     return;
                 }
                 LOG.info("Updating user status, userSubscription: " + userSubscriptionModel + ", user: " + userModel);
