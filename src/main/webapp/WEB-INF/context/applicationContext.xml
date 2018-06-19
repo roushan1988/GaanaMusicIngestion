@@ -79,6 +79,7 @@
         <property name="maxIdleTime" value="${jdbc.maxIdleTime}" />
         <property name="maxIdleTimeExcessConnections" value="${jdbc.maxIdleTimeExcessConnections}" />
         <property name="idleConnectionTestPeriod" value="${jdbc.idleConnectionTestPeriod}" />
+        <property name="numHelperThreads" value="${jdbc.numHelperThreads}"/>
     </bean>
     <bean id="jpaVendorAdapter"
           class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
