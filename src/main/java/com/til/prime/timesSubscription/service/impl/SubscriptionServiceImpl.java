@@ -19,6 +19,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.context.ApplicationContext;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -66,6 +67,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     private PropertyService propertyService;
     @Resource(name = "config_properties")
     private Properties properties;
+    @Autowired
+    private ApplicationContext applicationContext;
 
     @Override
     public PlanListResponse getAllPlans(PlanListRequest request) {
@@ -629,7 +632,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             try {
                 userSubscriptionModel = userSubscriptionRepository.save(userSubscriptionModel);
                 updateUserStatus(userSubscriptionModel);
-                saveUserSubscriptionAuditWithExternalUpdatesAsync(userSubscriptionModel, event, publishStatus);
+                applicationContext.getBean(SubscriptionService.class).saveUserSubscriptionAuditWithExternalUpdatesAsync(userSubscriptionModel, event, publishStatus);
                 break retryLoop;
             } catch (Exception e) {
                 retryCount--;
@@ -813,8 +816,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             }
         }
         userModel = userRepository.save(userModel);
-        UserAuditModel userAuditModel = subscriptionServiceHelper.getUserAudit(userModel, eventEnum);
-        userAuditRepository.save(userAuditModel);
+        applicationContext.getBean(SubscriptionService.class).saveUserAuditAsync(userModel, eventEnum);
         return userModel;
     }
 
@@ -1465,6 +1467,13 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         }
         response = subscriptionServiceHelper.prepareGenericResponse(response, validationResponse);
         return response;
+    }
+
+    @Override
+    @Async
+    public void saveUserAuditAsync(UserModel userModel, EventEnum event) {
+        UserAuditModel userAuditModel = subscriptionServiceHelper.getUserAudit(userModel, event);
+        userAuditRepository.save(userAuditModel);
     }
 
 }

@@ -39,6 +39,7 @@ public interface SubscriptionService {
     PropertyDataGetResponseCRM getPropertyTableData(PropertyDataRequestCRM request);
     GenericResponse updatePropertyTableData(PropertyDataUpdateRequestCRM request);
     GenericResponse deleteUser(GenericRequest request);
-    // dont call below method from anywhere except from saveSubscription, this is just for async implementation
+    // don't call below method from anywhere except from saveSubscription or saveUser, this is just for async implementation
+    void saveUserAuditAsync(UserModel userModel, EventEnum event);
     void saveUserSubscriptionAuditWithExternalUpdatesAsync(UserSubscriptionModel userSubscriptionModel, EventEnum event, boolean publishStatus);
 }
