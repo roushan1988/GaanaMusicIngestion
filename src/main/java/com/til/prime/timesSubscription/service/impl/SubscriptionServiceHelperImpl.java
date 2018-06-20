@@ -71,6 +71,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
             userSubscriptionModel.setTransactionStatus(TransactionStatusEnum.SUBSCRIPTION_TRANS_INITIATED);
         }
         userSubscriptionModel.setStatus(StatusEnum.getStatusForUserSubscription(userSubscriptionModel, date));
+        userSubscriptionModel.setStatusDate(new Date());
         return userSubscriptionModel;
     }
 
@@ -295,6 +296,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
         auditModel.setEndDate(userSubscriptionModel.getEndDate());
         auditModel.setPlanStatus(userSubscriptionModel.getPlanStatus());
         auditModel.setStatus(userSubscriptionModel.getStatus());
+        auditModel.setStatusDate(userSubscriptionModel.getStatusDate());
         auditModel.setTransactionStatus(userSubscriptionModel.getTransactionStatus());
         auditModel.setBusiness(userSubscriptionModel.getBusiness());
         auditModel.setChannel(userSubscriptionModel.getChannel());
@@ -333,6 +335,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
         Date newEndDate = TimeUtils.addDaysInDate(userSubscriptionModel.getEndDate(), extensionDays.intValue());
         userSubscriptionModel.setEndDate(newEndDate);
         userSubscriptionModel.setStatus(StatusEnum.getStatusForUserSubscription(userSubscriptionModel, null));
+        userSubscriptionModel.setStatusDate(new Date());
         return userSubscriptionModel;
     }
 

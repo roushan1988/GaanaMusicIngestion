@@ -329,9 +329,14 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             }
             RefundInternalResponse refundResponse = subscriptionServiceHelper.refundPayment(userSubscriptionModel.getOrderId(), refundAmount.doubleValue(), forceAmount);
             if (refundResponse.isSuccess()) {
-                //userSubscriptionModel.setIsDelete(true);
                 StatusEnum previousStatus = userSubscriptionModel.getStatus();
-                userSubscriptionModel.setStatus(previousStatus==StatusEnum.ACTIVE? StatusEnum.ACTIVE_CANCELLED: StatusEnum.CANCELLED);
+                if (previousStatus == StatusEnum.ACTIVE) {
+                    userSubscriptionModel.setStatus(StatusEnum.ACTIVE_CANCELLED);
+                    userSubscriptionModel.setEndDate(new Date());
+                } else {
+                    userSubscriptionModel.setStatus(StatusEnum.CANCELLED);
+                }
+                userSubscriptionModel.setStatusDate(new Date());
                 if (refundResponse.getRefundedAmount() != null) {
                     refundedAmount = new BigDecimal(refundResponse.getRefundedAmount());
                     refundedAmount.setScale(2, BigDecimal.ROUND_HALF_EVEN);
@@ -717,7 +722,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                     LOG.info("Updating user status for future cancellation of userSubscription: " + userSubscriptionModel + ", user: " + userModel);
                     UserSubscriptionModel lastUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndStatusInAndDeletedFalseAndOrderCompletedTrueOrderByIdDesc(userSubscriptionModel.getUser().getMobile(), StatusEnum.VALID_END_DATE_DISPLAY_STATUS_SET);
                     UserSubscriptionModel lastActiveUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndStatusInAndDeletedFalseAndOrderCompletedTrueOrderByIdDesc(userSubscriptionModel.getUser().getMobile(), StatusEnum.VALID_EXPIRY_STATUS_SET);
-                    SubscriptionStatusDTO statusDTO = getSubscriptionStatusDTO(lastActiveUserSubscription, userModel, lastUserSubscription.getStatus()==StatusEnum.ACTIVE_CANCELLED? lastUserSubscription.getUpdated(): lastUserSubscription.getEndDate());
+                    SubscriptionStatusDTO statusDTO = getSubscriptionStatusDTO(lastActiveUserSubscription, userModel, lastUserSubscription.getEndDate());
                     String mobile = userSubscriptionModel.getUser().getMobile();
                     LOG.info("Status DTO: " + statusDTO);
                     cacheManager.getCache(RedisConstants.PRIME_STATUS_CACHE_KEY).put(mobile, statusDTO);
@@ -725,7 +730,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 }
                 LOG.info("Updating user status, userSubscription: " + userSubscriptionModel + ", user: " + userModel);
                 UserSubscriptionModel lastUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndStatusInAndDeletedFalseAndOrderCompletedTrueOrderByIdDesc(userSubscriptionModel.getUser().getMobile(), StatusEnum.VALID_END_DATE_DISPLAY_STATUS_SET);
-                SubscriptionStatusDTO statusDTO = getSubscriptionStatusDTO(userSubscriptionModel, userModel, lastUserSubscription.getStatus()==StatusEnum.ACTIVE_CANCELLED? lastUserSubscription.getUpdated(): lastUserSubscription.getEndDate());
+                SubscriptionStatusDTO statusDTO = getSubscriptionStatusDTO(userSubscriptionModel, userModel, lastUserSubscription.getEndDate());
                 String mobile = userSubscriptionModel.getUser().getMobile();
                 LOG.info("Status DTO: " + statusDTO);
                 cacheManager.getCache(RedisConstants.PRIME_STATUS_CACHE_KEY).put(mobile, statusDTO);

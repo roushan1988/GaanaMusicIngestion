@@ -60,6 +60,7 @@ public class SubscriptionExpiryJob extends AbstractJob {
                     for (UserSubscriptionModel userSubscriptionModel : userSubscriptionModelList) {
                         try{
                             userSubscriptionModel.setStatus(StatusEnum.EXPIRED);
+                            userSubscriptionModel.setStatusDate(new Date());
                             PlanStatusEnum plan = userSubscriptionModel.getPlanStatus();
                             userSubscriptionModel = subscriptionService.saveUserSubscription(userSubscriptionModel, false, EventEnum.USER_SUBSCRIPTION_EXPIRY, true);
                             recordsAffected++;
@@ -68,6 +69,7 @@ public class SubscriptionExpiryJob extends AbstractJob {
                                     userSubscriptionModel.getUser().getMobile(), StatusEnum.FUTURE, TimeUtils.addMillisInDate(userSubscriptionModel.getEndDate(), -2000));
                             if(userSubscriptionModel1!=null){
                                 userSubscriptionModel1.setStatus(StatusEnum.ACTIVE);
+                                userSubscriptionModel1.setStatusDate(new Date());
                                 subscriptionService.saveUserSubscription(userSubscriptionModel1, false, EventEnum.USER_SUBSCRIPTION_ACTIVE, true);
                                 // subscriptionService.updateUserStatus(userSubscriptionModel1, userSubscriptionModel1.getUser());
                                 communicationService.sendExistingSubscriptionActivationCommunication(userSubscriptionModel1);

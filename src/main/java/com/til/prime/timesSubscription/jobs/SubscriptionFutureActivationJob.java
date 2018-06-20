@@ -66,6 +66,7 @@ public class SubscriptionFutureActivationJob extends AbstractJob {
                             continue loop;
                         }
                         userSubscriptionModel.setStatus(StatusEnum.ACTIVE);
+                        userSubscriptionModel.setStatusDate(new Date());
                         subscriptionService.saveUserSubscription(userSubscriptionModel, false, EventEnum.USER_SUBSCRIPTION_ACTIVE, true);
                         communicationService.sendExistingSubscriptionActivationCommunication(userSubscriptionModel);
                         recordsAffected++;

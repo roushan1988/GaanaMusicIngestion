@@ -331,3 +331,6 @@ ALTER TABLE user_subscription ADD COLUMN `status_published` tinyint(1) NOT NULL 
 ALTER TABLE user_subscription_audit ADD COLUMN `status_published` tinyint(1) NOT NULL after sso_communicated;
 ALTER TABLE user_subscription ADD INDEX `INDEX_STATUS_PUBLISHED` (`status_published`);
 insert into job values (null, "USER_STATUS_PUBLISH_JOB", "USER_STATUS_PUBLISH", null, now(), now(), false);
+
+ALTER TABLE user_subscription ADD COLUMN `status_date` datetime after status;
+ALTER TABLE user_subscription_audit ADD COLUMN `status_date` datetime after status;

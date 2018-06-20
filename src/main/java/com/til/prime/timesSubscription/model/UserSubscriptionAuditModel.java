@@ -48,6 +48,8 @@ public class UserSubscriptionAuditModel extends BaseModel {
     @Column
     @Enumerated(EnumType.STRING)
     private StatusEnum status;
+    @Column(name="status_date")
+    private Date statusDate;
     @Column(name="transaction_status")
     @Enumerated(EnumType.STRING)
     private TransactionStatusEnum transactionStatus;
@@ -237,6 +239,14 @@ public class UserSubscriptionAuditModel extends BaseModel {
 
     public void setStatus(StatusEnum status) {
         this.status = status;
+    }
+
+    public Date getStatusDate() {
+        return statusDate;
+    }
+
+    public void setStatusDate(Date statusDate) {
+        this.statusDate = statusDate;
     }
 
     public BigDecimal getRefundedAmount() {
