@@ -241,12 +241,12 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             userSubscriptionModel = userSubscriptionRepository.findByOrderIdAndSubscriptionVariantIdAndDeleted(request.getOrderId(), request.getVariantId(), false);
             UserSubscriptionModel conflictingUserSubscription = null;
             if(userSubscriptionModel!=null) {
-                conflictingUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndDeletedFalseAndOrderCompletedTrueAndEndDateAfter(userSubscriptionModel.getUser().getMobile(), userSubscriptionModel.getStartDate());
+                conflictingUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndDeletedFalseAndOrderCompletedTrueAndEndDateAfterAndStatusIn(userSubscriptionModel.getUser().getMobile(), userSubscriptionModel.getStartDate(), StatusEnum.VALID_INIT_STATUS_SET);
             }
             validationResponse = subscriptionValidationService.validatePostSubmitPurchasePlan(request, userSubscriptionModel, conflictingUserSubscription, validationResponse);
         }
         if (validationResponse.isValid()) {
-            UserSubscriptionModel lastUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndBusinessAndOrderCompletedAndDeletedOrderByIdDesc(userSubscriptionModel.getUser().getMobile(), userSubscriptionModel.getBusiness(), true, false);
+            UserSubscriptionModel lastUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndBusinessAndStatusInAndOrderCompletedTrueAndDeletedFalseOrderByIdDesc(userSubscriptionModel.getUser().getMobile(), userSubscriptionModel.getBusiness(), StatusEnum.VALID_INIT_STATUS_SET);
             userSubscriptionModel = subscriptionServiceHelper.updateSubmitPurchaseUserSubscription(request, userSubscriptionModel, lastUserSubscription);
             userSubscriptionModel = saveUserSubscription(userSubscriptionModel, false, userSubscriptionModel.isOrderCompleted() ? EventEnum.PAYMENT_SUCCESS : EventEnum.PAYMENT_FAILURE, true);
             if (userSubscriptionModel.isOrderCompleted()) {
@@ -390,8 +390,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         if (validationResponse.isValid()) {
             userModel.setBlocked(request.isBlockUser());
             userModel = saveUserModel(userModel, request.isBlockUser() ? EventEnum.USER_BLOCK : EventEnum.USER_UNBLOCK, false);
-            UserSubscriptionModel userSubscriptionModel = userSubscriptionRepository.findByUserMobileAndUserDeletedFalseAndStatusAndOrderCompletedTrue(request.getUser().getMobile(), StatusEnum.ACTIVE);
-            updateUserStatus(userSubscriptionModel, userModel);
+            clearUserStatusCache(userModel.getMobile());
         }
         response = subscriptionServiceHelper.prepareBlockUnblockResponse(response, validationResponse);
         return response;
@@ -405,7 +404,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         ExtendExpiryResponse response = new ExtendExpiryResponse();
         if (validationResponse.isValid()) {
             userSubscriptionModel = userSubscriptionRepository.findByIdAndOrderIdAndSubscriptionVariantIdAndDeleted(request.getUserSubscriptionId(), request.getOrderId(), request.getVariantId(), false);
-            lastUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndBusinessAndOrderCompletedAndDeletedOrderByIdDesc(request.getUser().getMobile(), BusinessEnum.TIMES_PRIME, true, false);
+            lastUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndBusinessAndStatusInAndOrderCompletedTrueAndDeletedFalseOrderByIdDesc(request.getUser().getMobile(), BusinessEnum.TIMES_PRIME, StatusEnum.VALID_USABLE_SET);
             validationResponse = subscriptionValidationService.validatePostExtendExpiry(request, userSubscriptionModel, lastUserSubscription, validationResponse);
         }
         if (validationResponse.isValid()) {
@@ -522,7 +521,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                     BackendSubscriptionUserModel model = backendSubscriptionUserRepository.findByMobileAndDeletedFalse(dto.getMobile());
                     if (model == null || (model != null && model.isCompleted() && dto.isForceActivation())) {
                         UserSubscriptionModel lastUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndBusinessAndOrderCompletedAndDeletedOrderByIdDesc(dto.getMobile(), BusinessEnum.TIMES_PRIME, true, false);
-                        if (lastUserSubscription != null && lastUserSubscription.getStatus() == StatusEnum.FUTURE) {
+                        if (lastUserSubscription != null && !StatusEnum.INVALID_BACKEND_SUBSCRIPTION_STATUS_SET.contains(lastUserSubscription.getStatus())) {
                             dto.setMessage(ValidationError.FUTURE_SUBSCRIPTION_EXISTS_FOR_USER.getErrorMessage());
                             failureList.add(dto);
                         } else {
@@ -741,6 +740,13 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         }
     }
 
+    @Override
+    public void clearUserStatusCache(String mobile) {
+        if (StringUtils.isNotEmpty(mobile)) {
+            cacheManager.getCache(RedisConstants.PRIME_STATUS_CACHE_KEY).evict(mobile);
+        }
+    }
+
     private void updateUserDetailsInCache(UserModel userModel) {
         Cache.ValueWrapper vw = cacheManager.getCache(RedisConstants.PRIME_STATUS_CACHE_KEY).get(userModel.getMobile());
         SubscriptionStatusDTO statusDTO = null;
@@ -829,11 +835,9 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     public GenericResponse updateCacheForMobile(GenericRequest request) {
     	ValidationResponse validationResponse = subscriptionValidationService.validatePreUpdateGenericCRMRequestWithMobile(request);
         GenericResponse response = new GenericResponse();
-        UserSubscriptionModel userSubscriptionModel = null;
 
         if (validationResponse.isValid()) {
-            userSubscriptionModel = userSubscriptionRepository.findByUserMobileAndUserDeletedFalseAndStatusAndDeletedAndOrderCompletedTrue(request.getUser().getMobile(), StatusEnum.ACTIVE, false);
-            validationResponse = subscriptionValidationService.validatePostUpdateCacheForMobile(userSubscriptionModel, validationResponse);
+            clearUserStatusCache(request.getUser().getMobile());
         }
         response = subscriptionServiceHelper.prepareUpdateCacheResponse(response, validationResponse);
         return response;

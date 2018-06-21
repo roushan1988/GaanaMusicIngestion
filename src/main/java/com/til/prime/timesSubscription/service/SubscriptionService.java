@@ -26,6 +26,7 @@ public interface SubscriptionService {
     UserModel getOrCreateUserWithMobileCheck(GenericRequest request, ValidationResponse validationResponse);
     UserSubscriptionModel saveUserSubscription(UserSubscriptionModel userSubscriptionModel, boolean retryForOrderId, EventEnum event, boolean publishStatus);
     void updateUserStatus(UserSubscriptionModel userSubscriptionModel, UserModel userModel);
+    void clearUserStatusCache(String mobile);
     UserModel saveUserModel(UserModel userModel, EventEnum eventEnum, boolean retryForPrimeId);
     void updateUserStatus(UserSubscriptionModel userSubscriptionModel);
     GenericResponse updateCacheForMobile(GenericRequest request);

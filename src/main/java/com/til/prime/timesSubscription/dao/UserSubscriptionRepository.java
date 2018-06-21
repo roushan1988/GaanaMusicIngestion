@@ -40,6 +40,7 @@ public interface UserSubscriptionRepository extends GenericJpaRepository<UserSub
     UserSubscriptionModel findFirstByUserMobileAndUserDeletedFalseAndOrderCompletedAndStartDateBeforeAndEndDateAfterAndDeleted(String mobile, boolean orderCompleted, Date date, Date date2, boolean deleted);
     UserSubscriptionModel findFirstByUserMobileAndUserDeletedFalseAndOrderCompletedAndStartDateBeforeAndEndDateAfter(String mobile, boolean orderCompleted, Date date, Date date2);
     UserSubscriptionModel findFirstByUserMobileAndUserDeletedFalseAndDeletedFalseAndOrderCompletedTrueAndEndDateAfter(String mobile, Date date);
+    UserSubscriptionModel findFirstByUserMobileAndUserDeletedFalseAndDeletedFalseAndOrderCompletedTrueAndEndDateAfterAndStatusIn(String mobile, Date date, Collection<StatusEnum> statusEnums);
     UserSubscriptionModel findFirstByUserMobileAndUserDeletedFalseAndBusinessAndOrderCompletedAndDeletedOrderByIdDesc(String mobile, BusinessEnum business, boolean orderCompleted, boolean deleted);
     UserSubscriptionModel findFirstByUserMobileAndUserDeletedFalseAndBusinessAndStatusInAndOrderCompletedTrueAndDeletedFalseOrderByIdDesc(String mobile, BusinessEnum business, Set<StatusEnum> statusEnums);
     List<UserSubscriptionModel> findByUserMobileAndUserDeletedFalseAndBusinessAndStatusInAndOrderCompletedTrueAndDeletedFalseOrderByIdDesc(String mobile, BusinessEnum business, Set<StatusEnum> statusEnums);
