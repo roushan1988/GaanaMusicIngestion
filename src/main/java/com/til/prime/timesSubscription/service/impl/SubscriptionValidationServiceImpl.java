@@ -304,8 +304,13 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
     public ValidationResponse validatePostCheckEligibility(CheckEligibilityRequest request, SubscriptionVariantModel variantModel, UserSubscriptionModel lastModel, UserSubscriptionModel restrictedModel, ValidationResponse validationResponse) {
         PreConditions.notNull(variantModel, ValidationError.INVALID_SUBSCRIPTION_VARIANT, validationResponse);
         PreConditions.mustBeNull(restrictedModel, ValidationError.USER_PLAN_DOES_NOT_QUALIFY, validationResponse);
-        PreConditions.mustBeEqual(request.getPlanType(), variantModel.getPlanType().name(), ValidationError.INVALID_PLAN_TYPE, validationResponse);
+        if(variantModel!=null) {
+            PreConditions.mustBeEqual(request.getPlanType(), variantModel.getPlanType().name(), ValidationError.INVALID_PLAN_TYPE, validationResponse);
+        }
         if(lastModel!=null){
+            if(PlanTypeEnum.TRAIL_PLAN_TYPES.contains(lastModel.getSubscriptionVariant().getPlanType())){
+                PreConditions.mustBeFalse(lastModel.getSubscriptionVariant().getPlanType()==PlanTypeEnum.valueOf(request.getPlanType()), ValidationError.INVALID_PLAN_TYPE, validationResponse);
+            }
             PreConditions.mustBeFalse(lastModel.getUser().isBlocked(), ValidationError.BLOCKED_USER, validationResponse);
             PreConditions.notGreater(lastModel.getSubscriptionVariant().getPlanType().getOrder(), PlanTypeEnum.valueOf(request.getPlanType()).getOrder(), ValidationError.INVALID_PLAN_TYPE, validationResponse);
             PreConditions.notAfter(lastModel.getEndDate(), TimeUtils.addDaysInDate(new Date(), GlobalConstants.MAX_DAYS_DIFF_FOR_NEW_SUBSCRIPTION_PURCHASE), ValidationError.USER_ALREADY_PURCHASED_MULTIPLE_FUTURE_PLANS, validationResponse);
