@@ -39,20 +39,34 @@ public enum PlanStatusEnum {
         return code;
     }
 
-    public static PlanStatusEnum getPlanStatus(PlanTypeEnum planTypeEnum, BigDecimal price, UserSubscriptionModel lastUserSubscription, boolean autoRenewal){
-        if(PlanTypeEnum.USAGE_RESTRICTED_PLANS_TYPES.contains(planTypeEnum)){
-            if(price.compareTo(BigDecimal.ZERO)<=0){
-                return PlanStatusEnum.FREE_TRIAL;
+    public static PlanStatusEnum getPlanStatus(StatusEnum status, PlanTypeEnum planTypeEnum, BigDecimal price, UserSubscriptionModel lastUserSubscription, boolean autoRenewal){
+        if(status==StatusEnum.CANCELLED || status==StatusEnum.ACTIVE_CANCELLED){
+            return PlanStatusEnum.SUBSCRIPTION_CANCELLED;
+        }else if(status==StatusEnum.EXPIRED){
+            if(PlanTypeEnum.USAGE_RESTRICTED_PLANS_TYPES.contains(planTypeEnum)){
+                if(price.compareTo(BigDecimal.ZERO)<=0){
+                    return PlanStatusEnum.FREE_TRAIL_EXPIRED;
+                }else{
+                    return PlanStatusEnum.FREE_TRIAL_WITH_PAYMENT_EXPIRED;
+                }
             }else{
-                return PlanStatusEnum.FREE_TRIAL_WITH_PAYMENT;
+                return PlanStatusEnum.SUBSCRIPTION_EXPIRED;
             }
-        }else if(price.compareTo(BigDecimal.ZERO)>0){
-            if(autoRenewal && (lastUserSubscription.getPlanStatus()==PlanStatusEnum.SUBSCRIPTION || lastUserSubscription.getPlanStatus()==PlanStatusEnum.SUBSCRIPTION_AUTO_RENEWAL)){
-                return PlanStatusEnum.SUBSCRIPTION_AUTO_RENEWAL;
-            }else{
-                return PlanStatusEnum.SUBSCRIPTION;
+        }else{
+            if(PlanTypeEnum.USAGE_RESTRICTED_PLANS_TYPES.contains(planTypeEnum)){
+                if(price.compareTo(BigDecimal.ZERO)<=0){
+                    return PlanStatusEnum.FREE_TRIAL;
+                }else{
+                    return PlanStatusEnum.FREE_TRIAL_WITH_PAYMENT;
+                }
+            }else if(price.compareTo(BigDecimal.ZERO)>0){
+                if(autoRenewal && lastUserSubscription!=null && (lastUserSubscription.getPlanStatus()==PlanStatusEnum.SUBSCRIPTION || lastUserSubscription.getPlanStatus()==PlanStatusEnum.SUBSCRIPTION_AUTO_RENEWAL)){
+                    return PlanStatusEnum.SUBSCRIPTION_AUTO_RENEWAL;
+                }else{
+                    return PlanStatusEnum.SUBSCRIPTION;
+                }
             }
+            return PlanStatusEnum.SUBSCRIPTION;
         }
-        return PlanStatusEnum.SUBSCRIPTION;
     }
 }

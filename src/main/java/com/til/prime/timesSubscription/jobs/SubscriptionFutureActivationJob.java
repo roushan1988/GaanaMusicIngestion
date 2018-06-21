@@ -7,6 +7,7 @@ import com.til.prime.timesSubscription.dto.internal.AffectedModelDetails;
 import com.til.prime.timesSubscription.dto.internal.JobDetails;
 import com.til.prime.timesSubscription.enums.EventEnum;
 import com.til.prime.timesSubscription.enums.JobKeyEnum;
+import com.til.prime.timesSubscription.enums.PlanStatusEnum;
 import com.til.prime.timesSubscription.enums.StatusEnum;
 import com.til.prime.timesSubscription.model.JobModel;
 import com.til.prime.timesSubscription.model.UserSubscriptionModel;
@@ -67,6 +68,7 @@ public class SubscriptionFutureActivationJob extends AbstractJob {
                         }
                         userSubscriptionModel.setStatus(StatusEnum.ACTIVE);
                         userSubscriptionModel.setStatusDate(new Date());
+                        userSubscriptionModel.setPlanStatus(PlanStatusEnum.getPlanStatus(StatusEnum.ACTIVE, userSubscriptionModel.getSubscriptionVariant().getPlanType(), userSubscriptionModel.getSubscriptionVariant().getPrice(), null, false));
                         subscriptionService.saveUserSubscription(userSubscriptionModel, false, EventEnum.USER_SUBSCRIPTION_ACTIVE, true);
                         communicationService.sendExistingSubscriptionActivationCommunication(userSubscriptionModel);
                         recordsAffected++;

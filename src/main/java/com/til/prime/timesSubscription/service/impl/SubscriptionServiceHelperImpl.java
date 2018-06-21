@@ -59,26 +59,26 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
         userSubscriptionModel.setChannel(channel);
         userSubscriptionModel.setPlatform(platform);
         userSubscriptionModel.setCreated(new Date());
+        userSubscriptionModel.setStatus(StatusEnum.getStatusForUserSubscription(userSubscriptionModel, date));
+        userSubscriptionModel.setStatusDate(new Date());
         if(price.compareTo(BigDecimal.ZERO)<=0 || (crmRequest&&free)){
             String orderId = UniqueIdGeneratorUtil.generateOrderId();
             userSubscriptionModel.setOrderId(orderId);
             userSubscriptionModel.setPaymentMethod(GlobalConstants.PAYMENT_METHOD_NA);
             userSubscriptionModel.setPaymentReference(GlobalConstants.PAYMENT_REFERENCE_NA);
             userSubscriptionModel.setOrderCompleted(true);
-            userSubscriptionModel.setPlanStatus(PlanStatusEnum.getPlanStatus(planType, variantModel.getPrice(), lastUserSubscription,  false));
+            userSubscriptionModel.setPlanStatus(PlanStatusEnum.getPlanStatus(userSubscriptionModel.getStatus(), planType, variantModel.getPrice(), lastUserSubscription,  false));
             userSubscriptionModel.setTransactionStatus(TransactionStatusEnum.SUBSCRIPTION_TRANS_SUCCESS);
         }else{
             userSubscriptionModel.setTransactionStatus(TransactionStatusEnum.SUBSCRIPTION_TRANS_INITIATED);
         }
-        userSubscriptionModel.setStatus(StatusEnum.getStatusForUserSubscription(userSubscriptionModel, date));
-        userSubscriptionModel.setStatusDate(new Date());
         return userSubscriptionModel;
     }
 
     @Override
     public UserSubscriptionModel updateSubmitPurchaseUserSubscription(SubmitPurchaseRequest request, UserSubscriptionModel userSubscriptionModel, UserSubscriptionModel lastUserSubscription) {
         SubscriptionVariantModel variantModel = userSubscriptionModel.getSubscriptionVariant();
-        userSubscriptionModel.setPlanStatus(PlanStatusEnum.getPlanStatus(variantModel.getPlanType(), variantModel.getPrice(), lastUserSubscription,  request.isAutoRenewalJob()));
+        userSubscriptionModel.setPlanStatus(PlanStatusEnum.getPlanStatus(userSubscriptionModel.getStatus(), variantModel.getPlanType(), variantModel.getPrice(), lastUserSubscription,  request.isAutoRenewalJob()));
         userSubscriptionModel.setPaymentReference(request.getPaymentReference());
         userSubscriptionModel.setTransactionStatus(request.isPaymentSuccess()? TransactionStatusEnum.SUBSCRIPTION_TRANS_SUCCESS: TransactionStatusEnum.SUBSCRIPTION_TRANS_FAILED);
         userSubscriptionModel.setOrderCompleted(request.isPaymentSuccess());
@@ -336,6 +336,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
         userSubscriptionModel.setEndDate(newEndDate);
         userSubscriptionModel.setStatus(StatusEnum.getStatusForUserSubscription(userSubscriptionModel, null));
         userSubscriptionModel.setStatusDate(new Date());
+        userSubscriptionModel.setPlanStatus(PlanStatusEnum.getPlanStatus(userSubscriptionModel.getStatus(), userSubscriptionModel.getSubscriptionVariant().getPlanType(), userSubscriptionModel.getSubscriptionVariant().getPrice(), null,  false));
         return userSubscriptionModel;
     }
 

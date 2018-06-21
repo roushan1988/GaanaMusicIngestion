@@ -337,6 +337,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                     userSubscriptionModel.setStatus(StatusEnum.CANCELLED);
                 }
                 userSubscriptionModel.setStatusDate(new Date());
+                userSubscriptionModel.setPlanStatus(PlanStatusEnum.getPlanStatus(userSubscriptionModel.getStatus(), userSubscriptionModel.getSubscriptionVariant().getPlanType(), userSubscriptionModel.getSubscriptionVariant().getPrice(), null,  false));
                 if (refundResponse.getRefundedAmount() != null) {
                     refundedAmount = new BigDecimal(refundResponse.getRefundedAmount());
                     refundedAmount.setScale(2, BigDecimal.ROUND_HALF_EVEN);
