@@ -60,7 +60,7 @@ public class StatusPublisherJob extends AbstractJob {
                     try{
                         userSubscriptionModel = subscriptionServiceHelper.publishUserStatus(userSubscriptionModel);
                         if (userSubscriptionModel.isStatusPublished()) {
-                            userSubscriptionModel = subscriptionService.saveUserSubscription(userSubscriptionModel, false, EventEnum.USER_STATUS_PUBLISH, false);
+                            userSubscriptionModel = subscriptionService.saveUserSubscription(userSubscriptionModel, false, EventEnum.USER_STATUS_PUBLISH, false, false);
                             recordsAffected++;
                             affectedModels.add(userSubscriptionModel.getId());
                         }

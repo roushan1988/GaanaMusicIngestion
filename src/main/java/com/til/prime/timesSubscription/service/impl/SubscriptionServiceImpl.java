@@ -154,7 +154,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             if (validationResponse.isValid()) {
                 userSubscriptionModel = subscriptionServiceHelper.generateInitPurchaseUserSubscription(request, subscriptionVariantModel, lastUserSubscription, userModel, request.getPrice(), crmRequest, isFree);
                 EventEnum eventEnum = EventEnum.getEventByInitPlanStatus(userSubscriptionModel.getPlanStatus());
-                userSubscriptionModel = saveUserSubscription(userSubscriptionModel, true, eventEnum, userSubscriptionModel.isOrderCompleted());
+                userSubscriptionModel = saveUserSubscription(userSubscriptionModel, true, eventEnum, userSubscriptionModel.isOrderCompleted(), userSubscriptionModel.isOrderCompleted());
                 if (userSubscriptionModel.isOrderCompleted()) {
                     if (PlanStatusEnum.FREE_TRIAL.equals(userSubscriptionModel.getPlanStatus())) {
                         communicationService.sendFreeTrialSubscriptionSuccessCommunication(userSubscriptionModel);
@@ -220,11 +220,11 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             }
             if (useNewSubscription) {
                 newUserSubscriptionModel = subscriptionServiceHelper.updateGenerateOrderUserSubscription(request, newUserSubscriptionModel);
-                newUserSubscriptionModel = saveUserSubscription(newUserSubscriptionModel, true, EventEnum.ORDER_ID_GENERATION, false);
+                newUserSubscriptionModel = saveUserSubscription(newUserSubscriptionModel, true, EventEnum.ORDER_ID_GENERATION, false, false);
 
             } else {
                 userSubscriptionModel = subscriptionServiceHelper.updateGenerateOrderUserSubscription(request, userSubscriptionModel);
-                userSubscriptionModel = saveUserSubscription(userSubscriptionModel, true, EventEnum.ORDER_ID_GENERATION, false);
+                userSubscriptionModel = saveUserSubscription(userSubscriptionModel, true, EventEnum.ORDER_ID_GENERATION, false, false);
             }
         }
         response = subscriptionServiceHelper.prepareGenerateOrderResponse(response, useNewSubscription ? newUserSubscriptionModel : userSubscriptionModel, validationResponse);
@@ -248,7 +248,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         if (validationResponse.isValid()) {
             UserSubscriptionModel lastUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndBusinessAndStatusInAndOrderCompletedTrueAndDeletedFalseOrderByIdDesc(userSubscriptionModel.getUser().getMobile(), userSubscriptionModel.getBusiness(), StatusEnum.VALID_INIT_STATUS_SET);
             userSubscriptionModel = subscriptionServiceHelper.updateSubmitPurchaseUserSubscription(request, userSubscriptionModel, lastUserSubscription);
-            userSubscriptionModel = saveUserSubscription(userSubscriptionModel, false, userSubscriptionModel.isOrderCompleted() ? EventEnum.PAYMENT_SUCCESS : EventEnum.PAYMENT_FAILURE, true);
+            userSubscriptionModel = saveUserSubscription(userSubscriptionModel, false, userSubscriptionModel.isOrderCompleted() ? EventEnum.PAYMENT_SUCCESS : EventEnum.PAYMENT_FAILURE, true, true);
             if (userSubscriptionModel.isOrderCompleted()) {
                 if (PlanStatusEnum.SUBSCRIPTION_AUTO_RENEWAL.equals(userSubscriptionModel.getPlanStatus())) {
                     communicationService.sendSubscriptionRenewedCommunication(userSubscriptionModel);
@@ -350,7 +350,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 if(previousStatus==StatusEnum.ACTIVE && eventEnum==EventEnum.SUBSCRIPTION_APP_CANCELLATION){
                     eventEnum = EventEnum.SUBSCRIPTION_APP_ACTIVE_CANCELLATION;
                 }
-                userSubscriptionModel = saveUserSubscription(userSubscriptionModel, false, eventEnum, true);
+                userSubscriptionModel = saveUserSubscription(userSubscriptionModel, false, eventEnum, true, true);
                 communicationService.sendSubscriptionCancellationCommunication(userSubscriptionModel);
             } else {
                 validationResponse.addValidationError(ValidationError.PAYMENT_REFUND_ERROR);
@@ -372,7 +372,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         if (validationResponse.isValid()) {
             for (UserSubscriptionModel userSubscriptionModel : userSubscriptionModelList) {
                 userSubscriptionModel.setAutoRenewal(false);
-                userSubscriptionModel = saveUserSubscription(userSubscriptionModel, false, EventEnum.SUBSCRIPTION_TURN_OFF_AUTO_DEBIT, !userSubscriptionModel.isSsoCommunicated());
+                userSubscriptionModel = saveUserSubscription(userSubscriptionModel, false, EventEnum.SUBSCRIPTION_TURN_OFF_AUTO_DEBIT, true, !userSubscriptionModel.isSsoCommunicated());
             }
         }
         response = subscriptionServiceHelper.prepareTurnOffAutoDebitResponse(response, validationResponse);
@@ -411,7 +411,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         if (validationResponse.isValid()) {
             StatusEnum statusEnum = userSubscriptionModel.getStatus();
             userSubscriptionModel = subscriptionServiceHelper.extendSubscription(userSubscriptionModel, request.getExtensionDays());
-            userSubscriptionModel = saveUserSubscription(userSubscriptionModel, false, EventEnum.SUBSCRIPTION_TRIAL_EXTENSION, !userSubscriptionModel.getStatus().equals(statusEnum) || !userSubscriptionModel.isSsoCommunicated());
+            userSubscriptionModel = saveUserSubscription(userSubscriptionModel, false, EventEnum.SUBSCRIPTION_TRIAL_EXTENSION, true, !userSubscriptionModel.getStatus().equals(statusEnum) || !userSubscriptionModel.isSsoCommunicated());
             communicationService.sendSubscriptionExpiryExtensionCommunication(userSubscriptionModel);
         }
         response = subscriptionServiceHelper.prepareExtendExpiryResponse(response, userSubscriptionModel, validationResponse);
@@ -563,7 +563,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 if(validationResponse.isValid()){
                     userSubscriptionModel = subscriptionServiceHelper.generateInitPurchaseUserSubscription(request.getUser(), request.getChannel(), request.getPlatform(), PlanTypeEnum.TRIAL, variantModel.getDurationDays(), variantModel, null, userModel, variantModel.getPrice(), false, true);
                     EventEnum eventEnum = EventEnum.getEventForBackendActivation(userSubscriptionModel.getPlanStatus());
-                    userSubscriptionModel = saveUserSubscription(userSubscriptionModel, true, eventEnum, true);
+                    userSubscriptionModel = saveUserSubscription(userSubscriptionModel, true, eventEnum, userSubscriptionModel.isOrderCompleted(), userSubscriptionModel.isOrderCompleted());
                     if (userSubscriptionModel.isOrderCompleted()) {
                         if (PlanStatusEnum.FREE_TRIAL.equals(userSubscriptionModel.getPlanStatus())) {
                             communicationService.sendFreeTrialSubscriptionSuccessCommunication(userSubscriptionModel);
@@ -578,7 +578,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 //extend
                 StatusEnum statusEnum = lastUserSubscription.getStatus();
                 lastUserSubscription = subscriptionServiceHelper.extendSubscription(lastUserSubscription, backendUser.getDurationDays());
-                userSubscriptionModel = saveUserSubscription(lastUserSubscription, false, EventEnum.SUBSCRIPTION_TRIAL_EXTENSION, !lastUserSubscription.getStatus().equals(statusEnum) || !lastUserSubscription.isSsoCommunicated());
+                userSubscriptionModel = saveUserSubscription(lastUserSubscription, false, EventEnum.SUBSCRIPTION_TRIAL_EXTENSION, true, !lastUserSubscription.getStatus().equals(statusEnum) || !lastUserSubscription.isSsoCommunicated());
                 backendUser.setCompleted(true);
                 EventEnum eventEnum = EventEnum.getEventForBackendActivation(userSubscriptionModel.getPlanStatus());
                 saveBackendSubscriptionUser(backendUser, eventEnum);
@@ -617,7 +617,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                     if (CollectionUtils.isNotEmpty(relevantUserSubscriptions)) {
                         for (UserSubscriptionModel model : relevantUserSubscriptions) {
                             model.setUser(userModel);
-                            saveUserSubscription(model, false, EventEnum.USER_SUBSCRIPTION_SWITCH, true);
+                            saveUserSubscription(model, false, EventEnum.USER_SUBSCRIPTION_SWITCH, true, true, true);
                         }
                     }
                     updateUserDetailsInCache(userModel);
@@ -630,14 +630,20 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Override
     @Transactional
-    public UserSubscriptionModel saveUserSubscription(UserSubscriptionModel userSubscriptionModel, boolean retryForOrderId,  EventEnum event, boolean publishStatus) {
+    public UserSubscriptionModel saveUserSubscription(UserSubscriptionModel userSubscriptionModel, boolean retryForOrderId,  EventEnum event, boolean publishStatus, boolean updateSSO) {
+        return saveUserSubscription(userSubscriptionModel, retryForOrderId, event, publishStatus, updateSSO, updateSSO);
+    }
+
+    @Override
+    @Transactional
+    public UserSubscriptionModel saveUserSubscription(UserSubscriptionModel userSubscriptionModel, boolean retryForOrderId, EventEnum event, boolean publishStatus, boolean updateSSO, boolean userUpdated) {
         int retryCount = retryForOrderId ? GlobalConstants.DB_RETRY_COUNT : GlobalConstants.SINGLE_TRY;
         retryLoop:
         while (retryCount > 0) {
             try {
                 userSubscriptionModel = userSubscriptionRepository.save(userSubscriptionModel);
                 updateUserStatus(userSubscriptionModel);
-                applicationContext.getBean(SubscriptionService.class).saveUserSubscriptionAuditWithExternalUpdatesAsync(userSubscriptionModel, event, publishStatus);
+                applicationContext.getBean(SubscriptionService.class).saveUserSubscriptionAuditWithExternalUpdatesAsync(userSubscriptionModel, event, publishStatus, updateSSO, userUpdated);
                 break retryLoop;
             } catch (Exception e) {
                 retryCount--;
@@ -653,15 +659,15 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Async
     @Override
-    public void saveUserSubscriptionAuditWithExternalUpdatesAsync(UserSubscriptionModel userSubscriptionModel, EventEnum event, boolean publishStatus){
-        if (publishStatus && userSubscriptionModel.isOrderCompleted() && StatusEnum.VALID_EXTERNAL_PUBLISH_STATUS_SET.contains(userSubscriptionModel.getStatus())) {
-            if(!userSubscriptionModel.isSsoCommunicated()) {
+    public void saveUserSubscriptionAuditWithExternalUpdatesAsync(UserSubscriptionModel userSubscriptionModel, EventEnum event, boolean publishStatus, boolean updateSSO, boolean userUpdated){
+        if (userSubscriptionModel.isOrderCompleted() && StatusEnum.VALID_EXTERNAL_PUBLISH_STATUS_SET.contains(userSubscriptionModel.getStatus())) {
+            if(updateSSO && (!userSubscriptionModel.isSsoCommunicated() || userUpdated)) {
                 userSubscriptionModel = subscriptionServiceHelper.updateSSOStatus(userSubscriptionModel);
             }
-            if(!userSubscriptionModel.isStatusPublished()){
+            if(publishStatus && !userSubscriptionModel.isStatusPublished()){
                 userSubscriptionModel = subscriptionServiceHelper.publishUserStatus(userSubscriptionModel);
             }
-            if(userSubscriptionModel.isSsoCommunicated() || userSubscriptionModel.isStatusPublished()){
+            if((publishStatus || updateSSO) && userSubscriptionModel.isSsoCommunicated() || userSubscriptionModel.isStatusPublished()){
                 userSubscriptionModel = userSubscriptionRepository.save(userSubscriptionModel);
             }
         }

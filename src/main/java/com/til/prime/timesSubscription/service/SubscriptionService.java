@@ -24,7 +24,8 @@ public interface SubscriptionService {
     BackendSubscriptionResponse backendSubscriptionViaServer(BackendSubscriptionRequest request);
     BackendSubscriptionActivationResponse backendSubscriptionActivation(BackendSubscriptionActivationRequest request);
     UserModel getOrCreateUserWithMobileCheck(GenericRequest request, ValidationResponse validationResponse);
-    UserSubscriptionModel saveUserSubscription(UserSubscriptionModel userSubscriptionModel, boolean retryForOrderId, EventEnum event, boolean publishStatus);
+    UserSubscriptionModel saveUserSubscription(UserSubscriptionModel userSubscriptionModel, boolean retryForOrderId, EventEnum event, boolean publishStatus, boolean updateSSO);
+    UserSubscriptionModel saveUserSubscription(UserSubscriptionModel userSubscriptionModel, boolean retryForOrderId, EventEnum event, boolean publishStatus, boolean updateSSO, boolean ssoIdUpdated);
     void updateUserStatus(UserSubscriptionModel userSubscriptionModel, UserModel userModel);
     void clearUserStatusCache(String mobile);
     UserModel saveUserModel(UserModel userModel, EventEnum eventEnum, boolean retryForPrimeId);
@@ -42,5 +43,5 @@ public interface SubscriptionService {
     GenericResponse deleteUser(GenericRequest request);
     // don't call below method from anywhere except from saveSubscription or saveUser, this is just for async implementation
     void saveUserAuditAsync(UserModel userModel, EventEnum event);
-    void saveUserSubscriptionAuditWithExternalUpdatesAsync(UserSubscriptionModel userSubscriptionModel, EventEnum event, boolean publishStatus);
+    void saveUserSubscriptionAuditWithExternalUpdatesAsync(UserSubscriptionModel userSubscriptionModel, EventEnum event, boolean publishStatus, boolean updateSSO, boolean ssoIdUpdated);
 }

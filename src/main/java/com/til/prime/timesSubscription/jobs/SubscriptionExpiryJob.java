@@ -63,7 +63,7 @@ public class SubscriptionExpiryJob extends AbstractJob {
                             userSubscriptionModel.setStatusDate(new Date());
                             userSubscriptionModel.setPlanStatus(PlanStatusEnum.getPlanStatus(StatusEnum.EXPIRED, userSubscriptionModel.getSubscriptionVariant().getPlanType(), userSubscriptionModel.getSubscriptionVariant().getPrice(), null, false));
                             PlanStatusEnum plan = userSubscriptionModel.getPlanStatus();
-                            userSubscriptionModel = subscriptionService.saveUserSubscription(userSubscriptionModel, false, EventEnum.USER_SUBSCRIPTION_EXPIRY, true);
+                            userSubscriptionModel = subscriptionService.saveUserSubscription(userSubscriptionModel, false, EventEnum.USER_SUBSCRIPTION_EXPIRY, true, true);
                             recordsAffected++;
                             affectedModels.add(userSubscriptionModel.getId());
                             UserSubscriptionModel userSubscriptionModel1 = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndStatusAndStartDateAfterAndDeletedFalseAndOrderCompletedTrueOrderById(
@@ -72,7 +72,7 @@ public class SubscriptionExpiryJob extends AbstractJob {
                                 userSubscriptionModel1.setStatus(StatusEnum.ACTIVE);
                                 userSubscriptionModel1.setStatusDate(new Date());
                                 userSubscriptionModel1.setPlanStatus(PlanStatusEnum.getPlanStatus(userSubscriptionModel1.getStatus(), userSubscriptionModel1.getSubscriptionVariant().getPlanType(), userSubscriptionModel1.getSubscriptionVariant().getPrice(), userSubscriptionModel, false));
-                                subscriptionService.saveUserSubscription(userSubscriptionModel1, false, EventEnum.USER_SUBSCRIPTION_ACTIVE, true);
+                                subscriptionService.saveUserSubscription(userSubscriptionModel1, false, EventEnum.USER_SUBSCRIPTION_ACTIVE, true, true);
                                 // subscriptionService.updateUserStatus(userSubscriptionModel1, userSubscriptionModel1.getUser());
                                 communicationService.sendExistingSubscriptionActivationCommunication(userSubscriptionModel1);
                                 recordsAffected++;

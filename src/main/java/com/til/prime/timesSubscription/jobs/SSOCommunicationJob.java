@@ -60,7 +60,7 @@ public class SSOCommunicationJob extends AbstractJob {
                     try{
                         userSubscriptionModel = subscriptionServiceHelper.updateSSOStatus(userSubscriptionModel);
                         if (userSubscriptionModel.isSsoCommunicated()) {
-                            userSubscriptionModel = subscriptionService.saveUserSubscription(userSubscriptionModel, false, EventEnum.SSO_COMMUNICATION, false);
+                            userSubscriptionModel = subscriptionService.saveUserSubscription(userSubscriptionModel, false, EventEnum.SSO_COMMUNICATION, false, false);
                             recordsAffected++;
                             affectedModels.add(userSubscriptionModel.getId());
                         }
