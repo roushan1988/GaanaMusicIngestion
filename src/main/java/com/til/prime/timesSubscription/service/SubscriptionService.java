@@ -25,11 +25,12 @@ public interface SubscriptionService {
     BackendSubscriptionActivationResponse backendSubscriptionActivation(BackendSubscriptionActivationRequest request);
     UserModel getOrCreateUserWithMobileCheck(GenericRequest request, ValidationResponse validationResponse);
     UserSubscriptionModel saveUserSubscription(UserSubscriptionModel userSubscriptionModel, boolean retryForOrderId, EventEnum event, boolean publishStatus, boolean updateSSO);
-    UserSubscriptionModel saveUserSubscription(UserSubscriptionModel userSubscriptionModel, boolean retryForOrderId, EventEnum event, boolean publishStatus, boolean updateSSO, boolean ssoIdUpdated);
-    void updateUserStatus(UserSubscriptionModel userSubscriptionModel, UserModel userModel);
+    UserSubscriptionModel saveUserSubscription(UserSubscriptionModel userSubscriptionModel, boolean retryForOrderId, EventEnum event, boolean publishStatus, boolean updateSSO, boolean ssoIdUpdated, boolean publishDetailsUpdated);
+    SubscriptionStatusDTO updateUserStatus(UserSubscriptionModel userSubscriptionModel, UserModel userModel);
+    SubscriptionStatusDTO getUserStatusCacheWithUpdateByMobile(String mobile);
     void clearUserStatusCache(String mobile);
     UserModel saveUserModel(UserModel userModel, EventEnum eventEnum, boolean retryForPrimeId);
-    void updateUserStatus(UserSubscriptionModel userSubscriptionModel);
+    SubscriptionStatusDTO updateUserStatus(UserSubscriptionModel userSubscriptionModel);
     GenericResponse updateCacheForMobile(GenericRequest request);
     CustomerSearchCRMResponse customerSearchCRM(CustomerSearchRequest request);
     CustomerDetailsCRMResponse customerDetailsCRM(CustomerSearchRequest request);
@@ -43,5 +44,5 @@ public interface SubscriptionService {
     GenericResponse deleteUser(GenericRequest request);
     // don't call below method from anywhere except from saveSubscription or saveUser, this is just for async implementation
     void saveUserAuditAsync(UserModel userModel, EventEnum event);
-    void saveUserSubscriptionAuditWithExternalUpdatesAsync(UserSubscriptionModel userSubscriptionModel, EventEnum event, boolean publishStatus, boolean updateSSO, boolean ssoIdUpdated);
+    void saveUserSubscriptionAuditWithExternalUpdatesAsync(UserSubscriptionModel userSubscriptionModel, SubscriptionStatusDTO statusDTO, EventEnum event, boolean publishStatus, boolean updateSSO, boolean ssoIdUpdated, boolean publishDetailsUpdated);
 }

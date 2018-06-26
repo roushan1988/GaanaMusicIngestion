@@ -52,7 +52,7 @@ public class SSOCommunicationJob extends AbstractJob {
             int page = 0;
             loop1:
             while(true) {
-                List<UserSubscriptionModel> userSubscriptions = userSubscriptionRepository.findUserSubscriptionsForSSOStatusUpdate(StatusEnum.VALID_EXTERNAL_PUBLISH_STATUS_SET, new PageRequest(page++, GlobalConstants.DEFAULT_PAGE_SIZE));
+                List<UserSubscriptionModel> userSubscriptions = userSubscriptionRepository.findUserSubscriptionsForSSOStatusUpdate(StatusEnum.VALID_SSO_UPDATE_STATUS_SET, new PageRequest(page++, GlobalConstants.DEFAULT_PAGE_SIZE));
                 if(CollectionUtils.isEmpty(userSubscriptions)){
                     break loop1;
                 }

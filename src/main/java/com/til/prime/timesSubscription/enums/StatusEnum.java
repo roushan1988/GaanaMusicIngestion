@@ -20,6 +20,7 @@ public enum StatusEnum {
     public static Set<StatusEnum> VALID_USER_STATUS_HISTORY_SET = Sets.newHashSet(StatusEnum.ACTIVE, StatusEnum.EXPIRED, StatusEnum.CANCELLED, StatusEnum.ACTIVE_CANCELLED);
     public static Set<StatusEnum> VALID_EXTERNAL_PUBLISH_WITH_LAST_END_DATE_STATUS_SET = Sets.newHashSet(StatusEnum.ACTIVE, StatusEnum.CANCELLED, StatusEnum.EXPIRED, StatusEnum.ACTIVE_CANCELLED);
     public static Set<StatusEnum> VALID_EXTERNAL_PUBLISH_STATUS_SET = Sets.newHashSet(StatusEnum.ACTIVE, StatusEnum.EXPIRED, StatusEnum.ACTIVE_CANCELLED);
+    public static Set<StatusEnum> VALID_SSO_UPDATE_STATUS_SET = Sets.newHashSet(StatusEnum.ACTIVE, StatusEnum.EXPIRED, StatusEnum.ACTIVE_CANCELLED);
     public static Set<StatusEnum> VALID_CACHE_UPDATE_WITH_LAST_END_DATE_SET = Sets.newHashSet(StatusEnum.ACTIVE, StatusEnum.EXPIRED, StatusEnum.CANCELLED, StatusEnum.ACTIVE_CANCELLED, StatusEnum.FUTURE);
     public static Set<StatusEnum> VALID_CACHE_UPDATE_SET = Sets.newHashSet(StatusEnum.ACTIVE, StatusEnum.EXPIRED, StatusEnum.ACTIVE_CANCELLED, StatusEnum.FUTURE);
 

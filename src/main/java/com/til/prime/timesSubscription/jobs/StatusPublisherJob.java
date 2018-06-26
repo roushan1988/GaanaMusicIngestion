@@ -2,11 +2,11 @@ package com.til.prime.timesSubscription.jobs;
 
 import com.til.prime.timesSubscription.constants.GlobalConstants;
 import com.til.prime.timesSubscription.dao.UserSubscriptionRepository;
+import com.til.prime.timesSubscription.dto.external.SubscriptionStatusDTO;
 import com.til.prime.timesSubscription.dto.internal.AffectedModelDetails;
 import com.til.prime.timesSubscription.dto.internal.JobDetails;
 import com.til.prime.timesSubscription.enums.EventEnum;
 import com.til.prime.timesSubscription.enums.JobKeyEnum;
-import com.til.prime.timesSubscription.enums.StatusEnum;
 import com.til.prime.timesSubscription.model.JobModel;
 import com.til.prime.timesSubscription.model.UserSubscriptionModel;
 import com.til.prime.timesSubscription.service.SubscriptionService;
@@ -52,13 +52,14 @@ public class StatusPublisherJob extends AbstractJob {
             int page = 0;
             loop1:
             while(true) {
-                List<UserSubscriptionModel> userSubscriptions = userSubscriptionRepository.findUserSubscriptionsForStatusPublish(StatusEnum.VALID_EXTERNAL_PUBLISH_STATUS_SET, new PageRequest(page++, GlobalConstants.DEFAULT_PAGE_SIZE));
+                List<UserSubscriptionModel> userSubscriptions = userSubscriptionRepository.findUserSubscriptionsForStatusPublish(new PageRequest(page++, GlobalConstants.DEFAULT_PAGE_SIZE));
                 if(CollectionUtils.isEmpty(userSubscriptions)){
                     break loop1;
                 }
                 for (UserSubscriptionModel userSubscriptionModel : userSubscriptions) {
                     try{
-                        userSubscriptionModel = subscriptionServiceHelper.publishUserStatus(userSubscriptionModel);
+                        SubscriptionStatusDTO subscriptionStatusDTO = subscriptionService.getUserStatusCacheWithUpdateByMobile(userSubscriptionModel.getUser().getMobile());
+                        userSubscriptionModel = subscriptionServiceHelper.publishUserStatus(userSubscriptionModel, subscriptionStatusDTO);
                         if (userSubscriptionModel.isStatusPublished()) {
                             userSubscriptionModel = subscriptionService.saveUserSubscription(userSubscriptionModel, false, EventEnum.USER_STATUS_PUBLISH, false, false);
                             recordsAffected++;

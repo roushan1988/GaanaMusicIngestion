@@ -338,6 +338,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 }
                 userSubscriptionModel.setStatusDate(new Date());
                 userSubscriptionModel.setPlanStatus(PlanStatusEnum.getPlanStatus(userSubscriptionModel.getStatus(), userSubscriptionModel.getSubscriptionVariant().getPlanType(), userSubscriptionModel.getSubscriptionVariant().getPrice(), null,  false));
+                userSubscriptionModel.setSsoCommunicated(false);
+                userSubscriptionModel.setStatusPublished(false);
                 if (refundResponse.getRefundedAmount() != null) {
                     refundedAmount = new BigDecimal(refundResponse.getRefundedAmount());
                     refundedAmount.setScale(2, BigDecimal.ROUND_HALF_EVEN);
@@ -372,6 +374,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         if (validationResponse.isValid()) {
             for (UserSubscriptionModel userSubscriptionModel : userSubscriptionModelList) {
                 userSubscriptionModel.setAutoRenewal(false);
+                userSubscriptionModel.setStatusPublished(false);
                 userSubscriptionModel = saveUserSubscription(userSubscriptionModel, false, EventEnum.SUBSCRIPTION_TURN_OFF_AUTO_DEBIT, true, !userSubscriptionModel.isSsoCommunicated());
             }
         }
@@ -409,9 +412,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             validationResponse = subscriptionValidationService.validatePostExtendExpiry(request, userSubscriptionModel, lastUserSubscription, validationResponse);
         }
         if (validationResponse.isValid()) {
-            StatusEnum statusEnum = userSubscriptionModel.getStatus();
             userSubscriptionModel = subscriptionServiceHelper.extendSubscription(userSubscriptionModel, request.getExtensionDays());
-            userSubscriptionModel = saveUserSubscription(userSubscriptionModel, false, EventEnum.SUBSCRIPTION_TRIAL_EXTENSION, true, !userSubscriptionModel.getStatus().equals(statusEnum) || !userSubscriptionModel.isSsoCommunicated());
+            userSubscriptionModel = saveUserSubscription(userSubscriptionModel, false, EventEnum.SUBSCRIPTION_TRIAL_EXTENSION, true, !userSubscriptionModel.isSsoCommunicated());
             communicationService.sendSubscriptionExpiryExtensionCommunication(userSubscriptionModel);
         }
         response = subscriptionServiceHelper.prepareExtendExpiryResponse(response, userSubscriptionModel, validationResponse);
@@ -465,7 +467,11 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         CheckStatusResponse response = new CheckStatusResponse();
         SubscriptionStatusDTO statusDTO = null;
         if (validationResponse.isValid()) {
-            statusDTO = getSubscriptionStatusWithValidation(request, true, validationResponse);
+            try {
+                statusDTO = getUserStatusCacheWithUpdateByMobile(request.getUser().getMobile());
+            }catch (Exception e){
+                validationResponse.addValidationError(ValidationError.valueOf(e.getMessage()));
+            }
         }
         response = subscriptionServiceHelper.prepareCheckStatusResponse(response, false, statusDTO, validationResponse);
         return response;
@@ -477,35 +483,14 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         CheckStatusResponse response = new CheckStatusResponse();
         SubscriptionStatusDTO statusDTO = null;
         if (validationResponse.isValid()) {
-            statusDTO = getSubscriptionStatusWithValidation(request, !external, validationResponse);
+            try {
+                statusDTO = getUserStatusCacheWithUpdateByMobile(request.getUser().getMobile());
+            }catch (Exception e){
+                validationResponse.addValidationError(ValidationError.valueOf(e.getMessage()));
+            }
         }
         response = subscriptionServiceHelper.prepareCheckStatusResponse(response, external, statusDTO, validationResponse);
         return response;
-    }
-
-    private SubscriptionStatusDTO getSubscriptionStatusWithValidation(CheckStatusRequest request, boolean updateCache, ValidationResponse validationResponse) {
-        SubscriptionStatusDTO statusDTO = null;
-        Cache.ValueWrapper vw = cacheManager.getCache(RedisConstants.PRIME_STATUS_CACHE_KEY).get(request.getUser().getMobile());
-        if (vw != null) {
-            statusDTO = (SubscriptionStatusDTO) vw.get();
-        }
-//        if (statusDTO == null && updateCache) { //cache update step
-        if (statusDTO == null) { //cache update step
-            LOG.info("Into cache update step");
-            UserSubscriptionModel userSubscriptionModel = null;
-            userSubscriptionModel = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndStatusInAndDeletedFalseAndOrderCompletedTrueOrderByIdDesc(request.getUser().getMobile(), StatusEnum.VALID_USER_STATUS_HISTORY_SET);
-            subscriptionValidationService.validatePostCheckStatus(request, userSubscriptionModel, validationResponse);
-            if (validationResponse.isValid()) {
-                updateUserStatus(userSubscriptionModel);
-                vw = cacheManager.getCache(RedisConstants.PRIME_STATUS_CACHE_KEY).get(request.getUser().getMobile());
-                if (vw != null) {
-                    statusDTO = (SubscriptionStatusDTO) vw.get();
-                }
-            }
-        }
-        LOG.info("SubscriptionStatusDTO: " + statusDTO);
-        LOG.info("Validation Response: " + validationResponse);
-        return statusDTO;
     }
 
     @Override
@@ -617,7 +602,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                     if (CollectionUtils.isNotEmpty(relevantUserSubscriptions)) {
                         for (UserSubscriptionModel model : relevantUserSubscriptions) {
                             model.setUser(userModel);
-                            saveUserSubscription(model, false, EventEnum.USER_SUBSCRIPTION_SWITCH, true, true, true);
+                            saveUserSubscription(model, false, EventEnum.USER_SUBSCRIPTION_SWITCH, true, true, true, true);
                         }
                     }
                     updateUserDetailsInCache(userModel);
@@ -631,19 +616,19 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     @Override
     @Transactional
     public UserSubscriptionModel saveUserSubscription(UserSubscriptionModel userSubscriptionModel, boolean retryForOrderId,  EventEnum event, boolean publishStatus, boolean updateSSO) {
-        return saveUserSubscription(userSubscriptionModel, retryForOrderId, event, publishStatus, updateSSO, updateSSO);
+        return saveUserSubscription(userSubscriptionModel, retryForOrderId, event, publishStatus, updateSSO, updateSSO, publishStatus);
     }
 
     @Override
     @Transactional
-    public UserSubscriptionModel saveUserSubscription(UserSubscriptionModel userSubscriptionModel, boolean retryForOrderId, EventEnum event, boolean publishStatus, boolean updateSSO, boolean userUpdated) {
+    public UserSubscriptionModel saveUserSubscription(UserSubscriptionModel userSubscriptionModel, boolean retryForOrderId, EventEnum event, boolean publishStatus, boolean updateSSO, boolean ssoIdUpdated, boolean publishDetailsUpdated) {
         int retryCount = retryForOrderId ? GlobalConstants.DB_RETRY_COUNT : GlobalConstants.SINGLE_TRY;
         retryLoop:
         while (retryCount > 0) {
             try {
                 userSubscriptionModel = userSubscriptionRepository.save(userSubscriptionModel);
-                updateUserStatus(userSubscriptionModel);
-                applicationContext.getBean(SubscriptionService.class).saveUserSubscriptionAuditWithExternalUpdatesAsync(userSubscriptionModel, event, publishStatus, updateSSO, userUpdated);
+                SubscriptionStatusDTO statusDTO = updateUserStatus(userSubscriptionModel);
+                applicationContext.getBean(SubscriptionService.class).saveUserSubscriptionAuditWithExternalUpdatesAsync(userSubscriptionModel, statusDTO, event, publishStatus, updateSSO, ssoIdUpdated, publishDetailsUpdated);
                 break retryLoop;
             } catch (Exception e) {
                 retryCount--;
@@ -659,15 +644,16 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Async
     @Override
-    public void saveUserSubscriptionAuditWithExternalUpdatesAsync(UserSubscriptionModel userSubscriptionModel, EventEnum event, boolean publishStatus, boolean updateSSO, boolean userUpdated){
-        if (userSubscriptionModel.isOrderCompleted() && StatusEnum.VALID_EXTERNAL_PUBLISH_STATUS_SET.contains(userSubscriptionModel.getStatus())) {
-            if(updateSSO && (!userSubscriptionModel.isSsoCommunicated() || userUpdated)) {
+    @Transactional
+    public void saveUserSubscriptionAuditWithExternalUpdatesAsync(UserSubscriptionModel userSubscriptionModel, SubscriptionStatusDTO statusDTO, EventEnum event, boolean publishStatus, boolean updateSSO, boolean ssoIdUpdated, boolean publishDetailsUpdated){
+        if (userSubscriptionModel.isOrderCompleted()) {
+            if(StatusEnum.VALID_SSO_UPDATE_STATUS_SET.contains(userSubscriptionModel.getStatus()) && updateSSO && (!userSubscriptionModel.isSsoCommunicated() || ssoIdUpdated)) {
                 userSubscriptionModel = subscriptionServiceHelper.updateSSOStatus(userSubscriptionModel);
             }
-            if(publishStatus && !userSubscriptionModel.isStatusPublished()){
-                userSubscriptionModel = subscriptionServiceHelper.publishUserStatus(userSubscriptionModel);
+            if(publishStatus && publishDetailsUpdated){
+                userSubscriptionModel = subscriptionServiceHelper.publishUserStatus(userSubscriptionModel, statusDTO);
             }
-            if((publishStatus || updateSSO) && userSubscriptionModel.isSsoCommunicated() || userSubscriptionModel.isStatusPublished()){
+            if((publishStatus || updateSSO) && (userSubscriptionModel.isSsoCommunicated() || userSubscriptionModel.isStatusPublished())){
                 userSubscriptionModel = userSubscriptionRepository.save(userSubscriptionModel);
             }
         }
@@ -675,8 +661,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         auditModel = userSubscriptionAuditRepository.save(auditModel);
     }
 
-    public void updateUserStatus(UserSubscriptionModel userSubscriptionModel) {
-        updateUserStatus(userSubscriptionModel, userSubscriptionModel.getUser());
+    public SubscriptionStatusDTO updateUserStatus(UserSubscriptionModel userSubscriptionModel) {
+        return updateUserStatus(userSubscriptionModel, userSubscriptionModel.getUser());
     }
 
     @Override
@@ -711,7 +697,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Override
     @Transactional
-    public void updateUserStatus(UserSubscriptionModel userSubscriptionModel, UserModel userModel) {
+    public SubscriptionStatusDTO updateUserStatus(UserSubscriptionModel userSubscriptionModel, UserModel userModel) {
         if (userSubscriptionModel != null && userSubscriptionModel.isOrderCompleted() && StatusEnum.VALID_CACHE_UPDATE_WITH_LAST_END_DATE_SET.contains(userSubscriptionModel.getStatus())) {
             try {
                 if (userSubscriptionModel.getStatus() == StatusEnum.FUTURE) {
@@ -722,7 +708,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                         statusDTO.setLastEndDate(userSubscriptionModel.getEndDate());
                         cacheManager.getCache(RedisConstants.PRIME_STATUS_CACHE_KEY).put(userSubscriptionModel.getUser().getMobile(), statusDTO);
                     }
-                    return;
+                    return statusDTO;
                 }
                 if (userSubscriptionModel.getStatus() == StatusEnum.CANCELLED) {
                     LOG.info("Updating user status for future cancellation of userSubscription: " + userSubscriptionModel + ", user: " + userModel);
@@ -732,7 +718,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                     String mobile = userSubscriptionModel.getUser().getMobile();
                     LOG.info("Status DTO: " + statusDTO);
                     cacheManager.getCache(RedisConstants.PRIME_STATUS_CACHE_KEY).put(mobile, statusDTO);
-                    return;
+                    return statusDTO;
                 }
                 LOG.info("Updating user status, userSubscription: " + userSubscriptionModel + ", user: " + userModel);
                 UserSubscriptionModel lastUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndStatusInAndDeletedFalseAndOrderCompletedTrueOrderByIdDesc(userSubscriptionModel.getUser().getMobile(), StatusEnum.VALID_END_DATE_DISPLAY_STATUS_SET);
@@ -740,11 +726,38 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 String mobile = userSubscriptionModel.getUser().getMobile();
                 LOG.info("Status DTO: " + statusDTO);
                 cacheManager.getCache(RedisConstants.PRIME_STATUS_CACHE_KEY).put(mobile, statusDTO);
+                return statusDTO;
             } catch (Exception e) {
                 LOG.error("Exception while updateUserStatus: ", e);
                 throw e;
             }
         }
+        return getUserStatusCacheWithUpdateByMobile(userModel.getMobile());
+    }
+
+    private SubscriptionStatusDTO getUserStatusCacheByMobile(String mobile){
+        Cache.ValueWrapper vw = cacheManager.getCache(RedisConstants.PRIME_STATUS_CACHE_KEY).get(mobile);
+        if (vw != null) {
+            return  (SubscriptionStatusDTO) vw.get();
+        }
+        return null;
+    }
+
+    @Override
+    public SubscriptionStatusDTO getUserStatusCacheWithUpdateByMobile(String mobile) {
+        SubscriptionStatusDTO statusDTO = getUserStatusCacheByMobile(mobile);
+        if (statusDTO == null) { //cache update step
+            LOG.info("Updating status cache for mobile: "+mobile);
+            UserSubscriptionModel userSubscriptionModel = null;
+            userSubscriptionModel = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndStatusInAndDeletedFalseAndOrderCompletedTrueOrderByIdDesc(mobile, StatusEnum.VALID_USER_STATUS_HISTORY_SET);
+            if (userSubscriptionModel!=null) {
+                statusDTO = updateUserStatus(userSubscriptionModel);
+            }else{
+                throw new RuntimeException("INVALID_USER_SUBSCRIPTION_DETAILS");
+            }
+        }
+        LOG.info("SubscriptionStatusDTO: " + statusDTO);
+        return statusDTO;
     }
 
     @Override
@@ -1488,6 +1501,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Override
     @Async
+    @Transactional
     public void saveUserAuditAsync(UserModel userModel, EventEnum event) {
         UserAuditModel userAuditModel = subscriptionServiceHelper.getUserAudit(userModel, event);
         userAuditRepository.save(userAuditModel);

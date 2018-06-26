@@ -79,6 +79,8 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
     public UserSubscriptionModel updateSubmitPurchaseUserSubscription(SubmitPurchaseRequest request, UserSubscriptionModel userSubscriptionModel, UserSubscriptionModel lastUserSubscription) {
         SubscriptionVariantModel variantModel = userSubscriptionModel.getSubscriptionVariant();
         userSubscriptionModel.setPlanStatus(PlanStatusEnum.getPlanStatus(userSubscriptionModel.getStatus(), variantModel.getPlanType(), variantModel.getPrice(), lastUserSubscription,  request.isAutoRenewalJob()));
+        userSubscriptionModel.setSsoCommunicated(false);
+        userSubscriptionModel.setStatusPublished(false);
         userSubscriptionModel.setPaymentReference(request.getPaymentReference());
         userSubscriptionModel.setTransactionStatus(request.isPaymentSuccess()? TransactionStatusEnum.SUBSCRIPTION_TRANS_SUCCESS: TransactionStatusEnum.SUBSCRIPTION_TRANS_FAILED);
         userSubscriptionModel.setOrderCompleted(request.isPaymentSuccess());
@@ -102,21 +104,26 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
     }
 
     @Override
-    public UserSubscriptionModel publishUserStatus(UserSubscriptionModel userSubscriptionModel) {
-        boolean success = publisherService.publishUserStatus(getPublishedUserStatusDTO(userSubscriptionModel));
+    public UserSubscriptionModel publishUserStatus(UserSubscriptionModel userSubscriptionModel, SubscriptionStatusDTO statusDTO) {
+        boolean success = publisherService.publishUserStatus(getPublishedUserStatusDTO(userSubscriptionModel, statusDTO));
         userSubscriptionModel.setStatusPublished(success);
         return userSubscriptionModel;
     }
 
-    private PublishedUserStatusDTO getPublishedUserStatusDTO(UserSubscriptionModel userSubscriptionModel){
+    private PublishedUserStatusDTO getPublishedUserStatusDTO(UserSubscriptionModel userSubscriptionModel, SubscriptionStatusDTO cacheDTO){
         PublishedUserStatusDTO statusDTO = new PublishedUserStatusDTO();
         statusDTO.setMobile(userSubscriptionModel.getUser().getMobile());
         statusDTO.setSsoId(userSubscriptionModel.getUser().getSsoId());
-        statusDTO.setPlanStatus(userSubscriptionModel.getPlanStatus().getCode());
-        statusDTO.setExpiry(userSubscriptionModel.getEndDate());
-        statusDTO.setEmail(userSubscriptionModel.getUser().getEmail());
-        statusDTO.setAutoRenewal(userSubscriptionModel.isAutoRenewal());
+        statusDTO.setPlanStatus(cacheDTO.getPlanStatus());
+        statusDTO.setExpiry(cacheDTO.getEndDate());
+        statusDTO.setLastExpiry(cacheDTO.getLastEndDate());
+        statusDTO.setEmail(cacheDTO.getEmail());
+        statusDTO.setAutoRenewal(cacheDTO.isAutoRenewal());
         statusDTO.setTimesPrimeUser(PlanStatusEnum.validTimesPrimeUser(statusDTO.getPlanStatus()));
+        statusDTO.setFirstName(cacheDTO.getFirstName());
+        statusDTO.setLastName(cacheDTO.getLastName());
+        statusDTO.setPrimeId(cacheDTO.getPrimeId());
+        statusDTO.setStartDate(cacheDTO.getStartDate());
         return statusDTO;
     }
 
@@ -332,10 +339,13 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
 
     @Override
     public UserSubscriptionModel extendSubscription(UserSubscriptionModel userSubscriptionModel, Long extensionDays) {
+        StatusEnum statusEnum = userSubscriptionModel.getStatus();
         Date newEndDate = TimeUtils.addDaysInDate(userSubscriptionModel.getEndDate(), extensionDays.intValue());
         userSubscriptionModel.setEndDate(newEndDate);
         userSubscriptionModel.setStatus(StatusEnum.getStatusForUserSubscription(userSubscriptionModel, null));
         userSubscriptionModel.setStatusDate(new Date());
+        userSubscriptionModel.setStatusPublished(false);
+        userSubscriptionModel.setSsoCommunicated(userSubscriptionModel.getStatus().equals(statusEnum));
         userSubscriptionModel.setPlanStatus(PlanStatusEnum.getPlanStatus(userSubscriptionModel.getStatus(), userSubscriptionModel.getSubscriptionVariant().getPlanType(), userSubscriptionModel.getSubscriptionVariant().getPrice(), null,  false));
         return userSubscriptionModel;
     }
