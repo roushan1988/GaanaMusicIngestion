@@ -819,10 +819,18 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
                 sb.append(request.getSecretKey());
                 
                 UserDTO user = request.getUser();
+                /*
                 String ssoId = user.getSsoId();
                 if(ssoId!=null && !StringUtils.isEmpty(ssoId)){
                 	sb.append(ssoId);
                 }
+                */
+                
+                String mobile = user.getMobile();
+                if(mobile!=null && !StringUtils.isEmpty(mobile)){
+                	sb.append(mobile);
+                }
+                
                 
                 String checksum = checksumService.calculateChecksumHmacSHA256(properties.getProperty(GlobalConstants.PAYMENTS_ENCRYPTION_KEY), sb.toString());
                 PreConditions.mustBeEqual(checksum, request.getChecksum(), ValidationError.INVALID_ENCRYPTION, validationResponse);

@@ -927,9 +927,10 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     	if(validationResponse.isValid()){
         	UserModel userModel = new UserModel(); 
             UserDTO user = request.getUser();
-            String ssoId = user.getSsoId();
-
-          	userModel = userRepository.findBySsoIdAndDeletedFalse(ssoId);
+            //String ssoId = user.getSsoId();
+            String mobile = user.getMobile();
+            
+          	userModel = userRepository.findByMobileAndDeletedFalse(mobile);
            	//userSubscriptionModelList = userSubscriptionRepository.findByUserMobileAndOrderCompletedAndDeleted(userModel.getMobile(), true, false);
            	if(userModel!=null){
            		customerCRM = convertUserToCustomerCRM(userModel);	
