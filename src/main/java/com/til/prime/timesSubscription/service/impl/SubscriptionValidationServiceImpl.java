@@ -419,7 +419,6 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
                 StringBuilder sb = new StringBuilder();
                 sb.append(request.getSecretKey()).append(request.getUserSubscriptionId()).append(request.getVariantId()).append(request.getOrderId()).append(request.getPrice().doubleValue());
                 String checksum = checksumService.calculateChecksumHmacSHA256(properties.getProperty(GlobalConstants.PAYMENTS_ENCRYPTION_KEY), sb.toString());
-                System.out.println(checksum);
                 PreConditions.mustBeEqual(checksum, request.getChecksum(), ValidationError.INVALID_ENCRYPTION, validationResponse);
             } catch (Exception e) {
                 validationResponse.addValidationError(ValidationError.INVALID_ENCRYPTION);
@@ -436,7 +435,6 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
                 StringBuilder sb = new StringBuilder();
                 sb.append(request.getSecretKey()).append(request.getUserSubscriptionId()).append(request.getPlanId()).append(request.getVariantId()).append(request.getPrice().doubleValue());
                 String checksum = checksumService.calculateChecksumHmacSHA256(properties.getProperty(GlobalConstants.PAYMENTS_ENCRYPTION_KEY), sb.toString());
-                System.out.println(checksum);
                 PreConditions.mustBeEqual(checksum, request.getChecksum(), ValidationError.INVALID_ENCRYPTION, validationResponse);
             } catch (Exception e) {
                 validationResponse.addValidationError(ValidationError.INVALID_ENCRYPTION);
