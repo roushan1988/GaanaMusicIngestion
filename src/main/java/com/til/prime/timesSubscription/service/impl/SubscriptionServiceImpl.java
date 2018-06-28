@@ -805,6 +805,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 statusDTO.setPlanStatus(PlanStatusEnum.FREE_TRAIL_EXPIRED.getCode());
             } else if (userSubscriptionModel.getPlanStatus() == PlanStatusEnum.FREE_TRIAL_WITH_PAYMENT) {
                 statusDTO.setPlanStatus(PlanStatusEnum.FREE_TRIAL_WITH_PAYMENT_EXPIRED.getCode());
+            }else{
+                statusDTO.setPlanStatus(userSubscriptionModel.getPlanStatus().getCode());
             }
         } else {
             statusDTO.setPlanStatus(userSubscriptionModel.getPlanStatus().getCode());
