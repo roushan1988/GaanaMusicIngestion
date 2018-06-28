@@ -642,9 +642,8 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
     private RefundInternalResponse inferPaymentsRefundResponse(PaymentsRefundResponse response){
         if(response.getStatus().equals(GlobalConstants.SUCCESS) && response.getStatusCode()==GlobalConstants.PAYMENTS_SUCCESS_STATUS_CODE){
             return new RefundInternalResponse(true, response.getRefundedAmount());
-        }else{
-            return new RefundInternalResponse(true, null);
         }
+        return new RefundInternalResponse(false, null);
     }
 
     private final boolean communicateSSO(UserSubscriptionModel userSubscriptionModel){
