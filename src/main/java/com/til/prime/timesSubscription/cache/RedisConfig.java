@@ -1,6 +1,7 @@
 package com.til.prime.timesSubscription.cache;
 
 import com.til.prime.timesSubscription.constants.RedisConstants;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachingConfigurerSupport;
@@ -43,7 +44,8 @@ public class RedisConfig extends CachingConfigurerSupport {
         JedisConnectionFactory factory = new JedisConnectionFactory();
         factory.setHostName(redisHostName);
         factory.setPort(redisPort);
-        factory.setPassword(redisPassword);
+        //AWS setup is passwordless and controlled by security group
+        if(StringUtils.isNotEmpty(redisPassword)) factory.setPassword(redisPassword);
         factory.setDatabase(redisDatabase);
         factory.setUsePool(true);
         return factory;
