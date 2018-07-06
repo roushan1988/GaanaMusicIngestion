@@ -1,15 +1,12 @@
 package com.til.prime.timesSubscription.service.impl;
 
-import com.google.gson.Gson;
-import com.til.prime.timesSubscription.constants.GlobalConstants;
 import com.til.prime.timesSubscription.dto.external.EmailTask;
 import com.til.prime.timesSubscription.dto.external.SMSTask;
 import com.til.prime.timesSubscription.service.QueueService;
 import org.apache.log4j.Logger;
-import org.springframework.amqp.core.AmqpTemplate;
-import org.springframework.amqp.core.Message;
-import org.springframework.amqp.core.MessageProperties;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -19,22 +16,21 @@ import java.util.Properties;
 @Service
 public class QueueServiceImpl implements QueueService {
     private static final Logger LOG = Logger.getLogger(QueueServiceImpl.class);
-    private static final Gson gson = new Gson();
-    private static final MessageProperties messageProperties;
-    static {
-        messageProperties = new MessageProperties();
-        messageProperties.setContentType(MessageProperties.CONTENT_TYPE_JSON);
-    }
     @Resource(name = "config_properties")
     private Properties properties;
+    @Value("${kafka.sms.topic}")
+    private String kafkaSMSTopic;
+    @Value("${kafka.email.topic}")
+    private String kafkaEmailTopic;
+
     @Autowired
-    private AmqpTemplate amqpTemplateSMS;
+    private KafkaTemplate<String, SMSTask> kafkaCommSMSTemplate;
     @Autowired
-    private AmqpTemplate amqpTemplateEmail;
+    private KafkaTemplate<String, EmailTask> kafkaCommEmailTemplate;
 
 //    @PostConstruct
-    public void test() throws Exception{
-        while (true) {
+//    public void test() throws Exception{
+//        while (true) {
 //            SMSTask smsTask = new SMSTask();
 //            smsTask.setMobileNumber("9880252944");
 //            smsTask.setPartnerId("TimesSubscription");
@@ -62,33 +58,29 @@ public class QueueServiceImpl implements QueueService {
 //            emailTask.setCtaKey("link1");
 //            emailTask.setTaskPriority(TaskPriorityEnum.HIGH_PRIORITY);
 //            pushToEmailQueue(emailTask);
-            Thread.sleep(10000);
-        }
-    }
+//            Thread.sleep(10000);
+//        }
+//    }
 
     @Override
     @Async
     public void pushToSMSQueue(SMSTask smsTask) {
-        Message message = null;
-        try {
-            message = new Message(gson.toJson(smsTask).getBytes(GlobalConstants.UTF_8), messageProperties);
-            amqpTemplateSMS.send(properties.getProperty(GlobalConstants.SMS_ROUTING_KEY), message);
-            LOG.info("SMSTask pushed into queue: "+smsTask);
-        } catch (Exception e) {
-            LOG.error("Exception", e);
+        try{
+            kafkaCommSMSTemplate.send(kafkaSMSTopic, smsTask).get();
+            LOG.info("Message published, topic: "+kafkaSMSTopic+", message: "+smsTask);
+        }catch (Exception e){
+            LOG.error("Exception while publishing message: "+smsTask, e);
         }
     }
 
     @Override
     @Async
     public void pushToEmailQueue(EmailTask emailTask) {
-        Message message = null;
-        try {
-            message = new Message(gson.toJson(emailTask).getBytes(GlobalConstants.UTF_8), messageProperties);
-            amqpTemplateEmail.send(properties.getProperty(GlobalConstants.EMAIL_ROUTING_KEY), message);
-            LOG.info("EMailTask pushed into queue: "+emailTask);
-        } catch (Exception e) {
-            LOG.error("Exception", e);
+        try{
+            kafkaCommEmailTemplate.send(kafkaEmailTopic, emailTask).get();
+            LOG.info("Message published, topic: "+ kafkaEmailTopic +", message: "+emailTask);
+        }catch (Exception e){
+            LOG.error("Exception while publishing message: "+emailTask, e);
         }
     }
 }

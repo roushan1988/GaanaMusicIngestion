@@ -19,12 +19,12 @@ public class UserStatusPublisherServiceImpl implements UserStatusPublisherServic
     private String kafkaTopic;
 
     @Autowired
-    private KafkaTemplate<String, PublishedUserStatusDTO> kafkaTemplate;
+    private KafkaTemplate<String, PublishedUserStatusDTO> kafkaPubSubTemplate;
 
     @Override
     public boolean publishUserStatus(PublishedUserStatusDTO msg) {
         try{
-            kafkaTemplate.send(kafkaTopic, msg).get();
+            kafkaPubSubTemplate.send(kafkaTopic, msg).get();
             LOG.info("Message published, topic: "+kafkaTopic+", message: "+msg);
             return true;
         }catch (Exception e){

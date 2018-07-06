@@ -29,21 +29,21 @@ public class KafkaConsumerConfig {
     private static final Logger LOG = Logger.getLogger(KafkaConsumerConfig.class);
 
 
-    @Value("${kafka.brokers}")
-    private String kafkaBrokers;
+    @Value("${kafka.pubsub.brokers}")
+    private String kafkaPubSubBrokers;
 
-    @Value("${kafka.jaas.config}")
-    private String jaasConfig;
+    @Value("${kafka.pubsub.jaas.config}")
+    private String jaasPubSubConfig;
 
     @Bean
     public ConsumerFactory<String, PublishedUserStatusDTO> consumerFactory() {
         Map<String, Object> props = new HashMap<>();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaBrokers);
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaPubSubBrokers);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, "test_consumer5");
         props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         props.put(CommonClientConfigs.SECURITY_PROTOCOL_CONFIG, GlobalConstants.SASL_PLAINTEXT);
         props.put(SaslConfigs.SASL_MECHANISM, PlainSaslServer.PLAIN_MECHANISM);
-        props.put(SaslConfigs.SASL_JAAS_CONFIG, jaasConfig);
+        props.put(SaslConfigs.SASL_JAAS_CONFIG, jaasPubSubConfig);
         return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), new JsonDeserializer<>(PublishedUserStatusDTO.class));
     }
 
