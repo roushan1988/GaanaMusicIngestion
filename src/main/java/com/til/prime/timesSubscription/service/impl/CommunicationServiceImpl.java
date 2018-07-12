@@ -102,13 +102,13 @@ public class CommunicationServiceImpl implements CommunicationService {
 
     @Override
     public void sendExistingSubscriptionActivationCommunication(UserSubscriptionModel userSubscription) {
-        SMSTask smsTask = helper.getExistingSubsActivationSMSTask(userSubscription);
-        queueService.pushToSMSQueue(smsTask);
-
-        if (StringUtils.isNotEmpty(userSubscription.getUser().getEmail())) {
-            EmailTask emailTask = helper.getExistingSubsActivationEmailTask(userSubscription);
-            queueService.pushToEmailQueue(emailTask);
-        }
+//        SMSTask smsTask = helper.getExistingSubsActivationSMSTask(userSubscription);
+//        queueService.pushToSMSQueue(smsTask);
+//
+//        if (StringUtils.isNotEmpty(userSubscription.getUser().getEmail())) {
+//            EmailTask emailTask = helper.getExistingSubsActivationEmailTask(userSubscription);
+//            queueService.pushToEmailQueue(emailTask);
+//        }
 
     }
 

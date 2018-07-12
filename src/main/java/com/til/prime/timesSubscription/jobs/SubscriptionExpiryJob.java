@@ -95,7 +95,7 @@ public class SubscriptionExpiryJob extends AbstractJob {
                                     }
                                 }
                             }else {
-                                if (PlanStatusEnum.FREE_TRIAL.equals(plan)){
+                                if (PlanStatusEnum.FREE_TRAIL_EXPIRED.equals(plan)){
                                     communicationService.sendFreeTrailExpiredCommunication(userSubscriptionModel);
                                 }else {
                                     communicationService.sendSubscriptionExpiredCommunication(userSubscriptionModel);
