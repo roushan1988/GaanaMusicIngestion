@@ -650,7 +650,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
     }
 
     private RefundInternalResponse inferPaymentsRefundResponse(PaymentsRefundResponse response){
-        if(response.getStatus().equals(GlobalConstants.SUCCESS) && response.getStatusCode()==GlobalConstants.PAYMENTS_SUCCESS_STATUS_CODE){
+        if((response.getStatus().equals(GlobalConstants.SUCCESS) && response.getStatusCode()==GlobalConstants.PAYMENTS_SUCCESS_STATUS_CODE) || (response.getStatus().equals(GlobalConstants.PENDING) && response.getStatusCode()==GlobalConstants.PAYMENTS_PENDING_STATUS_CODE)){
             return new RefundInternalResponse(true, response.getRefundedAmount());
         }
         return new RefundInternalResponse(false, null);

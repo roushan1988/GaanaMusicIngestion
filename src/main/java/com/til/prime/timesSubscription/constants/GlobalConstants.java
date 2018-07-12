@@ -54,12 +54,14 @@ public class GlobalConstants {
     public static final String GET = "GET";
     public static final String POST = "POST";
     public static final String SUCCESS = "SUCCESS";
+    public static final String PENDING = "PENDING";
     public static final String OK = "OK";
     public static final Gson gson = new Gson();
     public static final Long CRON_BATCH_PROCESSING_COUNT= 500L;
     public static final String PAYMENTS_RENEW_SUBSCRIPTION_URL_KEY = "payments.renew.subscription.url";
     public static final String PAYMENTS_REFUND_URL_KEY = "payments.refund.url";
     public static final int PAYMENTS_SUCCESS_STATUS_CODE = 2000;
+    public static final int PAYMENTS_PENDING_STATUS_CODE = 3000;
     public static final String SMS_ROUTING_KEY = "sms.routing.key";
     public static final String EMAIL_ROUTING_KEY = "email.routing.key";
     public static final String PAYMENTS_REQ_DELIM = "|";
