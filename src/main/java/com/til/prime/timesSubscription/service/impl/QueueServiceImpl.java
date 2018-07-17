@@ -66,7 +66,7 @@ public class QueueServiceImpl implements QueueService {
     @Async
     public void pushToSMSQueue(SMSTask smsTask) {
         try{
-            kafkaCommSMSTemplate.send(kafkaSMSTopic, smsTask).get();
+            kafkaCommSMSTemplate.send(kafkaSMSTopic, smsTask.getMobileNumber(), smsTask).get();
             LOG.info("Message published, topic: "+kafkaSMSTopic+", message: "+smsTask);
         }catch (Exception e){
             LOG.error("Exception while publishing message: "+smsTask, e);
@@ -77,7 +77,7 @@ public class QueueServiceImpl implements QueueService {
     @Async
     public void pushToEmailQueue(EmailTask emailTask) {
         try{
-            kafkaCommEmailTemplate.send(kafkaEmailTopic, emailTask).get();
+            kafkaCommEmailTemplate.send(kafkaEmailTopic, emailTask.getEmailId(), emailTask).get();
             LOG.info("Message published, topic: "+ kafkaEmailTopic +", message: "+emailTask);
         }catch (Exception e){
             LOG.error("Exception while publishing message: "+emailTask, e);
