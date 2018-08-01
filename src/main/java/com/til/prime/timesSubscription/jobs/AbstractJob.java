@@ -11,6 +11,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.annotation.Resource;
 import java.net.InetAddress;
@@ -85,11 +86,30 @@ public abstract class AbstractJob implements Job {
                 if (lock) {
                     releaseLock();
                     LOG.info("Released lock after execution with key: " + getJobKey());
+                }else{
+                    LOG.info("Lock not acquired for job key: "+getJobKey());
                 }
             }
         }else{
             LOG.info("Cron not enabled on this server for job key: "+getJobKey());
         }
+    }
+
+    @PostConstruct
+    public void startup() throws Exception{
+        LOG.info("Checking locks for job with key: "+getJobKey());
+        try {
+            JobModel jobModel = jobRepository.findByJobKeyAndOwner(getJobKey(), getCurrentSystemIP());
+            if(jobModel!=null){
+                LOG.info("Releasing lock for job with key: "+getJobKey());
+                boolean released = releaseLock();
+                LOG.info("Lock release "+(released?"SUCCESS":"FAILURE")+" for job with key: "+getJobKey());
+            }
+        } catch (Exception e) {
+            LOG.error("Exception while releasing lock on startup", e);
+            throw e;
+        }
+        LOG.info("Checkup complete for job with key: "+getJobKey());
     }
 
     @PreDestroy

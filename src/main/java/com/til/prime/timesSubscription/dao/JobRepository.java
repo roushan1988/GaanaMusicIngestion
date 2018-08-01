@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 public interface JobRepository extends GenericJpaRepository<JobModel, Long> {
     JobModel findByJobKey(JobKeyEnum jobKey);
+    JobModel findByJobKeyAndOwner(JobKeyEnum jobKey, String owner);
     @Modifying
     @Transactional
     @Query(value="update JobModel j set j.owner = :owner where j.jobKey = :jobKey and j.owner is null")
