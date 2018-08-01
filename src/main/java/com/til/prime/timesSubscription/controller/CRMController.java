@@ -1,7 +1,11 @@
 package com.til.prime.timesSubscription.controller;
 
-import com.til.prime.timesSubscription.constants.GlobalConstants;
+import com.til.prime.timesSubscription.aspect.Loggable;
+import com.til.prime.timesSubscription.dao.UserSubscriptionRepository;
 import com.til.prime.timesSubscription.dto.external.*;
+import com.til.prime.timesSubscription.service.PropertyService;
+import com.til.prime.timesSubscription.service.SubscriptionService;
+import com.til.prime.timesSubscription.util.ResponseUtil;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -9,12 +13,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import com.til.prime.timesSubscription.aspect.Loggable;
-import com.til.prime.timesSubscription.dao.UserSubscriptionRepository;
-import com.til.prime.timesSubscription.service.PropertyService;
-import com.til.prime.timesSubscription.service.SubscriptionService;
-import com.til.prime.timesSubscription.util.ResponseUtil;
 
 @Controller
 @RequestMapping("/crm")
@@ -215,16 +213,16 @@ public class CRMController {
     @RequestMapping(path="/deleteUser", method = RequestMethod.POST)
     @ResponseBody
     public GenericResponse deleteUser(@RequestBody GenericRequest request){
-        if(GlobalConstants.USER_DELETION_ALLOWED_ENVIRONMENTS.contains(System.getProperty(GlobalConstants.ENVIRONMENT))){
-            try {
-                return subscriptionService.deleteUser(request);
-            } catch (Exception e) {
-                LOG.error("Exception in deleteUser: ", e);
-                GenericResponse response = new GenericResponse();
-                return ResponseUtil.createExceptionResponse(response, 10);
-            }
+//        if(GlobalConstants.USER_DELETION_ALLOWED_ENVIRONMENTS.contains(System.getProperty(GlobalConstants.ENVIRONMENT))){
+        try {
+            return subscriptionService.deleteUser(request);
+        } catch (Exception e) {
+            LOG.error("Exception in deleteUser: ", e);
+            GenericResponse response = new GenericResponse();
+            return ResponseUtil.createExceptionResponse(response, 10);
         }
-        return ResponseUtil.createExceptionResponse(new GenericResponse(), 10);
+//        }
+//        return ResponseUtil.createExceptionResponse(new GenericResponse(), 10);
     }
     
 }
