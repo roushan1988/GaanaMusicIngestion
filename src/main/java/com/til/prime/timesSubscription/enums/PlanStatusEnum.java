@@ -8,7 +8,7 @@ import java.util.*;
 public enum PlanStatusEnum {
     INIT(0),
     FREE_TRIAL(1),
-    FREE_TRAIL_EXPIRED(2),
+    FREE_TRIAL_EXPIRED(2),
     FREE_TRIAL_WITH_PAYMENT(3),
     FREE_TRIAL_WITH_PAYMENT_EXPIRED(4),
     SUBSCRIPTION(5),
@@ -45,7 +45,7 @@ public enum PlanStatusEnum {
         }else if(status==StatusEnum.EXPIRED){
             if(PlanTypeEnum.USAGE_RESTRICTED_PLANS_TYPES.contains(planTypeEnum)){
                 if(price.compareTo(BigDecimal.ZERO)<=0){
-                    return PlanStatusEnum.FREE_TRAIL_EXPIRED;
+                    return PlanStatusEnum.FREE_TRIAL_EXPIRED;
                 }else{
                     return PlanStatusEnum.FREE_TRIAL_WITH_PAYMENT_EXPIRED;
                 }

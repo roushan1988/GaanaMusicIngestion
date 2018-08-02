@@ -802,7 +802,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             if (userSubscriptionModel.getPlanStatus() == PlanStatusEnum.SUBSCRIPTION || userSubscriptionModel.getPlanStatus() == PlanStatusEnum.SUBSCRIPTION_AUTO_RENEWAL) {
                 statusDTO.setPlanStatus(PlanStatusEnum.SUBSCRIPTION_EXPIRED.getCode());
             } else if (userSubscriptionModel.getPlanStatus() == PlanStatusEnum.FREE_TRIAL) {
-                statusDTO.setPlanStatus(PlanStatusEnum.FREE_TRAIL_EXPIRED.getCode());
+                statusDTO.setPlanStatus(PlanStatusEnum.FREE_TRIAL_EXPIRED.getCode());
             } else if (userSubscriptionModel.getPlanStatus() == PlanStatusEnum.FREE_TRIAL_WITH_PAYMENT) {
                 statusDTO.setPlanStatus(PlanStatusEnum.FREE_TRIAL_WITH_PAYMENT_EXPIRED.getCode());
             }else{
