@@ -821,6 +821,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         statusDTO.setFirstName(userSubscriptionModel.getUser().getFirstName());
         statusDTO.setLastName(userSubscriptionModel.getUser().getLastName());
         statusDTO.setPrimeId(userSubscriptionModel.getUser().getPrimeId());
+        statusDTO.setEmail(userSubscriptionModel.getUser().getEmail());
         LOG.info("StatusDTO: " + statusDTO);
         return statusDTO;
     }
