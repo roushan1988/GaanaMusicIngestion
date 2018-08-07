@@ -56,5 +56,5 @@ public interface CommunicationServiceHelper {
 
     EmailTask getSubscriptionExtensionEmailTask(UserSubscriptionModel userSubscriptionModel);
 
-
+    SMSTask getSsoOtpSMSTask(String mobile, String otp);
 }

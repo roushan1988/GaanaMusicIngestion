@@ -14,6 +14,7 @@ public class GlobalConstants {
     public static final int MILLIS_IN_AN_HOUR = 3600000;
     public static final int MILLIS_IN_A_DAY = 24*3600000;
     public static final String UTF_8 = "UTF-8";
+    public static final String SSO_CLIENT = "SSO";
     public static final String TYPE = "type";
     public static final String CHANNEL = "channel";
     public static final String SSOID = "ssoid";
@@ -90,6 +91,7 @@ public class GlobalConstants {
     public static final String SUBSCRIPTION_RENEWED_SMS_TEMPLATE_KEY = "subscription.renewed.sms.key";
     public static final String SUBSCRIPTION_EXTENDED_SMS_TEMPLATE_KEY = "subscription.extended.sms.key";
     public static final String SUBSCRIPTION_CANCELLED_SMS_TEMPLATE_KEY = "subscription.cancelled.sms.key";
+    public static final String SUBSCRIPTION_SSO_OTP_SMS_TEMPLATE_KEY = "subscription.sso.otp.sms.key";
 
     public static final String FREE_TRAIL_EXPIRY_REMINDER_SMS_TEMPLATE_KEY = "free.trail.expiry.reminder.sms.key";
     public static final String SUBSCRIPTION_EXPIRY_REMINDER_SMS_TEMPLATE_KEY = "subscription.expiry.reminder.sms.key";

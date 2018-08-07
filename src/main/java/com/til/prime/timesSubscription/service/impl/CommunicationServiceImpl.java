@@ -60,6 +60,12 @@ public class CommunicationServiceImpl implements CommunicationService {
     }
 
     @Override
+    public void sendSsoOtpSMS(String mobile, String otp) {
+        SMSTask smsTask = helper.getSsoOtpSMSTask(mobile, otp);
+        queueService.pushToSMSQueue(smsTask);
+    }
+
+    @Override
     public void sendSubscriptionCancellationCommunication(UserSubscriptionModel userSubscription) {
 
         SMSTask smsTask = helper.getCancelSubscriptionSMSTask(userSubscription);

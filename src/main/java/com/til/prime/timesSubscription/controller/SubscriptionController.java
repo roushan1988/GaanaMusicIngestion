@@ -236,6 +236,19 @@ public class SubscriptionController {
     }
 
     @Loggable
+    @RequestMapping(path="/sso/sendOtpSms", method = RequestMethod.POST)
+    @ResponseBody
+    public GenericResponse sendOtpSmsForSSO(@RequestBody SsoOtpRequest request){
+        try {
+            return subscriptionService.sendOtpSmsForSSO(request);
+        }catch (Exception e){
+            LOG.error("Exception in sendOtpSmsForSSO: ", e);
+            GenericResponse response = new GenericResponse();
+            return ResponseUtil.createExceptionResponse(response, 10);
+        }
+    }
+
+    @Loggable
     @RequestMapping(path="/otp/send", method = RequestMethod.POST)
     @ResponseBody
     public GenericResponse sendOtp(@RequestBody OtpRequest request){

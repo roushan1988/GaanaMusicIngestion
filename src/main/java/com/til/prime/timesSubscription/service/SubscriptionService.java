@@ -36,6 +36,7 @@ public interface SubscriptionService {
     CustomerDetailsCRMResponse customerDetailsCRM(CustomerSearchRequest request);
     OrderDetailsCRMResponse getOrderDetailsCRM(OrderDetailsRequest request);
     OrderSearchCRMResponse orderSearchCRM(OrderSearchRequest request);
+    GenericResponse sendOtpSmsForSSO(SsoOtpRequest request);
     GenericResponse sendOtp(OtpRequest request);
     OtpVerificationResponse verifyOtp(OtpVerificationRequest request);
     BackendSubscriptionUserModel saveBackendSubscriptionUser(BackendSubscriptionUserModel user, EventEnum eventEnum);

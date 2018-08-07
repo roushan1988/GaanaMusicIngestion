@@ -10,7 +10,6 @@ import com.til.prime.timesSubscription.model.BackendSubscriptionUserModel;
 import com.til.prime.timesSubscription.model.UserModel;
 import com.til.prime.timesSubscription.model.UserSubscriptionModel;
 import com.til.prime.timesSubscription.service.CommunicationServiceHelper;
-import com.til.prime.timesSubscription.util.GenericUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -338,6 +337,19 @@ public class CommunicationServiceHelperImpl implements CommunicationServiceHelpe
         emailTask.setContext(map);
         emailTask.setTaskPriority(TaskPriorityEnum.HIGH_PRIORITY);
         return emailTask;
+    }
+
+    @Override
+    public SMSTask getSsoOtpSMSTask(String mobile, String otp) {
+        SMSTask smsTask = new SMSTask();
+        smsTask.setMobileNumber(mobile);
+        smsTask.setPartnerId(GlobalConstants.PARTNER_ID_FOR_COMMUNICATION);
+        smsTask.setTemplateKey(properties.getProperty(GlobalConstants.SUBSCRIPTION_SSO_OTP_SMS_TEMPLATE_KEY));
+        Map<String, String> map = Maps.newHashMap();
+        map.put("otp", otp);
+        smsTask.setContext(map);
+        smsTask.setTaskPriority(TaskPriorityEnum.HIGH_PRIORITY);
+        return smsTask;
     }
 
     @Override

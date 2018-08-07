@@ -37,4 +37,6 @@ public interface CommunicationService {
 
     void sendSubscriptionExpiryExtensionCommunication(UserSubscriptionModel userSubscription);
 
+    void sendSsoOtpSMS(String mobile, String otp);
+
 }

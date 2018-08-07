@@ -39,6 +39,19 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
     private CacheService cacheService;
 
     @Override
+    public ValidationResponse validateSsoOtpRequest(SsoOtpRequest request) {
+        ValidationResponse validationResponse = new ValidationResponse();
+        PreConditions.notEmpty(request.getOtp(), ValidationError.INVALID_OTP, validationResponse);
+        PreConditions.validMobile(request.getMobile(), ValidationError.INVALID_MOBILE, validationResponse);
+        PreConditions.notEmpty(request.getChecksum(), ValidationError.INVALID_CHECKSUM, validationResponse);
+        updateValid(validationResponse);
+        if(validationResponse.isValid()){
+            validationResponse = validateEncryptionForSsoOtpRequest(request, validationResponse);
+        }
+        return updateValid(validationResponse);
+    }
+
+    @Override
     public ValidationResponse validatePreAllPlans(PlanListRequest request) {
         ValidationResponse validationResponse = new ValidationResponse();
         if(request.getUser()!=null){
@@ -617,6 +630,21 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
             } catch (Exception e) {
                 validationResponse.addValidationError(ValidationError.INVALID_ENCRYPTION);
             }
+        }
+        return updateValid(validationResponse);
+    }
+
+    private ValidationResponse validateEncryptionForSsoOtpRequest(SsoOtpRequest request, ValidationResponse validationResponse) {
+        try {
+            ExternalClientModel ssoClient = propertyService.getExternalClient(GlobalConstants.SSO_CLIENT);
+            StringBuilder sb = new StringBuilder();
+            sb.append(request.getMobile()).append(request.getOtp());
+            sb.append(ssoClient.getSecretKey());
+            String checksum = checksumService.calculateChecksumHmacSHA256(ssoClient.getEncryptionKey(), sb.toString());
+            System.out.println(checksum);
+            PreConditions.mustBeEqual(checksum, request.getChecksum(), ValidationError.INVALID_ENCRYPTION, validationResponse);
+        } catch (Exception e) {
+            validationResponse.addValidationError(ValidationError.INVALID_ENCRYPTION);
         }
         return updateValid(validationResponse);
     }

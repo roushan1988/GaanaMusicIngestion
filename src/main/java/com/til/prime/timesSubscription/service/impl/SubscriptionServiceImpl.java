@@ -1360,7 +1360,18 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         }
         
     }
-    
+
+    @Override
+    public GenericResponse sendOtpSmsForSSO(SsoOtpRequest request) {
+        ValidationResponse validationResponse = subscriptionValidationService.validateSsoOtpRequest(request);
+        GenericResponse response = new GenericResponse();
+        if (validationResponse.isValid()) {
+            communicationService.sendSsoOtpSMS(request.getMobile(), request.getOtp());
+        }
+        response = subscriptionServiceHelper.prepareGenericResponse(response, validationResponse);
+        return response;
+    }
+
 
     private OrderSearchResultCRM convertUserSubscriptionModelToOrderSearchCRM(UserSubscriptionModel userSubscriptionModel){
     	OrderSearchResultCRM orderSearchResultCRM = new OrderSearchResultCRM();

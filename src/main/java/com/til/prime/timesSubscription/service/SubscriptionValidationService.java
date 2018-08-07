@@ -9,6 +9,7 @@ import com.til.prime.timesSubscription.model.UserSubscriptionModel;
 import java.util.List;
 
 public interface SubscriptionValidationService {
+    ValidationResponse validateSsoOtpRequest(SsoOtpRequest request);
     ValidationResponse validatePreAllPlans(PlanListRequest request);
     ValidationResponse validatePostAllPlans(UserModel userModel, ValidationResponse validationResponse);
     ValidationResponse validatePreInitPurchasePlan(InitPurchaseRequest request, boolean crmRequest);
