@@ -7,6 +7,8 @@ import java.util.List;
 
 public class GlobalConstants {
     public static final Integer DEFAULT_PAGE_SIZE = 100;
+    public static final String DEFAULT_FIRST_NAME = "Preferred Customer";
+    public static final String NULL_STRING = "null";
     public static final String ENVIRONMENT = "env";
     public static final List<String> USER_DELETION_ALLOWED_ENVIRONMENTS = Arrays.asList("dev", "stage", "qa", "preprod");
     public static final String SASL_PLAINTEXT = "SASL_PLAINTEXT";
