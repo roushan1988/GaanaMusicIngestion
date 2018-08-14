@@ -400,7 +400,7 @@ public class CommunicationServiceHelperImpl implements CommunicationServiceHelpe
         smsTask.setTemplateKey(properties.getProperty(GlobalConstants.SUBSCRIPTION_EXPIRY_REMINDER_SMS_TEMPLATE_KEY));
         if(autoDebit){
             smsTask.setTemplateKey(properties.getProperty(GlobalConstants.SUBSCRIPTION_EXPIRY_AUTO_DEBIT_REMINDER_SMS_TEMPLATE_KEY));
-            map.put("pmtInstrument", userSubscriptionModel.getPaymentMethod());
+            map.put("pmtInstrument", userSubscriptionModel.getPgMethod());
         }
         smsTask.setContext(map);
         smsTask.setTaskPriority(TaskPriorityEnum.HIGH_PRIORITY);
@@ -422,7 +422,7 @@ public class CommunicationServiceHelperImpl implements CommunicationServiceHelpe
         emailTask.setTemplateKey(properties.getProperty(GlobalConstants.SUBSCRIPTION_EXPIRY_REMINDER_EMAIL_TEMPLATE_KEY));
         if(autoDebit){
             emailTask.setTemplateKey(properties.getProperty(GlobalConstants.SUBSCRIPTION_EXPIRY_AUTO_DEBIT_REMINDER_EMAIL_TEMPLATE_KEY));
-            map.put("pmtInstrument", userSubscriptionModel.getPaymentMethod());
+            map.put("pmtInstrument", userSubscriptionModel.getPgMethod());
         }
 
         emailTask.setContext(map);

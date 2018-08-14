@@ -1157,7 +1157,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 		customerCRM.setAutoRenewalStatus(true);
                 		autoDebitOrdersList.add(orderSearchResultCRM);
         	            orderSearchResultCRM.setAutoRenewal(true);
-                		customerCRM.setRenewalMode(userSubscriptionModel.getPaymentMethod());
+                		customerCRM.setRenewalMode(userSubscriptionModel.getPgMethod());
                     }else{
                     	customerCRM.setAutoRenewalStatus(false);
                     }
@@ -1169,7 +1169,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 		customerCRM.setAutoRenewalStatus(true);
                 		autoDebitOrdersList.add(orderSearchResultCRM);
         	            orderSearchResultCRM.setAutoRenewal(true);;
-                		customerCRM.setRenewalMode(userSubscriptionModel.getPaymentMethod());
+                		customerCRM.setRenewalMode(userSubscriptionModel.getPgMethod());
                     }else{
                     	customerCRM.setAutoRenewalStatus(false);
                     }

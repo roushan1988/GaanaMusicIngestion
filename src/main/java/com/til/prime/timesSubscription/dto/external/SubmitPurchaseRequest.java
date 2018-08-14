@@ -1,15 +1,18 @@
 package com.til.prime.timesSubscription.dto.external;
 
-import java.math.BigDecimal;
-
 public class SubmitPurchaseRequest extends GenericRequest {
     private Long userSubscriptionId;
     private String orderId;
     private Long variantId;
+    private Double price;
     private boolean paymentSuccess;
-    private String paymentMethod;
-    private BigDecimal price;
-    private String paymentReference;
+    private Double pgAmount = 0d;
+    private String pgMethod;
+    private String pgReference;
+    private String promoCode;
+    private Double promoAmount = 0d;
+    private Double tpAmount = 0d;
+    private String tpReference;
     private boolean autoRenewal;
     private boolean autoRenewalJob = false;
 
@@ -37,6 +40,14 @@ public class SubmitPurchaseRequest extends GenericRequest {
         this.variantId = variantId;
     }
 
+    public Double getPrice() {
+        return price;
+    }
+
+    public void setPrice(Double price) {
+        this.price = price;
+    }
+
     public boolean isPaymentSuccess() {
         return paymentSuccess;
     }
@@ -45,28 +56,60 @@ public class SubmitPurchaseRequest extends GenericRequest {
         this.paymentSuccess = paymentSuccess;
     }
 
-    public String getPaymentMethod() {
-        return paymentMethod;
+    public Double getPgAmount() {
+        return pgAmount;
     }
 
-    public void setPaymentMethod(String paymentMethod) {
-        this.paymentMethod = paymentMethod;
+    public void setPgAmount(Double pgAmount) {
+        this.pgAmount = pgAmount;
     }
 
-    public BigDecimal getPrice() {
-        return price;
+    public String getPgMethod() {
+        return pgMethod;
     }
 
-    public void setPrice(BigDecimal price) {
-        this.price = price;
+    public void setPgMethod(String pgMethod) {
+        this.pgMethod = pgMethod;
     }
 
-    public String getPaymentReference() {
-        return paymentReference;
+    public String getPgReference() {
+        return pgReference;
     }
 
-    public void setPaymentReference(String paymentReference) {
-        this.paymentReference = paymentReference;
+    public void setPgReference(String pgReference) {
+        this.pgReference = pgReference;
+    }
+
+    public String getPromoCode() {
+        return promoCode;
+    }
+
+    public void setPromoCode(String promoCode) {
+        this.promoCode = promoCode;
+    }
+
+    public Double getPromoAmount() {
+        return promoAmount;
+    }
+
+    public void setPromoAmount(Double promoAmount) {
+        this.promoAmount = promoAmount;
+    }
+
+    public Double getTpAmount() {
+        return tpAmount;
+    }
+
+    public void setTpAmount(Double tpAmount) {
+        this.tpAmount = tpAmount;
+    }
+
+    public String getTpReference() {
+        return tpReference;
+    }
+
+    public void setTpReference(String tpReference) {
+        this.tpReference = tpReference;
     }
 
     public boolean isAutoRenewal() {
@@ -91,15 +134,20 @@ public class SubmitPurchaseRequest extends GenericRequest {
         sb.append("userSubscriptionId=").append(userSubscriptionId);
         sb.append(", orderId='").append(orderId).append('\'');
         sb.append(", variantId=").append(variantId);
-        sb.append(", paymentSuccess=").append(paymentSuccess);
-        sb.append(", paymentMethod='").append(paymentMethod).append('\'');
         sb.append(", price=").append(price);
-        sb.append(", paymentReference='").append(paymentReference).append('\'');
-        sb.append(", checksum='").append(checksum).append('\'');
+        sb.append(", paymentSuccess=").append(paymentSuccess);
+        sb.append(", pgAmount=").append(pgAmount);
+        sb.append(", pgMethod='").append(pgMethod).append('\'');
+        sb.append(", pgReference='").append(pgReference).append('\'');
+        sb.append(", promoCode='").append(promoCode).append('\'');
+        sb.append(", promoAmount=").append(promoAmount);
+        sb.append(", tpAmount=").append(tpAmount);
+        sb.append(", tpReference='").append(tpReference).append('\'');
         sb.append(", autoRenewal=").append(autoRenewal);
         sb.append(", autoRenewalJob=").append(autoRenewalJob);
         sb.append(", user=").append(user);
         sb.append(", secretKey='").append(secretKey).append('\'');
+        sb.append(", checksum='").append(checksum).append('\'');
         sb.append('}');
         return sb.toString();
     }

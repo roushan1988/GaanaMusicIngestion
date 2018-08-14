@@ -10,12 +10,16 @@ public class GenerateOrderRequest extends GenericRequest {
     private Long durationDays;
     private String planType;
     private String business;
-    private String paymentMethod;
     private boolean retryOnFailure;
     private boolean renewal;
     private boolean duplicate;
     private boolean job;
     private String platform;
+    private Double pgAmount = 0d;
+    private String pgMethod;
+    private String promoCode;
+    private Double promoAmount = 0d;
+    private Double tpAmount = 0d;
 
     public Long getUserSubscriptionId() {
         return userSubscriptionId;
@@ -73,14 +77,6 @@ public class GenerateOrderRequest extends GenericRequest {
         this.business = business;
     }
 
-    public String getPaymentMethod() {
-        return paymentMethod;
-    }
-
-    public void setPaymentMethod(String paymentMethod) {
-        this.paymentMethod = paymentMethod;
-    }
-
     public boolean isRetryOnFailure() {
         return retryOnFailure;
     }
@@ -121,6 +117,46 @@ public class GenerateOrderRequest extends GenericRequest {
         this.platform = platform;
     }
 
+    public Double getPgAmount() {
+        return pgAmount;
+    }
+
+    public void setPgAmount(Double pgAmount) {
+        this.pgAmount = pgAmount;
+    }
+
+    public String getPgMethod() {
+        return pgMethod;
+    }
+
+    public void setPgMethod(String pgMethod) {
+        this.pgMethod = pgMethod;
+    }
+
+    public String getPromoCode() {
+        return promoCode;
+    }
+
+    public void setPromoCode(String promoCode) {
+        this.promoCode = promoCode;
+    }
+
+    public Double getPromoAmount() {
+        return promoAmount;
+    }
+
+    public void setPromoAmount(Double promoAmount) {
+        this.promoAmount = promoAmount;
+    }
+
+    public Double getTpAmount() {
+        return tpAmount;
+    }
+
+    public void setTpAmount(Double tpAmount) {
+        this.tpAmount = tpAmount;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("GenerateOrderRequest{");
@@ -131,15 +167,19 @@ public class GenerateOrderRequest extends GenericRequest {
         sb.append(", durationDays=").append(durationDays);
         sb.append(", planType='").append(planType).append('\'');
         sb.append(", business='").append(business).append('\'');
-        sb.append(", paymentMethod='").append(paymentMethod).append('\'');
-        sb.append(", checksum='").append(checksum).append('\'');
         sb.append(", retryOnFailure=").append(retryOnFailure);
         sb.append(", renewal=").append(renewal);
         sb.append(", duplicate=").append(duplicate);
         sb.append(", job=").append(job);
         sb.append(", platform='").append(platform).append('\'');
+        sb.append(", pgAmount=").append(pgAmount);
+        sb.append(", pgMethod='").append(pgMethod).append('\'');
+        sb.append(", promoCode='").append(promoCode).append('\'');
+        sb.append(", promoAmount=").append(promoAmount);
+        sb.append(", tpAmount=").append(tpAmount);
         sb.append(", user=").append(user);
         sb.append(", secretKey='").append(secretKey).append('\'');
+        sb.append(", checksum='").append(checksum).append('\'');
         sb.append('}');
         return sb.toString();
     }

@@ -104,8 +104,13 @@ CREATE TABLE `user_subscription` (
   `user_id` int(11) NOT NULL,
   `ticket_id` varchar(64) DEFAULT NULL,
   `order_id` varchar(64) DEFAULT NULL,
-  `payment_method` varchar(128) DEFAULT NULL,
-  `payment_reference` varchar(128) DEFAULT NULL,
+  `pg_method` varchar(128) DEFAULT NULL,
+  `pg_reference` varchar(128) DEFAULT NULL,
+  `pg_amount` double DEFAULT 0,
+  `tp_reference` varchar(128) DEFAULT NULL,
+  `tp_amount` double DEFAULT 0,
+  `promo_code` varchar(128) DEFAULT NULL,
+  `promo_amount` double DEFAULT 0,
   `order_completed` tinyint(1) NOT NULL,
   `sso_communicated` tinyint(1) NOT NULL,
   `status_published` tinyint(1) NOT NULL,
@@ -150,8 +155,13 @@ CREATE TABLE `user_subscription_audit` (
   `sso_id` varchar(64) NOT NULL,
   `ticket_id` varchar(64) DEFAULT NULL,
   `order_id` varchar(64) DEFAULT NULL,
-  `payment_method` varchar(128) DEFAULT NULL,
-  `payment_reference` varchar(128) DEFAULT NULL,
+  `pg_method` varchar(128) DEFAULT NULL,
+  `pg_reference` varchar(128) DEFAULT NULL,
+  `pg_amount` double DEFAULT 0,
+  `tp_reference` varchar(128) DEFAULT NULL,
+  `tp_amount` double DEFAULT 0,
+  `promo_code` varchar(128) DEFAULT NULL,
+  `promo_amount` double DEFAULT 0,
   `order_completed` tinyint(1) NOT NULL,
   `sso_communicated` tinyint(1) NOT NULL,
   `status_published` tinyint(1) NOT NULL,
@@ -299,18 +309,6 @@ insert into job values (null, "SUBSCRIPTION_EXPIRY_JOB", "SUBSCRIPTION_EXPIRY", 
 insert into job values (null, "SUBSCRIPTION_EXPIRY_REMINDER_JOB", "SUBSCRIPTION_EXPIRY_REMINDER", null, now(), now(), false);
 insert into job values (null, "EXPIRED_SUBSCRIPTION_RENEWAL_REMINDER_JOB", "EXPIRED_SUBSCRIPTION_RENEWAL_REMINDER", null, now(), now(), false);
 
-//production
-+----+-----------+----------------------------------+------------------------------------------------------------------+
-| id | client_id | secret_key                       | encryption_key                                                   |
-+----+-----------+----------------------------------+------------------------------------------------------------------+
-|  1 | 1MG       | naVwjBtl8kX4rv9Kzu6GA7dFeWM1UpSA | HXeIYmLvNCKjbamUnU04eOzumfsG096IYEhxFoqNCRvUYxkfN63k4584GMr8flj4 |
-|  2 | HOUSEJOY  | UxloH5QGnVdSdICIGSCqELYcPG6w1oLu | AZG5OJdFTTzeXeyrVhPJK1zSN7BsMaTt9oDbClF255WpfqzTJRidFC2HRBWZmPvY |
-|  3 | DINEOUT   | qfLKutHHwZyIYpJUEQQXpl48CG4fiNK3 | kYGMN7p0nG7bvjK1pEKQD2LbMcLY575mCJHKnD4vo0WzjmIR1CGdfquyo9q9LGvs |
-|  4 | OLA       | aNYwawgzNHpORkrKmGzhwz81O0rKbljU | 6o6RKuv6TnmEUZCcoyocyothlS0DH09WZRRqCV4Iut0i8l7B6r3EBCKYQOuGqbSn |
-|  5 | BIGBASKET | Om1omHMstMLyIfGYTt4Y4UHHwkqemcnp | DzSXz1aJJGmDQVbKYpmSLMNvKlNS1zA6cXgtArQD0wNRXISRdopVEV37t5iBKHoy |
-|  6 | QUIRK     | 4M5st2SB6MiwiwPXFtbHCqxAlMlEATI6 | fRcTL356OqPJzoueHWvZ0vyiEFdRvM9EsXh82oVy0an2OmMUwNTIPqVmJolnAhjd |
-+----+-----------+----------------------------------+------------------------------------------------------------------+
-
 insert into external_clients values (1, "1MG", "naVwjBtl8kX4rv9Kzu6GA7dFeWM1UpSA", "HXeIYmLvNCKjbamUnU04eOzumfsG096IYEhxFoqNCRvUYxkfN63k4584GMr8flj4", now(), now(), false);
 insert into external_clients values (2, "HOUSEJOY", "UxloH5QGnVdSdICIGSCqELYcPG6w1oLu", "AZG5OJdFTTzeXeyrVhPJK1zSN7BsMaTt9oDbClF255WpfqzTJRidFC2HRBWZmPvY", now(), now(), false);
 insert into external_clients values (3, "DINEOUT", "qfLKutHHwZyIYpJUEQQXpl48CG4fiNK3", "kYGMN7p0nG7bvjK1pEKQD2LbMcLY575mCJHKnD4vo0WzjmIR1CGdfquyo9q9LGvs", now(), now(), false);
@@ -337,6 +335,17 @@ insert into job values (null, "USER_STATUS_PUBLISH_JOB", "USER_STATUS_PUBLISH", 
 ALTER TABLE user_subscription ADD COLUMN `status_date` datetime after status;
 ALTER TABLE user_subscription_audit ADD COLUMN `status_date` datetime after status;
 
+alter table user_subscription add column `pg_amount` double DEFAULT 0 after payment_reference;
+alter table user_subscription add column `tp_reference` varchar(128) DEFAULT NULL after pg_amount;
+alter table user_subscription add column `tp_amount` double DEFAULT 0 after tp_reference;
+alter table user_subscription add column `promo_code` varchar(128) DEFAULT NULL after tp_amount;
+alter table user_subscription add column `promo_amount` double DEFAULT 0 after promo_code;
+
+alter table user_subscription_audit add column `pg_amount` double DEFAULT 0 after payment_reference;
+alter table user_subscription_audit add column `tp_reference` varchar(128) DEFAULT NULL after pg_amount;
+alter table user_subscription_audit add column `tp_amount` double DEFAULT 0 after tp_reference;
+alter table user_subscription_audit add column `promo_code` varchar(128) DEFAULT NULL after tp_amount;
+alter table user_subscription_audit add column `promo_amount` double DEFAULT 0 after promo_code;
 
 alter table user_subscription modify column `ticket_id` varchar(64) DEFAULT NULL;
 alter table user_subscription_audit modify column `ticket_id` varchar(64) DEFAULT NULL;

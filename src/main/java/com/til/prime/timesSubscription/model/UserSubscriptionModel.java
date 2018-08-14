@@ -22,9 +22,19 @@ public class UserSubscriptionModel extends BaseModel {
     @Column(name="order_id")
     private String orderId;
     @Column(name="payment_method")
-    private String paymentMethod;
+    private String pgMethod;
     @Column(name="payment_reference")
-    private String paymentReference;
+    private String pgReference;
+    @Column(name="pg_amount")
+    private Double pgAmount;
+    @Column(name="tp_amount")
+    private Double tpAmount;
+    @Column(name="tp_reference")
+    private String tpReference;
+    @Column(name="promo_amount")
+    private Double promoAmount;
+    @Column(name="promo_code")
+    private String promoCode;
     @Column(name="order_completed")
     private boolean orderCompleted;
     @Column(name="sso_communicated")
@@ -123,20 +133,60 @@ public class UserSubscriptionModel extends BaseModel {
         this.orderId = orderId;
     }
 
-    public String getPaymentMethod() {
-        return paymentMethod;
+    public String getPgMethod() {
+        return pgMethod;
     }
 
-    public void setPaymentMethod(String paymentMethod) {
-        this.paymentMethod = paymentMethod;
+    public void setPgMethod(String pgMethod) {
+        this.pgMethod = pgMethod;
     }
 
-    public String getPaymentReference() {
-        return paymentReference;
+    public String getPgReference() {
+        return pgReference;
     }
 
-    public void setPaymentReference(String paymentReference) {
-        this.paymentReference = paymentReference;
+    public void setPgReference(String pgReference) {
+        this.pgReference = pgReference;
+    }
+
+    public Double getPgAmount() {
+        return pgAmount;
+    }
+
+    public void setPgAmount(Double pgAmount) {
+        this.pgAmount = pgAmount;
+    }
+
+    public Double getTpAmount() {
+        return tpAmount;
+    }
+
+    public void setTpAmount(Double tpAmount) {
+        this.tpAmount = tpAmount;
+    }
+
+    public String getTpReference() {
+        return tpReference;
+    }
+
+    public void setTpReference(String tpReference) {
+        this.tpReference = tpReference;
+    }
+
+    public Double getPromoAmount() {
+        return promoAmount;
+    }
+
+    public void setPromoAmount(Double promoAmount) {
+        this.promoAmount = promoAmount;
+    }
+
+    public String getPromoCode() {
+        return promoCode;
+    }
+
+    public void setPromoCode(String promoCode) {
+        this.promoCode = promoCode;
     }
 
     public boolean isOrderCompleted() {
@@ -266,14 +316,21 @@ public class UserSubscriptionModel extends BaseModel {
         sb.append(", ticketId='").append(ticketId).append('\'');
         sb.append(", subscriptionVariant=").append(subscriptionVariant);
         sb.append(", orderId='").append(orderId).append('\'');
-        sb.append(", paymentMethod='").append(paymentMethod).append('\'');
-        sb.append(", paymentReference='").append(paymentReference).append('\'');
+        sb.append(", pgMethod='").append(pgMethod).append('\'');
+        sb.append(", pgReference='").append(pgReference).append('\'');
+        sb.append(", pgAmount=").append(pgAmount);
+        sb.append(", tpAmount=").append(tpAmount);
+        sb.append(", tpReference='").append(tpReference).append('\'');
+        sb.append(", promoAmount=").append(promoAmount);
+        sb.append(", promoCode='").append(promoCode).append('\'');
         sb.append(", orderCompleted=").append(orderCompleted);
         sb.append(", ssoCommunicated=").append(ssoCommunicated);
+        sb.append(", statusPublished=").append(statusPublished);
         sb.append(", startDate=").append(startDate);
         sb.append(", endDate=").append(endDate);
         sb.append(", planStatus=").append(planStatus);
         sb.append(", status=").append(status);
+        sb.append(", statusDate=").append(statusDate);
         sb.append(", transactionStatus=").append(transactionStatus);
         sb.append(", business=").append(business);
         sb.append(", autoRenewal=").append(autoRenewal);

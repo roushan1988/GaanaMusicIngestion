@@ -65,8 +65,13 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
         if(price.compareTo(BigDecimal.ZERO)<=0 || (crmRequest&&free)){
             String orderId = UniqueIdGeneratorUtil.generateOrderId();
             userSubscriptionModel.setOrderId(orderId);
-            userSubscriptionModel.setPaymentMethod(GlobalConstants.PAYMENT_METHOD_NA);
-            userSubscriptionModel.setPaymentReference(GlobalConstants.PAYMENT_REFERENCE_NA);
+            userSubscriptionModel.setPgMethod(GlobalConstants.PAYMENT_INFO_NA);
+            userSubscriptionModel.setPgReference(GlobalConstants.PAYMENT_INFO_NA);
+            userSubscriptionModel.setPgAmount(0d);
+            userSubscriptionModel.setTpReference(GlobalConstants.PAYMENT_INFO_NA);
+            userSubscriptionModel.setTpAmount(0d);
+            userSubscriptionModel.setPromoCode(GlobalConstants.PAYMENT_INFO_NA);
+            userSubscriptionModel.setPromoAmount(0d);
             userSubscriptionModel.setOrderCompleted(true);
             userSubscriptionModel.setPlanStatus(PlanStatusEnum.getPlanStatus(userSubscriptionModel.getStatus(), planType, variantModel.getPrice(), lastUserSubscription,  false));
             userSubscriptionModel.setTransactionStatus(TransactionStatusEnum.SUBSCRIPTION_TRANS_SUCCESS);
@@ -82,7 +87,8 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
         userSubscriptionModel.setPlanStatus(PlanStatusEnum.getPlanStatus(userSubscriptionModel.getStatus(), variantModel.getPlanType(), userSubscriptionModel.getPrice(), lastUserSubscription,  request.isAutoRenewalJob()));
         userSubscriptionModel.setSsoCommunicated(false);
         userSubscriptionModel.setStatusPublished(false);
-        userSubscriptionModel.setPaymentReference(request.getPaymentReference());
+        userSubscriptionModel.setPgReference(request.getPgReference());
+        userSubscriptionModel.setTpReference(request.getTpReference());
         userSubscriptionModel.setTransactionStatus(request.isPaymentSuccess()? TransactionStatusEnum.SUBSCRIPTION_TRANS_SUCCESS: TransactionStatusEnum.SUBSCRIPTION_TRANS_FAILED);
         userSubscriptionModel.setOrderCompleted(request.isPaymentSuccess());
         userSubscriptionModel.setAutoRenewal(request.isAutoRenewal());
@@ -93,7 +99,11 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
     public UserSubscriptionModel updateGenerateOrderUserSubscription(GenerateOrderRequest request, UserSubscriptionModel userSubscriptionModel) {
         String orderId = UniqueIdGeneratorUtil.generateOrderId();
         userSubscriptionModel.setOrderId(orderId);
-        userSubscriptionModel.setPaymentMethod(request.getPaymentMethod());
+        userSubscriptionModel.setPgMethod(request.getPgMethod());
+        userSubscriptionModel.setPgAmount(request.getPgAmount());
+        userSubscriptionModel.setTpAmount(request.getTpAmount());
+        userSubscriptionModel.setPromoCode(request.getPromoCode());
+        userSubscriptionModel.setPromoAmount(request.getPromoAmount());
         return userSubscriptionModel;
     }
 
@@ -307,8 +317,13 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
         auditModel.setSsoId(userSubscriptionModel.getUser().getSsoId());
         auditModel.setTicketId(userSubscriptionModel.getTicketId());
         auditModel.setOrderId(userSubscriptionModel.getOrderId());
-        auditModel.setPaymentMethod(userSubscriptionModel.getPaymentMethod());
-        auditModel.setPaymentReference(userSubscriptionModel.getPaymentReference());
+        auditModel.setPgAmount(userSubscriptionModel.getPgAmount());
+        auditModel.setPgMethod(userSubscriptionModel.getPgMethod());
+        auditModel.setPgReference(userSubscriptionModel.getPgReference());
+        auditModel.setTpAmount(userSubscriptionModel.getTpAmount());
+        auditModel.setTpReference(userSubscriptionModel.getTpReference());
+        auditModel.setPromoAmount(userSubscriptionModel.getPromoAmount());
+        auditModel.setPromoCode(userSubscriptionModel.getPromoCode());
         auditModel.setOrderCompleted(userSubscriptionModel.isOrderCompleted());
         auditModel.setPrice(userSubscriptionModel.getPrice());
         auditModel.setSsoCommunicated(userSubscriptionModel.isSsoCommunicated());

@@ -147,7 +147,13 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
         PreConditions.notNull(request.getDurationDays(), ValidationError.INVALID_DURATION_DAYS, validationResponse);
         PreConditions.notNullEnumCheck(request.getPlanType(), PlanTypeEnum.names(), ValidationError.INVALID_PLAN_TYPE, validationResponse);
         PreConditions.notNullEnumCheck(request.getBusiness(), BusinessEnum.names(), ValidationError.INVALID_BUSINESS, validationResponse);
-        PreConditions.notEmpty(request.getPaymentMethod(), ValidationError.INVALID_PAYMENT_METHOD, validationResponse);
+        if(request.getPgAmount()>0){
+            PreConditions.notEmpty(request.getPgMethod(), ValidationError.INVALID_PAYMENT_DETAILS, validationResponse);
+        }
+        if(request.getPromoAmount()>0){
+            PreConditions.notEmpty(request.getPromoCode(), ValidationError.INVALID_PAYMENT_DETAILS, validationResponse);
+        }
+        PreConditions.mustBeEqual(request.getPgAmount()+request.getTpAmount()+request.getPromoAmount(), request.getPrice(), ValidationError.INVALID_PRICE, validationResponse);
         if(request.isRenewal() && !request.isJob()){
             PreConditions.notNullEnumCheck(request.getPlatform(), PlatformEnum.names(), ValidationError.INVALID_PLATFORM, validationResponse);
         }
@@ -191,9 +197,18 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
         PreConditions.notNull(request.getUserSubscriptionId(), ValidationError.INVALID_USER_SUBSCRIPTION_ID, validationResponse);
         PreConditions.notEmpty(request.getOrderId(), ValidationError.INVALID_ORDER_ID, validationResponse);
         PreConditions.notNull(request.getVariantId(), ValidationError.INVALID_VARIANT_ID, validationResponse);
-        PreConditions.notEmpty(request.getPaymentMethod(), ValidationError.INVALID_PAYMENT_DETAILS, validationResponse);
-//        PreConditions.notEmpty(request.getPaymentReference(), ValidationError.INVALID_PAYMENT_DETAILS, validationResponse);
+        PreConditions.mustBeTrue(StringUtils.isNotEmpty(request.getPgReference()) || StringUtils.isNotEmpty(request.getPromoCode()) || StringUtils.isNotEmpty(request.getTpReference()), ValidationError.INVALID_PAYMENT_DETAILS, validationResponse);
+        if(StringUtils.isNotEmpty(request.getPgReference())){
+            PreConditions.notEmpty(request.getPgMethod(), ValidationError.INVALID_PAYMENT_DETAILS, validationResponse);
+        }
+        if(StringUtils.isNotEmpty(request.getPromoCode())){
+            PreConditions.notNullPositiveCheck(request.getPromoAmount(), ValidationError.INVALID_PAYMENT_DETAILS, validationResponse);
+        }
+        if(StringUtils.isNotEmpty(request.getTpReference())){
+            PreConditions.notNullPositiveCheck(request.getTpAmount(), ValidationError.INVALID_PAYMENT_DETAILS, validationResponse);
+        }
         PreConditions.notNull(request.getPrice(), ValidationError.INVALID_PRICE, validationResponse);
+        PreConditions.mustBeEqual(request.getPgAmount()+request.getTpAmount()+request.getPromoAmount(), request.getPrice(), ValidationError.INVALID_PRICE, validationResponse);
         return updateValid(validationResponse);
     }
 
@@ -204,8 +219,8 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
         if(userSubscriptionModel!=null){
             PreConditions.mustBeFalse(userSubscriptionModel.getUser().isBlocked(), ValidationError.BLOCKED_USER, validationResponse);
             PreConditions.mustBeFalse(userSubscriptionModel.isOrderCompleted(), ValidationError.ORDER_ALREADY_COMPLETED, validationResponse);
-            PreConditions.mustBeEqual(request.getPaymentMethod(), userSubscriptionModel.getPaymentMethod(), ValidationError.INVALID_PAYMENT_METHOD, validationResponse);
-            PreConditions.bigDecimalComparisonMustBeEqual(userSubscriptionModel.getSubscriptionVariant().getPrice(), request.getPrice(), ValidationError.INVALID_PRICE, validationResponse);
+            PreConditions.mustBeEqual(request.getPgMethod(), userSubscriptionModel.getPgMethod(), ValidationError.INVALID_PAYMENT_METHOD, validationResponse);
+            PreConditions.mustBeEqual(userSubscriptionModel.getSubscriptionVariant().getPrice().doubleValue(), request.getPrice(), ValidationError.INVALID_PRICE, validationResponse);
             if(request.isAutoRenewal()){
                 PreConditions.mustBeTrue(userSubscriptionModel.getSubscriptionVariant().isRecurring(), ValidationError.INVALID_RECURRING_PAYMENT, validationResponse);
             }
