@@ -20,3 +20,8 @@ curl -H "Content-Type: application/json" -X GET -d '{"secretKey":"g45Gy8nd78NngH
 curl -H "Content-Type: application/json" -X POST -d '{"user":{"mobile":"9880252944"}, "resend":true}' 'http://localhost:8081/til/subscription/otp/send' | python -m json.tool
 curl -H "Content-Type: application/json" -X POST -d '{"user":{"mobile":"9880252944"}, "otp":"123456"}' 'http://localhost:8081/til/subscription/otp/verify' | python -m json.tool
 curl -H "Content-Type: application/json" -X POST -d '{"mobile":"9880252944", "otp":"123456", "checksum":"test"}' 'http://localhost:8081/til/subscription//sso/sendOtpSms' | python -m json.tool
+
+
+
+
+curl -H "Content-Type: application/json" -X POST -d '{"secretKey":"g45Gy8nd78NngHjjkjggdeerh678bhYg788nbVbH", "planId":1, "variantId":2, "price": 999.0, "durationDays":365,"planType":"PAYMENT","business":"TIMES_PRIME","channel":"TIMES_PRIME","platform":"CRM", "free":true, "user":{"mobile":"9880252944"}}' 'http://localhost:8081/crm/server/offerSubscription' | python -m json.tool

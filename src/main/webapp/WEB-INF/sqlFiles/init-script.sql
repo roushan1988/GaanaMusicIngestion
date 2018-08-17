@@ -102,7 +102,7 @@ CREATE TABLE `offer`(
 CREATE TABLE `user_subscription` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` int(11) NOT NULL,
-  `ticket_id` varchar(64) NOT NULL,
+  `ticket_id` varchar(64) DEFAULT NULL,
   `order_id` varchar(64) DEFAULT NULL,
   `payment_method` varchar(128) DEFAULT NULL,
   `payment_reference` varchar(128) DEFAULT NULL,
@@ -147,7 +147,7 @@ CREATE TABLE `user_subscription_audit` (
   `event` varchar(32) NOT NULL,
   `user_id` int(11) NOT NULL,
   `sso_id` varchar(64) NOT NULL,
-  `ticket_id` varchar(64) NOT NULL,
+  `ticket_id` varchar(64) DEFAULT NULL,
   `order_id` varchar(64) DEFAULT NULL,
   `payment_method` varchar(128) DEFAULT NULL,
   `payment_reference` varchar(128) DEFAULT NULL,
@@ -334,3 +334,7 @@ insert into job values (null, "USER_STATUS_PUBLISH_JOB", "USER_STATUS_PUBLISH", 
 
 ALTER TABLE user_subscription ADD COLUMN `status_date` datetime after status;
 ALTER TABLE user_subscription_audit ADD COLUMN `status_date` datetime after status;
+
+
+alter table user_subscription modify column `ticket_id` varchar(64) DEFAULT NULL;
+alter table user_subscription_audit modify column `ticket_id` varchar(64) DEFAULT NULL;

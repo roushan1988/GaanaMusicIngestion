@@ -81,7 +81,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         }
         if (validationResponse.isValid()) {
             if (request.getUser() != null) {
-                UserModel userModel = getOrCreateUserWithMobileCheck(request, validationResponse);
+                UserModel userModel = getOrCreateUserWithMobileCheck(request, validationResponse, false);
                 if(validationResponse.isValid()){
                     List<SubscriptionPlanModel> subscriptionPlanModels = null;
                     boolean flag = false;
@@ -150,7 +150,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             validationResponse = subscriptionValidationService.validatePostInitPurchasePlan(request, subscriptionVariantModel, restrictedUsageUserSubscription, lastUserSubscription, crmRequest, validationResponse);
         }
         if (validationResponse.isValid()) {
-            UserModel userModel = getOrCreateUserWithMobileCheck(request, validationResponse);
+            UserModel userModel = getOrCreateUserWithMobileCheck(request, validationResponse, crmRequest);
             if (validationResponse.isValid()) {
                 userSubscriptionModel = subscriptionServiceHelper.generateInitPurchaseUserSubscription(request, subscriptionVariantModel, lastUserSubscription, userModel, request.getPrice(), crmRequest, isFree);
                 EventEnum eventEnum = EventEnum.getEventByInitPlanStatus(userSubscriptionModel.getPlanStatus());
@@ -544,7 +544,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 request.getUser().setLastName(request.getUser().getLastName());
                 request.getUser().setEmail(StringUtils.isEmpty(request.getUser().getEmail()) ? backendUser.getEmail() : request.getUser().getEmail());
                 SubscriptionVariantModel variantModel = propertyService.getBackendFreeTrialVariant(BusinessEnum.TIMES_PRIME, CountryEnum.IN);
-                UserModel userModel = getOrCreateUserWithMobileCheck(request, validationResponse);
+                UserModel userModel = getOrCreateUserWithMobileCheck(request, validationResponse, false);
                 if(validationResponse.isValid()){
                     userSubscriptionModel = subscriptionServiceHelper.generateInitPurchaseUserSubscription(request.getUser(), request.getChannel(), request.getPlatform(), PlanTypeEnum.TRIAL, variantModel.getDurationDays(), variantModel, null, userModel, variantModel.getPrice(), false, true);
                     EventEnum eventEnum = EventEnum.getEventForBackendActivation(userSubscriptionModel.getPlanStatus());
@@ -576,15 +576,18 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Override
     @Transactional
-    public UserModel getOrCreateUserWithMobileCheck(GenericRequest request, ValidationResponse validationResponse) {
+    public UserModel getOrCreateUserWithMobileCheck(GenericRequest request, ValidationResponse validationResponse, boolean crmRequest) {
         UserModel userModel = userRepository.findByMobileAndDeletedFalse(request.getUser().getMobile());
-        if (userModel == null) {
+        if(crmRequest && userModel==null){
+            throw new RuntimeException("User doesn't exist");
+        }
+        if (userModel == null && !crmRequest) {
             userModel = subscriptionServiceHelper.getUser(request);
             userModel = saveUserModel(userModel, EventEnum.NORMAL_USER_CREATION,true);
         } else {
             subscriptionValidationService.validateBlockedUser(userModel, validationResponse);
             if (validationResponse.isValid()) {
-                if(!request.getUser().getSsoId().equals(userModel.getSsoId())){
+                if(!crmRequest && !request.getUser().getSsoId().equals(userModel.getSsoId())){
                     List<UserSubscriptionModel> relevantUserSubscriptions = userSubscriptionRepository.findByUserMobileAndUserDeletedFalseAndOrderCompletedTrueAndDeletedFalseOrderById(userModel.getMobile());
                     List<UserSubscriptionModel> relevantActiveAndFutureSubscriptions = relevantUserSubscriptions.stream().filter(us -> StatusEnum.VALID_WORKING_STATUS_SET.contains(us.getStatus())).collect(Collectors.toList());
                     userModel.setIsDelete(true);
