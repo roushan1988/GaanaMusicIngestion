@@ -1096,7 +1096,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 	activeSubscriptionDetails.setUserSubscriptionId(userSubscriptionModel.getId().toString());
                 	activeSubscriptionDetails.setOrderId(userSubscriptionModel.getOrderId());
                 	
-                	if(userSubscriptionModel.getSubscriptionVariant()!=null){
+                	if(userSubscriptionModel.getSubscriptionVariant()!=null && userSubscriptionModel.getSubscriptionVariant().getPrice()!=null && userSubscriptionModel.getPrice()!=null){
     	            	activeSubscriptionDetails.setPlanDurationDays(userSubscriptionModel.getSubscriptionVariant().getDurationDays().toString());
     	            	activeSubscriptionDetails.setVariantId(userSubscriptionModel.getSubscriptionVariant().getId().toString());
     	            	activeSubscriptionDetails.setSubscriptionPlan(userSubscriptionModel.getSubscriptionVariant().getSubscriptionPlan().getName());
