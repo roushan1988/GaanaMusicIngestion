@@ -337,7 +337,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                     userSubscriptionModel.setStatus(StatusEnum.CANCELLED);
                 }
                 userSubscriptionModel.setStatusDate(new Date());
-                userSubscriptionModel.setPlanStatus(PlanStatusEnum.getPlanStatus(userSubscriptionModel.getStatus(), userSubscriptionModel.getSubscriptionVariant().getPlanType(), userSubscriptionModel.getSubscriptionVariant().getPrice(), null,  false));
+                userSubscriptionModel.setPlanStatus(PlanStatusEnum.getPlanStatus(userSubscriptionModel.getStatus(), userSubscriptionModel.getSubscriptionVariant().getPlanType(), userSubscriptionModel.getPrice(), null,  false));
                 userSubscriptionModel.setSsoCommunicated(false);
                 userSubscriptionModel.setStatusPublished(false);
                 if (refundResponse.getRefundedAmount() != null) {
@@ -1071,8 +1071,8 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                     orderSearchResultCRM.setSubscriptionStatus(userSubscriptionModel.getStatus().toString());
                 }
                 
-                if(userSubscriptionModel.getSubscriptionVariant()!=null && userSubscriptionModel.getSubscriptionVariant().getPrice()!=null){
-                    orderSearchResultCRM.setAmount(userSubscriptionModel.getSubscriptionVariant().getPrice().doubleValue());            	
+                if(userSubscriptionModel.getPrice()!=null){
+                    orderSearchResultCRM.setAmount(userSubscriptionModel.getPrice().doubleValue());
                 }
 
                 if(userSubscriptionModel.getEndDate()!=null){
@@ -1102,7 +1102,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     	            	activeSubscriptionDetails.setSubscriptionPlan(userSubscriptionModel.getSubscriptionVariant().getSubscriptionPlan().getName());
     	            	activeSubscriptionDetails.setPlanType(userSubscriptionModel.getSubscriptionVariant().getPlanType().toString());
     	            	activeSubscriptionDetails.setPlanID(userSubscriptionModel.getSubscriptionVariant().getSubscriptionPlan().getId().toString());
-    	            	activeSubscriptionDetails.setPlanPrice(userSubscriptionModel.getSubscriptionVariant().getPrice().toString());
+    	            	activeSubscriptionDetails.setPlanPrice(userSubscriptionModel.getPrice().toString());
                 	}
                 	
                 	customerCRM.setActiveSubscriptionDetails(activeSubscriptionDetails);
@@ -1235,9 +1235,9 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     		}
         	if(userSubscriptionModel.getSubscriptionVariant()!=null){
             	orderDetailsCRM.setSubscriptionPlan(userSubscriptionModel.getSubscriptionVariant().getDurationDays().toString() + " DAY " + userSubscriptionModel.getSubscriptionVariant().getPlanType().toString());
-            	if(userSubscriptionModel.getSubscriptionVariant().getPrice()!=null){
-                	orderDetailsCRM.setAmount(userSubscriptionModel.getSubscriptionVariant().getPrice().doubleValue());            		
-                	orderDetailsCRM.setBilledAmount(userSubscriptionModel.getSubscriptionVariant().getPrice().toString());
+            	if(userSubscriptionModel.getPrice()!=null && userSubscriptionModel.getSubscriptionVariant()!=null && userSubscriptionModel.getSubscriptionVariant().getPrice()!=null){
+                	orderDetailsCRM.setAmount(userSubscriptionModel.getPrice().doubleValue());
+                	orderDetailsCRM.setBilledAmount(userSubscriptionModel.getPrice().toString());
                 	orderDetailsCRM.setRenewalAmount(userSubscriptionModel.getSubscriptionVariant().getPrice().toString());
                 	orderDetailsCRM.setPlanPrice(userSubscriptionModel.getSubscriptionVariant().getPrice().toString());
 
@@ -1401,7 +1401,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 orderSearchResultCRM.setSubscriptionStatus(userSubscriptionModel.getStatus().toString());
             }
 
-    		orderSearchResultCRM.setAmount(userSubscriptionModel.getSubscriptionVariant().getPrice().doubleValue());
+    		orderSearchResultCRM.setAmount(userSubscriptionModel.getPrice().doubleValue());
     		orderSearchResultCRM.setSubscriptionStatus(userSubscriptionModel.getStatus().toString());
     		
     		orderSearchResultCRM.setExpiryDateVal(userSubscriptionModel.getEndDate());

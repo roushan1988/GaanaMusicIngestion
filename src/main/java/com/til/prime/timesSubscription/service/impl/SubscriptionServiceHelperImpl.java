@@ -79,7 +79,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
     @Override
     public UserSubscriptionModel updateSubmitPurchaseUserSubscription(SubmitPurchaseRequest request, UserSubscriptionModel userSubscriptionModel, UserSubscriptionModel lastUserSubscription) {
         SubscriptionVariantModel variantModel = userSubscriptionModel.getSubscriptionVariant();
-        userSubscriptionModel.setPlanStatus(PlanStatusEnum.getPlanStatus(userSubscriptionModel.getStatus(), variantModel.getPlanType(), variantModel.getPrice(), lastUserSubscription,  request.isAutoRenewalJob()));
+        userSubscriptionModel.setPlanStatus(PlanStatusEnum.getPlanStatus(userSubscriptionModel.getStatus(), variantModel.getPlanType(), userSubscriptionModel.getPrice(), lastUserSubscription,  request.isAutoRenewalJob()));
         userSubscriptionModel.setSsoCommunicated(false);
         userSubscriptionModel.setStatusPublished(false);
         userSubscriptionModel.setPaymentReference(request.getPaymentReference());
@@ -152,7 +152,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
             response.setPlanId(variantModel.getSubscriptionPlan().getId());
             response.setVariantId(variantModel.getId());
             response.setPaymentRequired(!userSubscriptionModel.isOrderCompleted());
-            response.setPaymentAmount(userSubscriptionModel.getSubscriptionVariant().getPrice());
+            response.setPaymentAmount(userSubscriptionModel.getPrice());
             response.setPrimeId(userSubscriptionModel.getUser().getPrimeId());
             response = (InitPurchaseResponse) ResponseUtil.createSuccessResponse(response);
         }else{
@@ -317,7 +317,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
 
     @Override
     public BigDecimal calculateRefundAmount(UserSubscriptionModel userSubscriptionModel) {
-        BigDecimal price = userSubscriptionModel.getSubscriptionVariant().getPrice();
+        BigDecimal price = userSubscriptionModel.getPrice();
         if(price.compareTo(BigDecimal.ZERO)==0){
             return BigDecimal.ZERO;
         }
@@ -348,7 +348,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
         userSubscriptionModel.setStatusDate(new Date());
         userSubscriptionModel.setStatusPublished(false);
         userSubscriptionModel.setSsoCommunicated(userSubscriptionModel.getStatus().equals(statusEnum));
-        userSubscriptionModel.setPlanStatus(PlanStatusEnum.getPlanStatus(userSubscriptionModel.getStatus(), userSubscriptionModel.getSubscriptionVariant().getPlanType(), userSubscriptionModel.getSubscriptionVariant().getPrice(), null,  false));
+        userSubscriptionModel.setPlanStatus(PlanStatusEnum.getPlanStatus(userSubscriptionModel.getStatus(), userSubscriptionModel.getSubscriptionVariant().getPlanType(), userSubscriptionModel.getPrice(), null,  false));
         return userSubscriptionModel;
     }
 

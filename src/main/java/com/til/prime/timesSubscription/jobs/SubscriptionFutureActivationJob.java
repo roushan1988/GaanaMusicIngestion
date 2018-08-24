@@ -68,7 +68,7 @@ public class SubscriptionFutureActivationJob extends AbstractJob {
                         }
                         userSubscriptionModel.setStatus(StatusEnum.ACTIVE);
                         userSubscriptionModel.setStatusDate(new Date());
-                        userSubscriptionModel.setPlanStatus(PlanStatusEnum.getPlanStatus(StatusEnum.ACTIVE, userSubscriptionModel.getSubscriptionVariant().getPlanType(), userSubscriptionModel.getSubscriptionVariant().getPrice(), null, false));
+                        userSubscriptionModel.setPlanStatus(PlanStatusEnum.getPlanStatus(StatusEnum.ACTIVE, userSubscriptionModel.getSubscriptionVariant().getPlanType(), userSubscriptionModel.getPrice(), null, false));
                         userSubscriptionModel.setSsoCommunicated(false);
                         userSubscriptionModel.setStatusPublished(false);
                         subscriptionService.saveUserSubscription(userSubscriptionModel, false, EventEnum.USER_SUBSCRIPTION_ACTIVE, true, true);

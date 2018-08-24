@@ -49,7 +49,7 @@ public class ModelToDTOConvertorUtil {
         dto.setName(variantModel.getName());
         dto.setPlanType(variantModel.getPlanType().name());
         dto.setDurationDays(variantModel.getDurationDays());
-        dto.setPrice(variantModel.getPrice());
+        dto.setPrice(model.getPrice());
         dto.setStartDate(model.getStartDate());
         dto.setEndDate(model.getEndDate());
         dto.setPlanStatus(model.getPlanStatus().name());

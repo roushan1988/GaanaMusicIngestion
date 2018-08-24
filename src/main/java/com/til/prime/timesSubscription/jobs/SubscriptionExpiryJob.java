@@ -61,7 +61,7 @@ public class SubscriptionExpiryJob extends AbstractJob {
                         try{
                             userSubscriptionModel.setStatus(StatusEnum.EXPIRED);
                             userSubscriptionModel.setStatusDate(new Date());
-                            userSubscriptionModel.setPlanStatus(PlanStatusEnum.getPlanStatus(StatusEnum.EXPIRED, userSubscriptionModel.getSubscriptionVariant().getPlanType(), userSubscriptionModel.getSubscriptionVariant().getPrice(), null, false));
+                            userSubscriptionModel.setPlanStatus(PlanStatusEnum.getPlanStatus(StatusEnum.EXPIRED, userSubscriptionModel.getSubscriptionVariant().getPlanType(), userSubscriptionModel.getPrice(), null, false));
                             userSubscriptionModel.setSsoCommunicated(false);
                             userSubscriptionModel.setStatusPublished(false);
                             PlanStatusEnum plan = userSubscriptionModel.getPlanStatus();
@@ -73,7 +73,7 @@ public class SubscriptionExpiryJob extends AbstractJob {
                             if(userSubscriptionModel1!=null){
                                 userSubscriptionModel1.setStatus(StatusEnum.ACTIVE);
                                 userSubscriptionModel1.setStatusDate(new Date());
-                                userSubscriptionModel1.setPlanStatus(PlanStatusEnum.getPlanStatus(userSubscriptionModel1.getStatus(), userSubscriptionModel1.getSubscriptionVariant().getPlanType(), userSubscriptionModel1.getSubscriptionVariant().getPrice(), userSubscriptionModel, false));
+                                userSubscriptionModel1.setPlanStatus(PlanStatusEnum.getPlanStatus(userSubscriptionModel1.getStatus(), userSubscriptionModel1.getSubscriptionVariant().getPlanType(), userSubscriptionModel1.getPrice(), userSubscriptionModel, false));
                                 userSubscriptionModel1.setSsoCommunicated(false);
                                 userSubscriptionModel1.setStatusPublished(false);
                                 subscriptionService.saveUserSubscription(userSubscriptionModel1, false, EventEnum.USER_SUBSCRIPTION_ACTIVE, true, true);
