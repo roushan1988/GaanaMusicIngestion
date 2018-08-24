@@ -62,6 +62,8 @@ public class UserSubscriptionAuditModel extends BaseModel {
     @Column
     @Enumerated(EnumType.STRING)
     private PlatformEnum platform;
+    @Column
+    private BigDecimal price;
     @Column(name="refunded_amount")
     private BigDecimal refundedAmount;
 
@@ -247,6 +249,14 @@ public class UserSubscriptionAuditModel extends BaseModel {
 
     public void setStatusDate(Date statusDate) {
         this.statusDate = statusDate;
+    }
+
+    public BigDecimal getPrice() {
+        return price;
+    }
+
+    public void setPrice(BigDecimal price) {
+        this.price = price;
     }
 
     public BigDecimal getRefundedAmount() {

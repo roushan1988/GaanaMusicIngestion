@@ -119,6 +119,7 @@ CREATE TABLE `user_subscription` (
   `channel` varchar(32) NOT NULL,
   `platform` varchar(32) NOT NULL,
   `status` varchar(32) NOT NULL,
+  `price` DECIMAL(5,2) NOT NULL,
   `refunded_amount` DECIMAL(5,2) DEFAULT NULL,
   `created` datetime NOT NULL,
   `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -163,6 +164,7 @@ CREATE TABLE `user_subscription_audit` (
   `channel` varchar(32) NOT NULL,
   `platform` varchar(32) NOT NULL,
   `status` varchar(32) NOT NULL,
+  `price` DECIMAL(5,2) NOT NULL,
   `refunded_amount` DECIMAL(5,2) DEFAULT NULL,
   `created` datetime NOT NULL,
   `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -338,3 +340,13 @@ ALTER TABLE user_subscription_audit ADD COLUMN `status_date` datetime after stat
 
 alter table user_subscription modify column `ticket_id` varchar(64) DEFAULT NULL;
 alter table user_subscription_audit modify column `ticket_id` varchar(64) DEFAULT NULL;
+
+
+alter table user_subscription add column `price` DECIMAL(5,2) DEFAULT NULL;
+alter table user_subscription_audit add column `price` DECIMAL(5,2) DEFAULT NULL;
+update user_subscription set price = 0 where subscription_variant_id = 1;
+update user_subscription set price = 999 where subscription_variant_id = 2;
+update user_subscription_audit set price = 0 where subscription_variant_id = 1;
+update user_subscription_audit set price = 999 where subscription_variant_id = 2;
+alter table user_subscription modify column `price` DECIMAL(5,2) NOT NULL;
+alter table user_subscription_audit modify column `price` DECIMAL(5,2) NOT NULL;

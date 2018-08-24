@@ -56,6 +56,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
         userSubscriptionModel.setEndDate(TimeUtils.addDaysInDate(userSubscriptionModel.getStartDate(), durationDays.intValue()));
         userSubscriptionModel.setPlanStatus(PlanStatusEnum.INIT);
         userSubscriptionModel.setBusiness(variantModel.getSubscriptionPlan().getBusiness());
+        userSubscriptionModel.setPrice(variantModel.getPrice());
         userSubscriptionModel.setChannel(channel);
         userSubscriptionModel.setPlatform(platform);
         userSubscriptionModel.setCreated(new Date());
@@ -297,6 +298,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
         auditModel.setPaymentMethod(userSubscriptionModel.getPaymentMethod());
         auditModel.setPaymentReference(userSubscriptionModel.getPaymentReference());
         auditModel.setOrderCompleted(userSubscriptionModel.isOrderCompleted());
+        auditModel.setPrice(userSubscriptionModel.getPrice());
         auditModel.setSsoCommunicated(userSubscriptionModel.isSsoCommunicated());
         auditModel.setStatusPublished(userSubscriptionModel.isStatusPublished());
         auditModel.setStartDate(userSubscriptionModel.getStartDate());

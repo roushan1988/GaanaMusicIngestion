@@ -57,6 +57,8 @@ public class UserSubscriptionModel extends BaseModel {
     @Column
     @Enumerated(EnumType.STRING)
     private PlatformEnum platform;
+    @Column
+    private BigDecimal price;
     @Column(name="refunded_amount")
     private BigDecimal refundedAmount;
 
@@ -70,6 +72,7 @@ public class UserSubscriptionModel extends BaseModel {
         this.subscriptionVariant = model.subscriptionVariant;
         this.business = model.getBusiness();
         this.channel = model.getChannel();
+        this.price = model.getSubscriptionVariant().getPrice();
         setCreated(date);
         if(renewalRequest){
             this.startDate = TimeUtils.addMillisInDate(model.getEndDate(), 1);
@@ -240,6 +243,14 @@ public class UserSubscriptionModel extends BaseModel {
         this.statusDate = statusDate;
     }
 
+    public BigDecimal getPrice() {
+        return price;
+    }
+
+    public void setPrice(BigDecimal price) {
+        this.price = price;
+    }
+
     public BigDecimal getRefundedAmount() {
         return refundedAmount;
     }
@@ -268,6 +279,7 @@ public class UserSubscriptionModel extends BaseModel {
         sb.append(", autoRenewal=").append(autoRenewal);
         sb.append(", channel=").append(channel);
         sb.append(", platform=").append(platform);
+        sb.append(", price=").append(price);
         sb.append(", refundedAmount=").append(refundedAmount);
         sb.append('}');
         return sb.toString();
