@@ -47,7 +47,7 @@ public interface SubscriptionService {
     GenericResponse updatePropertyTableData(PropertyDataUpdateRequestCRM request);
     GenericResponse deleteUser(GenericRequest request);
     List<Long> sendReminder(Long days, Long subsId);
-    SubscriptionExpired expireSubscription(Long subsId);
+    SubscriptionExpired expireSubscription(Long subsId) throws Exception;
     // don't call below method from anywhere except from saveSubscription or saveUser, this is just for async implementation
     void saveUserAuditAsync(UserModel userModel, EventEnum event);
     void saveUserSubscriptionAuditWithExternalUpdatesAsync(UserSubscriptionModel userSubscriptionModel, SubscriptionStatusDTO statusDTO, EventEnum event, boolean publishStatus, boolean updateSSO, boolean ssoIdUpdated, boolean publishDetailsUpdated);
