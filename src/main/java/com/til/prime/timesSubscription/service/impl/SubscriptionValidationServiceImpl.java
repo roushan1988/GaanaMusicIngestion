@@ -153,7 +153,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
         if(request.getPromoAmount()>0){
             PreConditions.notEmpty(request.getPromoCode(), ValidationError.INVALID_PAYMENT_DETAILS, validationResponse);
         }
-        PreConditions.mustBeEqual(request.getPgAmount()+request.getTpAmount()+request.getPromoAmount(), request.getPrice(), ValidationError.INVALID_PRICE, validationResponse);
+//        PreConditions.mustBeEqual(request.getPgAmount()+request.getTpAmount()+request.getPromoAmount(), request.getPrice(), ValidationError.INVALID_PRICE, validationResponse);
         if(request.isRenewal() && !request.isJob()){
             PreConditions.notNullEnumCheck(request.getPlatform(), PlatformEnum.names(), ValidationError.INVALID_PLATFORM, validationResponse);
         }
@@ -208,7 +208,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
             PreConditions.notNullPositiveCheck(request.getTpAmount(), ValidationError.INVALID_PAYMENT_DETAILS, validationResponse);
         }
         PreConditions.notNull(request.getPrice(), ValidationError.INVALID_PRICE, validationResponse);
-        PreConditions.mustBeEqual(request.getPgAmount()+request.getTpAmount()+request.getPromoAmount(), request.getPrice(), ValidationError.INVALID_PRICE, validationResponse);
+//        PreConditions.mustBeEqual(request.getPgAmount()+request.getTpAmount()+request.getPromoAmount(), request.getPrice(), ValidationError.INVALID_PRICE, validationResponse);
         return updateValid(validationResponse);
     }
 
