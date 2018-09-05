@@ -219,7 +219,9 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
         if(userSubscriptionModel!=null){
             PreConditions.mustBeFalse(userSubscriptionModel.getUser().isBlocked(), ValidationError.BLOCKED_USER, validationResponse);
             PreConditions.mustBeFalse(userSubscriptionModel.isOrderCompleted(), ValidationError.ORDER_ALREADY_COMPLETED, validationResponse);
-            PreConditions.mustBeEqual(request.getPgMethod(), userSubscriptionModel.getPgMethod(), ValidationError.INVALID_PAYMENT_METHOD, validationResponse);
+            if(StringUtils.isNotEmpty(userSubscriptionModel.getPgMethod()) || StringUtils.isNotEmpty(request.getPgMethod())){
+                PreConditions.mustBeEqual(request.getPgMethod(), userSubscriptionModel.getPgMethod(), ValidationError.INVALID_PAYMENT_METHOD, validationResponse);
+            }
             PreConditions.mustBeEqual(userSubscriptionModel.getSubscriptionVariant().getPrice().doubleValue(), request.getPrice(), ValidationError.INVALID_PRICE, validationResponse);
             if(request.isAutoRenewal()){
                 PreConditions.mustBeTrue(userSubscriptionModel.getSubscriptionVariant().isRecurring(), ValidationError.INVALID_RECURRING_PAYMENT, validationResponse);
