@@ -1571,9 +1571,9 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             userSubscriptionModel1.setSsoCommunicated(false);
             userSubscriptionModel1.setStatusPublished(false);
             saveUserSubscription(userSubscriptionModel1, false, EventEnum.USER_SUBSCRIPTION_ACTIVE, true, true);
+            recordsAffected++;
             // subscriptionService.updateUserStatus(userSubscriptionModel1, userSubscriptionModel1.getUser());
             communicationService.sendExistingSubscriptionActivationCommunication(userSubscriptionModel1);
-            recordsAffected++;
             affectedModels.add(userSubscriptionModel1.getId());
         }else if(userSubscriptionModel.getSubscriptionVariant().isRecurring() && userSubscriptionModel.isAutoRenewal() && !userSubscriptionModel.getUser().isBlocked()){
             userSubscriptionModel = expireUserSubscription(userSubscriptionModel);
