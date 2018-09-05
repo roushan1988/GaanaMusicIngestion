@@ -1,10 +1,13 @@
 package com.til.prime.timesSubscription.service;
 
 import com.til.prime.timesSubscription.dto.external.*;
+import com.til.prime.timesSubscription.dto.internal.SubscriptionExpired;
 import com.til.prime.timesSubscription.enums.EventEnum;
 import com.til.prime.timesSubscription.model.BackendSubscriptionUserModel;
 import com.til.prime.timesSubscription.model.UserModel;
 import com.til.prime.timesSubscription.model.UserSubscriptionModel;
+
+import java.util.List;
 
 public interface SubscriptionService {
     PlanListResponse getAllPlans(PlanListRequest request);
@@ -46,4 +49,6 @@ public interface SubscriptionService {
     // don't call below method from anywhere except from saveSubscription or saveUser, this is just for async implementation
     void saveUserAuditAsync(UserModel userModel, EventEnum event);
     void saveUserSubscriptionAuditWithExternalUpdatesAsync(UserSubscriptionModel userSubscriptionModel, SubscriptionStatusDTO statusDTO, EventEnum event, boolean publishStatus, boolean updateSSO, boolean ssoIdUpdated, boolean publishDetailsUpdated);
+    List<Long> sendReminder(Long days, Long subsId);
+    SubscriptionExpired expireSubscription(Long subsId);
 }

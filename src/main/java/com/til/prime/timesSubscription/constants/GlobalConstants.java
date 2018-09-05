@@ -28,6 +28,7 @@ public class GlobalConstants {
     public static final String TP_SITE_ID_KEY = "sso.tp.site.id";
     public static final String TP_CHANNEL_KEY = "sso.tp.channel";
     public static final String PAYMENTS_ENCRYPTION_KEY= "payments.encryption.key";
+    public static final String PRIME_ENCRYPTION_KEY= "prime.encryption.key";
     public static final String TICKETID = "ticketId";
     public static final String SITEID = "siteId";
     public static final int ORDER_ID_LENGTH = 16;
@@ -43,6 +44,7 @@ public class GlobalConstants {
     public static final String EXCEPTION = "EXCEPTION";
     public static final int MAX_DAYS_DIFF_FOR_NEW_SUBSCRIPTION_PURCHASE = (365*2)+90;
     public static final String PAYMENTS_SECRET_KEY = "payments.secret.key";
+    public static final String PRIME_SECRET_KEY = "prime.secret.key";
     public static final long MAX_SUBSCRIPTION_EXTENSION_DAYS = 365l;
     public static final long MAX_BACKEND_SUBSCRIPTION_DAYS = 365l;
     public static final String CONTENT_TYPE_JSON = "application/json";
@@ -62,6 +64,7 @@ public class GlobalConstants {
     public static final Gson gson = new Gson();
     public static final Long CRON_BATCH_PROCESSING_COUNT= 500L;
     public static final String PAYMENTS_RENEW_SUBSCRIPTION_URL_KEY = "payments.renew.subscription.url";
+    public static final String PRIME_TOTAL_SAVING_URL_KEY = "prime.getTotalSavings.url";
     public static final String PAYMENTS_REFUND_URL_KEY = "payments.refund.url";
     public static final int PAYMENTS_SUCCESS_STATUS_CODE = 2000;
     public static final int PAYMENTS_PENDING_STATUS_CODE = 3000;

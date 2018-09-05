@@ -7,6 +7,7 @@ import com.til.prime.timesSubscription.dao.*;
 import com.til.prime.timesSubscription.dto.external.*;
 import com.til.prime.timesSubscription.dto.internal.OtpStatus;
 import com.til.prime.timesSubscription.dto.internal.RefundInternalResponse;
+import com.til.prime.timesSubscription.dto.internal.SubscriptionExpired;
 import com.til.prime.timesSubscription.enums.*;
 import com.til.prime.timesSubscription.model.*;
 import com.til.prime.timesSubscription.service.*;
@@ -69,6 +70,10 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     private Properties properties;
     @Autowired
     private ApplicationContext applicationContext;
+
+    @Autowired
+    private TimesPrimeService timesPrimeService;
+
 
     @Override
     public PlanListResponse getAllPlans(PlanListRequest request) {
@@ -1523,5 +1528,105 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         UserAuditModel userAuditModel = subscriptionServiceHelper.getUserAudit(userModel, event);
         userAuditRepository.save(userAuditModel);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Long> sendReminder(Long days, Long subsId) {
+        List<Long> idList = new ArrayList<>();
+        UserSubscriptionModel userSubscriptionModel = userSubscriptionRepository.findById(subsId).get();
+        Long futureCount = userSubscriptionRepository.countByUserMobileAndUserDeletedFalseAndStatusAndStartDateAfterAndDeletedFalseAndOrderCompletedTrue(userSubscriptionModel.getUser().getMobile(), StatusEnum.FUTURE, TimeUtils.addMillisInDate(userSubscriptionModel.getEndDate(), -1000));
+        if (futureCount <= 0) {
+            if (userSubscriptionModel.isAutoRenewal()) {
+                communicationService.sendSubscriptionRenewalReminderAutoDebitOnCommunication(userSubscriptionModel);
+            } else {
+                if (PlanStatusEnum.FREE_TRIAL.equals(userSubscriptionModel.getPlanStatus())) {
+                    Double totalSavings = timesPrimeService.getTotalSaving(userSubscriptionModel.getUser().getMobile());
+                    if (!(totalSavings == null || totalSavings.compareTo(0d) == 0) || totalSavings.compareTo(99d) == 0) {
+                        communicationService.sendFreeTrailExpiryReminderCommunication(userSubscriptionModel, days);
+                    }
+                } else {
+                    communicationService.sendSubscriptionRenewalReminderAutoDebitOffCommunication(userSubscriptionModel);
+                }
+            }
+            idList.add(userSubscriptionModel.getId());
+        }
+        return idList;
+    }
+
+    @Override
+    @Transactional
+    public SubscriptionExpired expireSubscription(Long subsId){
+        List<Long> affectedModels = new ArrayList<>();
+        UserSubscriptionModel userSubscriptionModel = userSubscriptionRepository.findById(subsId).get();
+        Long recordsAffected = 0l;
+        recordsAffected++;
+        affectedModels.add(userSubscriptionModel.getId());
+        UserSubscriptionModel userSubscriptionModel1 = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndStatusAndStartDateAfterAndDeletedFalseAndOrderCompletedTrueOrderById(
+                userSubscriptionModel.getUser().getMobile(), StatusEnum.FUTURE, TimeUtils.addMillisInDate(userSubscriptionModel.getEndDate(), -2000));
+        if(userSubscriptionModel1!=null){
+            userSubscriptionModel = expireUserSubscription(userSubscriptionModel);
+            userSubscriptionModel1.setStatus(StatusEnum.ACTIVE);
+            userSubscriptionModel1.setStatusDate(new Date());
+            userSubscriptionModel1.setPlanStatus(PlanStatusEnum.getPlanStatus(userSubscriptionModel1.getStatus(), userSubscriptionModel1.getSubscriptionVariant().getPlanType(), userSubscriptionModel1.getPrice(), userSubscriptionModel, false));
+            userSubscriptionModel1.setSsoCommunicated(false);
+            userSubscriptionModel1.setStatusPublished(false);
+            saveUserSubscription(userSubscriptionModel1, false, EventEnum.USER_SUBSCRIPTION_ACTIVE, true, true);
+            // subscriptionService.updateUserStatus(userSubscriptionModel1, userSubscriptionModel1.getUser());
+            communicationService.sendExistingSubscriptionActivationCommunication(userSubscriptionModel1);
+            recordsAffected++;
+            affectedModels.add(userSubscriptionModel1.getId());
+        }else if(userSubscriptionModel.getSubscriptionVariant().isRecurring() && userSubscriptionModel.isAutoRenewal() && !userSubscriptionModel.getUser().isBlocked()){
+            userSubscriptionModel = expireUserSubscription(userSubscriptionModel);
+            LOG.info("Initiating SUBSCRIPTION RENEWAL for userSubscriptionId: "+userSubscriptionModel.getId()+", orderId: "+userSubscriptionModel.getOrderId());
+            boolean success = subscriptionServiceHelper.renewSubscription(userSubscriptionModel);
+            if(success){
+                UserSubscriptionModel userSubscriptionModel2 = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndStatusAndStartDateAfterAndDeletedFalseAndOrderCompletedTrueOrderById(
+                        userSubscriptionModel.getUser().getMobile(), StatusEnum.ACTIVE, TimeUtils.addMillisInDate(userSubscriptionModel.getEndDate(), -2000));
+                if(userSubscriptionModel2!=null){
+                    UserSubscriptionAuditModel auditModel = subscriptionServiceHelper.getUserSubscriptionAuditModel(userSubscriptionModel2, EventEnum.SUBSCRIPTION_AUTO_RENEWAL);
+                    userSubscriptionAuditRepository.save(auditModel);
+                    recordsAffected++;
+                    affectedModels.add(userSubscriptionModel2.getId());
+                }
+            }
+        } else {
+            Boolean extended = Boolean.FALSE;
+            if (userSubscriptionModel.getPlanStatus().equals(PlanStatusEnum.FREE_TRIAL)) {
+                Double totalSavings = timesPrimeService.getTotalSaving(userSubscriptionModel.getUser().getMobile());
+                if (!(totalSavings == null || totalSavings.compareTo(0d) == 0) || totalSavings.compareTo(99d) == 0) {
+                    ExtendExpiryRequest request = new ExtendExpiryRequest();
+                    request.setExtensionDays(30l);
+                    request.setUserSubscriptionId(userSubscriptionModel.getId());
+                    request.setOrderId(userSubscriptionModel.getOrderId());
+                    request.setVariantId(userSubscriptionModel.getSubscriptionVariant().getId());
+                    extendExpiry(request);
+                    extended = Boolean.TRUE;
+                }
+            }
+            if (!extended) {
+                userSubscriptionModel = expireUserSubscription(userSubscriptionModel);
+                PlanStatusEnum plan = userSubscriptionModel.getPlanStatus();
+                if (PlanStatusEnum.FREE_TRIAL_EXPIRED.equals(plan)) {
+                    communicationService.sendFreeTrailExpiredCommunication(userSubscriptionModel);
+                } else {
+                    communicationService.sendSubscriptionExpiredCommunication(userSubscriptionModel);
+                }
+            }
+        }
+        recordsAffected++;
+        affectedModels.add(userSubscriptionModel.getId());
+        return new SubscriptionExpired(recordsAffected, affectedModels);
+
+    }
+    private UserSubscriptionModel expireUserSubscription(UserSubscriptionModel userSubscriptionModel) {
+        userSubscriptionModel.setStatus(StatusEnum.EXPIRED);
+        userSubscriptionModel.setStatusDate(new Date());
+        userSubscriptionModel.setPlanStatus(PlanStatusEnum.getPlanStatus(StatusEnum.EXPIRED, userSubscriptionModel.getSubscriptionVariant().getPlanType(), userSubscriptionModel.getPrice(), null, false));
+        userSubscriptionModel.setSsoCommunicated(false);
+        userSubscriptionModel.setStatusPublished(false);
+        userSubscriptionModel = saveUserSubscription(userSubscriptionModel, false, EventEnum.USER_SUBSCRIPTION_EXPIRY, true, true);
+        return userSubscriptionModel;
+    }
+
 
 }
