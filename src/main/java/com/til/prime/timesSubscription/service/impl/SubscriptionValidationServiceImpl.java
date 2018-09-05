@@ -197,7 +197,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
         PreConditions.notNull(request.getUserSubscriptionId(), ValidationError.INVALID_USER_SUBSCRIPTION_ID, validationResponse);
         PreConditions.notEmpty(request.getOrderId(), ValidationError.INVALID_ORDER_ID, validationResponse);
         PreConditions.notNull(request.getVariantId(), ValidationError.INVALID_VARIANT_ID, validationResponse);
-        PreConditions.mustBeTrue(StringUtils.isNotEmpty(request.getPgReference()) || StringUtils.isNotEmpty(request.getPromoCode()) || StringUtils.isNotEmpty(request.getTpReference()), ValidationError.INVALID_PAYMENT_DETAILS, validationResponse);
+//        PreConditions.mustBeTrue(StringUtils.isNotEmpty(request.getPgReference()) || StringUtils.isNotEmpty(request.getPromoCode()) || StringUtils.isNotEmpty(request.getTpReference()), ValidationError.INVALID_PAYMENT_DETAILS, validationResponse);
         if(StringUtils.isNotEmpty(request.getPgReference())){
             PreConditions.notEmpty(request.getPgMethod(), ValidationError.INVALID_PAYMENT_DETAILS, validationResponse);
         }
