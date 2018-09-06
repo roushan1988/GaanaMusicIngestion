@@ -42,6 +42,7 @@ public interface SubscriptionServiceHelper {
     BackendSubscriptionUserModel getBackendSubscriptionUser(BackendSubscriptionUserModel model, BackendActivationUserDTO dto);
     BackendSubscriptionUserAuditModel getBackendSubscriptionUserAudit(BackendSubscriptionUserModel user, EventEnum event);
     boolean renewSubscription(UserSubscriptionModel userSubscriptionModel);
+    boolean reloadPlanCacheViaUrl(String url);
     RefundInternalResponse refundPayment(String orderId, Double refundAmount, boolean forceAmount);
     String shortenUrl(String longUrl);
     OrderSearchCRMResponse prepareOrderSearchResponse(OrderSearchCRMResponse response, OrderSearchResultsCRM orderSearchResultsCRM, ValidationResponse validationResponse);
@@ -51,6 +52,7 @@ public interface SubscriptionServiceHelper {
     CustomerDetailsCRMResponse prepareCustomerDetailsResponse(CustomerDetailsCRMResponse customerDetailsCRMResponse, CustomerCRM customerCRM, ValidationResponse validationResponse);
     CustomerSearchCRMResponse prepareCustomerSearchCRMResponse(CustomerSearchCRMResponse customerSearchCRMResponse, CustomerSearchDTOs customerSearchDTOs, ValidationResponse validationResponse);
     OtpVerificationResponse prepareOtpVerificationResponse(OtpVerificationResponse response, ValidationResponse validationResponse);
+    PlanPriceUpdateResponse prepareUpdatePriceResponse(PlanPriceUpdateResponse response, BigDecimal oldPrice, ValidationResponse validationResponse);
     GenericResponse prepareGenericResponse(GenericResponse response, ValidationResponse validationResponse);
     OtpStatus sendOtp(String mobile, boolean resend);
     OtpStatus verifyOtp(String mobile, String otp);

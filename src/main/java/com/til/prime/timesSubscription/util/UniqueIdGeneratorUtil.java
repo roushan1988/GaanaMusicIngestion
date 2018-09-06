@@ -12,6 +12,14 @@ public class UniqueIdGeneratorUtil {
     private static final int BASE36_RADIX = 36;
     private static final int CONSECUTIVE_SIMILAR_CHARACTERS = 4;
 
+    public static final String generateRandom(int length){
+        StringBuilder sb = new StringBuilder();
+        RandomStringGenerator generator = new RandomStringGenerator.Builder().withinRange('0', 'z').filteredBy(CharacterPredicates.LETTERS,
+                CharacterPredicates.DIGITS).build();
+        sb.append(generator.generate(length));
+        return sb.toString();
+    }
+
     public static final String generateOrderId(){
         return generateUniqueIdInConsecutiveSimilarCharactersPattern(GlobalConstants.ORDER_ID_LENGTH, null);
     }

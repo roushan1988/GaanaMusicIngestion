@@ -7,7 +7,9 @@ import java.util.List;
 
 public class GlobalConstants {
     public static final Integer DEFAULT_PAGE_SIZE = 100;
+    public static final Integer MAX_TIMESTAMP_DIFF_MILLIS = 300000;
     public static final String DEFAULT_FIRST_NAME = "Preferred Customer";
+    public static final String SUBSCRIPTION_PLAN_RELOAD_URL_LIST = "subscription.plan.reload.url.list";
     public static final String NULL_STRING = "null";
     public static final String ENVIRONMENT = "env";
     public static final List<String> USER_DELETION_ALLOWED_ENVIRONMENTS = Arrays.asList("dev", "stage", "qa", "preprod");

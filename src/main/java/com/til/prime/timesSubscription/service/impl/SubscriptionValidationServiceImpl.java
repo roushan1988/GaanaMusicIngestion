@@ -1004,6 +1004,61 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
         return updateValid(validationResponse);
     }
 
+    @Override
+    public ValidationResponse validateUpdatePlanPrice(PlanPriceUpdateRequest request) {
+        ValidationResponse validationResponse = new ValidationResponse();
+        PreConditions.notNull(request.getPrice(), ValidationError.INVALID_PRICE, validationResponse);
+        PreConditions.notNullPositiveCheck(request.getPlanId(), ValidationError.INVALID_PLAN_ID, validationResponse);
+        PreConditions.notNullPositiveCheck(request.getVariantId(), ValidationError.INVALID_VARIANT_ID, validationResponse);
+        PreConditions.notNullPositiveCheck(request.getTimestamp(), ValidationError.INVALID_TIMESTAMP, validationResponse);
+        PreConditions.mustBeEqual(request.getSecretKey(), properties.getProperty(GlobalConstants.PAYMENTS_SECRET_KEY), ValidationError.INVALID_SECRET_KEY, validationResponse);
+        PreConditions.notEmpty(request.getChecksum(), ValidationError.INVALID_CHECKSUM, validationResponse);
+        updateValid(validationResponse);
+        if(validationResponse.isValid()){
+            Long currentTimestamp = System.currentTimeMillis();
+            PreConditions.mustBeTrue(Math.abs(currentTimestamp-request.getTimestamp())<GlobalConstants.MAX_TIMESTAMP_DIFF_MILLIS, ValidationError.INVALID_PLAN_UPDATE_REQUEST, validationResponse);
+            updateValid(validationResponse);
+        }
+        if(validationResponse.isValid()){
+            try{
+                StringBuilder checksumString = new StringBuilder("").append(request.getPlanId()).append(request.getVariantId()).append(request.getPrice()).append(request.getTimestamp()).append(properties.getProperty(GlobalConstants.PAYMENTS_SECRET_KEY));
+                String checksum = checksumService.calculateChecksumHmacSHA256(properties.getProperty(GlobalConstants.PAYMENTS_ENCRYPTION_KEY), checksumString.toString());
+                System.out.println(checksum);
+                PreConditions.mustBeEqual(checksum, request.getChecksum(), ValidationError.INVALID_ENCRYPTION, validationResponse);
+                updateValid(validationResponse);
+            }catch (Exception e){
+                LOG.error("error while calculating checksum for subscription call for refund payments: ", e);
+                throw new RuntimeException(e.getMessage());
+            }
+        }
+        return validationResponse;
+    }
+
+    @Override
+    public ValidationResponse validateReloadPlanCache(PlanCacheReloadRequest request) {
+        ValidationResponse validationResponse = new ValidationResponse();
+        PreConditions.notNullPositiveCheck(request.getTimestamp(), ValidationError.INVALID_TIMESTAMP, validationResponse);
+        PreConditions.notEmpty(request.getChecksum(), ValidationError.INVALID_CHECKSUM, validationResponse);
+        PreConditions.mustBeEqual(request.getSecretKey(), properties.getProperty(GlobalConstants.PAYMENTS_SECRET_KEY), ValidationError.INVALID_SECRET_KEY, validationResponse);
+        updateValid(validationResponse);
+        if(validationResponse.isValid()){
+            Long currentTimestamp = System.currentTimeMillis();
+            PreConditions.mustBeTrue(Math.abs(currentTimestamp-request.getTimestamp())<GlobalConstants.MAX_TIMESTAMP_DIFF_MILLIS, ValidationError.INVALID_PLAN_UPDATE_REQUEST, validationResponse);
+            updateValid(validationResponse);
+        }
+        try{
+            StringBuilder checksumString = new StringBuilder("").append(request.getTimestamp()).append(properties.getProperty(GlobalConstants.PAYMENTS_SECRET_KEY));
+            String checksum = checksumService.calculateChecksumHmacSHA256(properties.getProperty(GlobalConstants.PAYMENTS_ENCRYPTION_KEY), checksumString.toString());
+            System.out.println(checksum);
+            PreConditions.mustBeEqual(checksum, request.getChecksum(), ValidationError.INVALID_ENCRYPTION, validationResponse);
+            updateValid(validationResponse);
+        }catch (Exception e){
+            LOG.error("error while calculating checksum for subscription call for refund payments: ", e);
+            throw new RuntimeException(e.getMessage());
+        }
+        return validationResponse;
+    }
+
     private ValidationResponse validateEncryptionForUpdateCRMProperties(PropertyDataUpdateRequestCRM request, ValidationResponse validationResponse) {
         PreConditions.mustBeEqual(request.getSecretKey(), properties.getProperty(GlobalConstants.PAYMENTS_SECRET_KEY), ValidationError.INVALID_SECRET_KEY, validationResponse);
         PreConditions.notEmpty(request.getChecksum(), ValidationError.INVALID_CHECKSUM, validationResponse);

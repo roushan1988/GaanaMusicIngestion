@@ -22,6 +22,7 @@ public interface PropertyService {
     ExternalClientModel getExternalClient(String clientId);
     SubscriptionVariantModel getBackendFreeTrialVariant(BusinessEnum business, CountryEnum country);
     List<SubscriptionPlanDTO> getAllPlans(BusinessEnum business, CountryEnum country);
+    void reloadAllPlans();
     List<SubscriptionPlanModel> getAllPlanModels(BusinessEnum business, CountryEnum country);
     Map<PropertyEnum, String> getPropertyTableData();
     GenericResponse updatePropertyTableData(PropertyDataUpdateRequestCRM request);

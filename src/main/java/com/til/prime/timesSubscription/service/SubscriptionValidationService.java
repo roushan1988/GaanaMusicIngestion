@@ -55,4 +55,6 @@ public interface SubscriptionValidationService {
     ValidationResponse validatePostBackendSubscriptionActivation(BackendSubscriptionActivationRequest request, BackendSubscriptionUserModel backendUser, ValidationResponse validationResponse);
     ValidationResponse validatePreGetCRMProperties(PropertyDataRequestCRM request);
     ValidationResponse validatePreUpdateCRMProperties(PropertyDataUpdateRequestCRM request);
+    ValidationResponse validateUpdatePlanPrice(PlanPriceUpdateRequest request);
+    ValidationResponse validateReloadPlanCache(PlanCacheReloadRequest request);
 }

@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.math.BigDecimal;
+
 @Controller
 @RequestMapping("/crm")
 public class CRMController {
@@ -224,5 +226,39 @@ public class CRMController {
 //        }
 //        return ResponseUtil.createExceptionResponse(new GenericResponse(), 10);
     }
-    
+
+    @Loggable
+    @RequestMapping(path="/updatePlanPrice", method = RequestMethod.POST)
+    @ResponseBody
+    public PlanPriceUpdateResponse updatePlanPrice(@RequestBody PlanPriceUpdateRequest request){
+        BigDecimal oldPrice = null;
+        try {
+            PlanPriceUpdateResponse response = subscriptionService.updatePlanPrice(request, false);
+            oldPrice = response.getOldPrice();
+            subscriptionService.reloadPriceCacheViaUrl();
+            return response;
+        }catch (Exception e){
+            PlanPriceUpdateResponse response = new PlanPriceUpdateResponse();
+            PlanPriceUpdateRequest newRequest = new PlanPriceUpdateRequest();
+            newRequest.setPrice(oldPrice);
+            newRequest.setPlanId(request.getPlanId());
+            newRequest.setVariantId(request.getVariantId());
+            subscriptionService.updatePlanPrice(newRequest, true);
+            LOG.error("Exception in updatePlanPrice: ", e);
+            return (PlanPriceUpdateResponse) ResponseUtil.createExceptionResponse(response, 10);
+        }
+    }
+
+    @Loggable
+    @RequestMapping(path="/reloadPlanCache", method = RequestMethod.POST)
+    @ResponseBody
+    public GenericResponse reloadPlanCache(@RequestBody PlanCacheReloadRequest request){
+        try {
+            return subscriptionService.reloadPlanCache(request);
+        }catch (Exception e){
+            LOG.error("Exception in reloadPlanCache: ", e);
+            GenericResponse response = new GenericResponse();
+            return ResponseUtil.createExceptionResponse(response, 10);
+        }
+    }
 }

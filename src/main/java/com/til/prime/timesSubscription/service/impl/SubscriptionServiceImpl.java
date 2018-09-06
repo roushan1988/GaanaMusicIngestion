@@ -1526,6 +1526,64 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
+    @Transactional
+    public PlanPriceUpdateResponse updatePlanPrice(PlanPriceUpdateRequest request, boolean bypassValidation) {
+        ValidationResponse validationResponse = new ValidationResponse();
+        if(!bypassValidation){
+            validationResponse = subscriptionValidationService.validateUpdatePlanPrice(request);
+        }else{
+            validationResponse.setValid(true);
+        }
+        PlanPriceUpdateResponse response = new PlanPriceUpdateResponse();
+        BigDecimal oldPrice = null;
+        if (validationResponse.isValid()) {
+            try{
+                SubscriptionVariantModel variantModel = subscriptionVariantRepository.findByIdAndSubscriptionPlanIdAndDeleted(request.getVariantId(), request.getPlanId(), false);
+                if(variantModel==null){
+                    validationResponse.addValidationError(ValidationError.INVALID_SUBSCRIPTION_VARIANT);
+                }else{
+                    oldPrice = variantModel.getPrice();
+                    variantModel.setPrice(request.getPrice());
+                    subscriptionVariantRepository.save(variantModel);
+                }
+            }catch (Exception e){
+                LOG.error("Exception", e);
+                throw e;
+            }
+        }
+        response = subscriptionServiceHelper.prepareUpdatePriceResponse(response, oldPrice, validationResponse);
+        return response;
+    }
+
+    @Override
+    public void reloadPriceCacheViaUrl() {
+        List<String> urls = Arrays.stream((properties.getProperty(GlobalConstants.SUBSCRIPTION_PLAN_RELOAD_URL_LIST)).split(",")).collect(Collectors.toList());
+        for(String url: urls){
+            boolean success = subscriptionServiceHelper.reloadPlanCacheViaUrl(url);
+            if(!success){
+                LOG.error("Failure in reloading plan cache, url: "+url);
+                throw new RuntimeException("Failure in reloading plan cache, url: "+url);
+            }
+        }
+    }
+
+    @Override
+    public GenericResponse reloadPlanCache(PlanCacheReloadRequest request) {
+        ValidationResponse validationResponse = subscriptionValidationService.validateReloadPlanCache(request);
+        GenericResponse response = new GenericResponse();
+        if (validationResponse.isValid()) {
+            try{
+                propertyService.reloadAllPlans();
+            }catch (Exception e){
+                LOG.error("Exception", e);
+                throw e;
+            }
+        }
+        response = subscriptionServiceHelper.prepareGenericResponse(response, validationResponse);
+        return response;
+    }
+
+    @Override
     @Async
     @Transactional
     public void saveUserAuditAsync(UserModel userModel, EventEnum event) {

@@ -172,8 +172,8 @@ public class PropertyServiceImpl implements PropertyService {
         return response;
     }
 
-    
-    private void reloadAllPlans(){
+    @Override
+    public void reloadAllPlans(){
         List<SubscriptionPlanModel> plans = planRepository.findByDeletedFalse();
         propertyMap.putIfAbsent(PropertyEnum.SUBSCRIPTION_PLAN_DTOS, new ConcurrentHashMap<BusinessCountry, List<SubscriptionPlanDTO>>());
         propertyMap.putIfAbsent(PropertyEnum.SUBSCRIPTION_PLAN_MODELS, new ConcurrentHashMap<BusinessCountry, List<SubscriptionPlanModel>>());
@@ -209,6 +209,7 @@ public class PropertyServiceImpl implements PropertyService {
             case "Double": return Double.parseDouble(value);
             case "String": return value;
             case "List<Long>": return Arrays.stream(value.split(",")).map(Long::parseLong).collect(Collectors.toList());
+            case "List<String>": return Arrays.stream(value.split(",")).collect(Collectors.toList());
             default: return value;
         }
     }

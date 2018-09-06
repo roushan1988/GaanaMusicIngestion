@@ -499,6 +499,32 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
     }
 
     @Override
+    public boolean reloadPlanCacheViaUrl(String url) {
+        try{
+            PlanCacheReloadRequest reloadRequest = new PlanCacheReloadRequest();
+            updateChecksumForPlanCacheReload(reloadRequest);
+            GenericResponse response = httpConnectionUtils.requestForObject(reloadRequest, url, GenericResponse.class, GlobalConstants.POST);
+            return response.getSuccess();
+        }catch (Exception e){
+            LOG.error("Exception in reload plan cache", e);
+        }
+        return false;
+    }
+
+    private void updateChecksumForPlanCacheReload(PlanCacheReloadRequest request){
+        try{
+            request.setSecretKey(properties.getProperty(GlobalConstants.PAYMENTS_SECRET_KEY));
+            request.setTimestamp(System.currentTimeMillis());
+            StringBuilder checksumString = new StringBuilder("").append(request.getTimestamp()).append(request.getSecretKey());
+            String checksum = checksumService.calculateChecksumHmacSHA256(properties.getProperty(GlobalConstants.PAYMENTS_ENCRYPTION_KEY), checksumString.toString());
+            request.setChecksum(checksum);
+        }catch (Exception e){
+            LOG.error("error while calculating checksum for subscription call for refund payments: ", e);
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    @Override
     public final RefundInternalResponse refundPayment(String orderId, Double refundAmount, boolean forceAmount){
         if (Double.compare(refundAmount, 0d)==0) {
             return new RefundInternalResponse(true, refundAmount);
@@ -548,6 +574,17 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
                 response.setType(WebViewTypeEnum.TOAST.getName());
             }
             response = (OtpVerificationResponse) ResponseUtil.createFailureResponse(response, validationResponse, validationResponse.getMaxCategory());
+        }
+        return response;
+    }
+
+    @Override
+    public PlanPriceUpdateResponse prepareUpdatePriceResponse(PlanPriceUpdateResponse response, BigDecimal oldPrice, ValidationResponse validationResponse) {
+        response.setOldPrice(oldPrice);
+        if(validationResponse.isValid()){
+            response = (PlanPriceUpdateResponse) ResponseUtil.createSuccessResponse(response);
+        }else{
+            response = (PlanPriceUpdateResponse) ResponseUtil.createFailureResponse(response, validationResponse, validationResponse.getMaxCategory());
         }
         return response;
     }
