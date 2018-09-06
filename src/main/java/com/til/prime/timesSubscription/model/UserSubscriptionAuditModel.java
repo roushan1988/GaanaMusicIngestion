@@ -26,9 +26,9 @@ public class UserSubscriptionAuditModel extends BaseModel {
     private String ticketId;
     @Column(name="order_id")
     private String orderId;
-    @Column(name="pg_method")
+    @Column(name="payment_method")
     private String pgMethod;
-    @Column(name="pg_reference")
+    @Column(name="payment_reference")
     private String pgReference;
     @Column(name="pg_amount")
     private Double pgAmount;
