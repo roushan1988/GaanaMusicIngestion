@@ -11,7 +11,6 @@ import com.til.prime.timesSubscription.dto.internal.SubscriptionExpired;
 import com.til.prime.timesSubscription.enums.*;
 import com.til.prime.timesSubscription.model.*;
 import com.til.prime.timesSubscription.service.*;
-import com.til.prime.timesSubscription.util.PreConditions;
 import com.til.prime.timesSubscription.util.TimeUtils;
 import com.til.prime.timesSubscription.util.UniqueIdGeneratorUtil;
 import org.apache.commons.codec.binary.Base64;
@@ -1602,10 +1601,10 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 communicationService.sendSubscriptionRenewalReminderAutoDebitOnCommunication(userSubscriptionModel);
             } else {
                 if (PlanStatusEnum.FREE_TRIAL.equals(userSubscriptionModel.getPlanStatus())) {
-                    Double totalSavings = timesPrimeService.getTotalSaving(userSubscriptionModel.getUser().getMobile());
-                    if (!(totalSavings == null || totalSavings.compareTo(0d) == 0 || totalSavings.compareTo(99d) == 0)) {
-                        communicationService.sendFreeTrailExpiryReminderCommunication(userSubscriptionModel, days);
-                    }
+//                    Double totalSavings = timesPrimeService.getTotalSaving(userSubscriptionModel.getUser().getMobile());
+//                    if (!(totalSavings == null || totalSavings.compareTo(0d) == 0 || totalSavings.compareTo(99d) == 0)) {
+                    communicationService.sendFreeTrailExpiryReminderCommunication(userSubscriptionModel, days);
+//                    }
                 } else {
                     communicationService.sendSubscriptionRenewalReminderAutoDebitOffCommunication(userSubscriptionModel);
                 }
@@ -1653,31 +1652,31 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             }
         } else {
             Boolean extended = Boolean.FALSE;
-            if (userSubscriptionModel.getPlanStatus().equals(PlanStatusEnum.FREE_TRIAL)) {
-                Double totalSavings = timesPrimeService.getTotalSaving(userSubscriptionModel.getUser().getMobile());
-                if ((totalSavings == null || totalSavings.compareTo(0d) == 0 || totalSavings.compareTo(99d) == 0)) {
-                    try {
-                        ExtendExpiryRequest request = new ExtendExpiryRequest();
-                        request.setExtensionDays(30l);
-                        UserDTO user = new UserDTO();
-                        user.setMobile(userSubscriptionModel.getUser().getMobile());
-                        request.setUser(user);
-                        request.setUserSubscriptionId(userSubscriptionModel.getId());
-                        request.setOrderId(userSubscriptionModel.getOrderId());
-                        request.setVariantId(userSubscriptionModel.getSubscriptionVariant().getId());
-                        request.setSecretKey(properties.getProperty(GlobalConstants.PAYMENTS_SECRET_KEY));
-
-                        StringBuilder sb = new StringBuilder();
-                        sb.append(request.getSecretKey()).append(request.getUserSubscriptionId()).append(request.getVariantId()).append(request.getOrderId()).append(request.isRefund());
-                        String checksum = checksumService.calculateChecksumHmacSHA256(properties.getProperty(GlobalConstants.PAYMENTS_ENCRYPTION_KEY), sb.toString());
-                        request.setChecksum(checksum);
-                        extendExpiry(request);
-                        extended = Boolean.TRUE;
-                    } catch (Exception e) {
-                        throw e;
-                    }
-                }
-            }
+//            if (userSubscriptionModel.getPlanStatus().equals(PlanStatusEnum.FREE_TRIAL)) {
+//                Double totalSavings = timesPrimeService.getTotalSaving(userSubscriptionModel.getUser().getMobile());
+//                if ((totalSavings == null || totalSavings.compareTo(0d) == 0 || totalSavings.compareTo(99d) == 0)) {
+//                    try {
+//                        ExtendExpiryRequest request = new ExtendExpiryRequest();
+//                        request.setExtensionDays(30l);
+//                        UserDTO user = new UserDTO();
+//                        user.setMobile(userSubscriptionModel.getUser().getMobile());
+//                        request.setUser(user);
+//                        request.setUserSubscriptionId(userSubscriptionModel.getId());
+//                        request.setOrderId(userSubscriptionModel.getOrderId());
+//                        request.setVariantId(userSubscriptionModel.getSubscriptionVariant().getId());
+//                        request.setSecretKey(properties.getProperty(GlobalConstants.PAYMENTS_SECRET_KEY));
+//
+//                        StringBuilder sb = new StringBuilder();
+//                        sb.append(request.getSecretKey()).append(request.getUserSubscriptionId()).append(request.getVariantId()).append(request.getOrderId()).append(request.isRefund());
+//                        String checksum = checksumService.calculateChecksumHmacSHA256(properties.getProperty(GlobalConstants.PAYMENTS_ENCRYPTION_KEY), sb.toString());
+//                        request.setChecksum(checksum);
+//                        extendExpiry(request);
+//                        extended = Boolean.TRUE;
+//                    } catch (Exception e) {
+//                        throw e;
+//                    }
+//                }
+//            }
             if (!extended) {
                 userSubscriptionModel = expireUserSubscription(userSubscriptionModel);
                 PlanStatusEnum plan = userSubscriptionModel.getPlanStatus();
