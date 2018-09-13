@@ -350,3 +350,4 @@ update user_subscription_audit set price = 0 where subscription_variant_id = 1;
 update user_subscription_audit set price = 999 where subscription_variant_id = 2;
 alter table user_subscription modify column `price` DECIMAL(5,2) NOT NULL;
 alter table user_subscription_audit modify column `price` DECIMAL(5,2) NOT NULL;
+insert into subscription_property(key_name , key_value , created, updated, deleted) values("SUBSCRIPTION_CTA_RENEWAL_REMINDER_DAYS", 30, now(), now(),0);

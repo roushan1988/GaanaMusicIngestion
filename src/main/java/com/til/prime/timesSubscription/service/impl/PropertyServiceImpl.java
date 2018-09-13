@@ -66,7 +66,7 @@ public class PropertyServiceImpl implements PropertyService {
     }
 
     @Override
-    public Object getProperty(PropertyEnum propertyEnum){
+    public Object   getProperty(PropertyEnum propertyEnum){
         Object value = propertyMap.get(propertyEnum);
         if(value==null){
             LOG.info("Find property - " + propertyEnum.name());
@@ -90,16 +90,16 @@ public class PropertyServiceImpl implements PropertyService {
     }
 
     @Override
-    public List<Long> getExpiredSubscriptionRenewalReminderDays() {
-        return Arrays.stream(((String) getProperty(PropertyEnum.EXPIRED_SUBSCRIPTION_RENEWAL_REMINDER_DAYS)).split(",")).map(i -> Long.parseLong(i)).collect(Collectors.toList());
-    }
-
-    @Override
     public ExternalClientModel getExternalClient(String clientId) {
         if(getProperty(PropertyEnum.EXTERNAL_CLIENTS)==null){
             reloadExternalClients();
         }
         return ((Map<String, ExternalClientModel>)getProperty(PropertyEnum.EXTERNAL_CLIENTS)).get(clientId);
+    }
+
+    @Override
+    public Long getSubscriptionCTARenewalReminderDays() {
+        return (Long) getProperty(PropertyEnum.SUBSCRIPTION_CTA_RENEWAL_REMINDER_DAYS);
     }
 
     private void reloadExternalClients(){

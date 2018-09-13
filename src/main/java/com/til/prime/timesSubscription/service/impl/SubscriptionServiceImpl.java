@@ -34,6 +34,10 @@ import java.nio.charset.Charset;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.til.prime.timesSubscription.enums.PlanStatusEnum.getPlanStatusEnum;
+import static com.til.prime.timesSubscription.enums.PlanStatusEnum.getPlanTexts;
+import static java.text.MessageFormat.format;
+
 @Service
 @Transactional
 public class SubscriptionServiceImpl implements SubscriptionService {
@@ -82,6 +86,10 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     public PlanListResponse getAllPlans(PlanListRequest request) {
         ValidationResponse validationResponse = subscriptionValidationService.validatePreAllPlans(request);
         PlanListResponse response = new PlanListResponse();
+        String channel = request.getChannel() != null ? request.getChannel().getName() : ChannelEnum.TIMES_PRIME.getName();
+        int price = 999;
+        Long daysForPayment = propertyService.getSubscriptionCTARenewalReminderDays();
+        ValuePropDTO valuePropDTO = getPlanTexts(null, PlanStatusEnum.INIT, null, null, channel, null, daysForPayment);
         List<SubscriptionPlanDTO> subscriptionPlans = null;
         if (validationResponse.isValid() && request.getUser() != null) {
             UserModel userModel = userRepository.findByMobileAndDeletedFalse(request.getUser().getMobile());
@@ -108,7 +116,15 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                             UserSubscriptionModel lastUserSubscription = userSubscriptionRepository.findFirstByUserMobileAndUserDeletedFalseAndBusinessAndOrderCompletedAndDeletedOrderByIdDesc(request.getUser().getMobile(), request.getBusiness(), true, false);
                             subscriptionPlans.add(ModelToDTOConvertorUtil.getSubscriptionPlanDTO(subscriptionPlanModel, lastUserSubscription));
                         }
+                        SubscriptionPlanDTO sPlan = subscriptionPlans.get(0);
+                        price = sPlan.getVariants().get(sPlan.getVariants().size() - 1).getPrice().intValue();
                     }
+                }
+                try {
+                    SubscriptionStatusDTO subscriptionStatusDTO = getUserStatusCacheWithUpdateByMobile(request.getUser().getMobile());
+                    valuePropDTO = getPlanTexts(valuePropDTO, getPlanStatusEnum(subscriptionStatusDTO.getPlanStatus()), subscriptionStatusDTO.getEndDate(), subscriptionStatusDTO.getLastEndDate(), channel, format("₹{0}", price), daysForPayment);
+                } catch (RuntimeException e) {
+                    System.out.println(e.getMessage());
                 }
             } else {
                 if (request.getPlanId() != null) {
@@ -125,7 +141,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 }
             }
         }
-        response = subscriptionServiceHelper.preparePlanListResponse(response, subscriptionPlans, validationResponse);
+        response = subscriptionServiceHelper.preparePlanListResponse(response, subscriptionPlans, valuePropDTO, validationResponse);
         return response;
     }
 

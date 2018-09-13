@@ -18,7 +18,7 @@ public interface PropertyService {
     Object getProperty(PropertyEnum propertyEnum);
     List<Long> getSubscriptionRenewalReminderDays();
     List<Long> getSubscriptionExpiryReminderDays();
-    List<Long> getExpiredSubscriptionRenewalReminderDays();
+    Long getSubscriptionCTARenewalReminderDays();
     ExternalClientModel getExternalClient(String clientId);
     SubscriptionVariantModel getBackendFreeTrialVariant(BusinessEnum business, CountryEnum country);
     List<SubscriptionPlanDTO> getAllPlans(BusinessEnum business, CountryEnum country);

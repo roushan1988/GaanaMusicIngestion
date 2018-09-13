@@ -129,9 +129,10 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
     }
 
     @Override
-    public PlanListResponse preparePlanListResponse(PlanListResponse response, List<SubscriptionPlanDTO> subscriptionPlans, ValidationResponse validationResponse) {
+    public PlanListResponse preparePlanListResponse(PlanListResponse response, List<SubscriptionPlanDTO> subscriptionPlans, ValuePropDTO valuePropDTO, ValidationResponse validationResponse) {
         if(validationResponse.isValid()){
             response.setPlanDTOList(Arrays.asList(subscriptionPlans.get(0)));
+            response.setValueProp(valuePropDTO);
             response = (PlanListResponse) ResponseUtil.createSuccessResponse(response);
         }else{
             response = (PlanListResponse) ResponseUtil.createFailureResponse(response, validationResponse, validationResponse.getMaxCategory());

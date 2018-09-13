@@ -117,4 +117,19 @@ public class GlobalConstants {
     public static final String SUBSCRIPTION_EXPIRY_REMINDER_EMAIL_TEMPLATE_KEY = "subscription.expiry.reminder.email.key";
     public static final String SUBSCRIPTION_EXPIRY_AUTO_DEBIT_REMINDER_EMAIL_TEMPLATE_KEY = "subscription.expiry.auto.debit.reminder.email.key";
 
+    public static final String PAYMENT_CTA = "PAY NOW";
+    public static final String PAYMENT_RENEW_CTA = "RENEW NOW";
+    public static final String PAYMENT_SUBSCRIPTION_CTA = "SUBSCRIBE NOW";
+    public static final String PAYMENT_SUBSCRIPTION_CTA_LARGE = "PAY {0} FOR ONE YEAR SUBSCRIPTION";
+    public static final String PAYMENT_SUBSCRIPTION_FREE_CTA = "START YOUR 30 DAYS FREE TRIAL";
+    public static final String PAYMENT_SUBSCRIPTION_FREE_CTA_SMALL = "TRY FOR FREE";
+    public static final String PAYMENT_VP_TP_HEADING = "You are already a Times Prime member";
+    public static final String PAYMENT_VP_TP_SUBHEADING = "get access to 20+ brands and 1000+ events";
+    public static final String PAYMENT_VP_HEADING = "Pay only {0} for a year";
+    public static final String PAYMENT_VP_HEADING_3 = "Your subscription will expire in {0} days";
+    public static final String PAYMENT_VP_SUBHEADING = "to continue enjoying timesprime benefits";
+    public static final String PAYMENT_VP_SUBHEADING_2 = "to enjoy 1 more year of timesprime benefits";
+    public static final String PAYMENT_VP_SUBHEADING_3 = "Pay {0} for 1 more year of timesprime benefits ";
+    public static final String PAYMENT_VP_INIT_HEADING = "UNLOCK A HOST OF PRIVILEGES";
+    public static final String PAYMENT_VP_INIT_SUBHEADING = "Simply login to enjoy an endless stream of benefits, curated just for you";
 }
