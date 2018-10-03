@@ -71,6 +71,29 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
     }
 
     @Override
+    public ValidationResponse validatePrePlanDetailsByVariant(PlanDetailsRequest request, boolean server) {
+        ValidationResponse validationResponse = new ValidationResponse();
+        if(!server){
+            validationResponse = validateUser(request, validationResponse);
+        }
+        PreConditions.notNull(request.getPlanId(), ValidationError.INVALID_PLAN_ID, validationResponse);
+        PreConditions.notNull(request.getVariantId(), ValidationError.INVALID_VARIANT_ID, validationResponse);
+        PreConditions.notNull(request.getBusiness(), ValidationError.INVALID_BUSINESS, validationResponse);
+        PreConditions.notNull(request.getChannel(), ValidationError.INVALID_CHANNEL, validationResponse);
+        validationResponse = updateValid(validationResponse);
+        if(validationResponse.isValid() && server){
+            validationResponse = validateEncryptionForPlanDetailsByVariant(request, validationResponse);
+        }
+        return updateValid(validationResponse);
+    }
+
+    @Override
+    public ValidationResponse validatePostPlanDetailsByVariant(PlanDetailsRequest request, SubscriptionVariantModel model, ValidationResponse validationResponse) {
+        PreConditions.notNull(model, ValidationError.INVALID_SUBSCRIPTION_VARIANT, validationResponse);
+        return validationResponse;
+    }
+
+    @Override
     public ValidationResponse validatePreInitPurchasePlan(InitPurchaseRequest request, boolean crmRequest) {
         ValidationResponse validationResponse = new ValidationResponse();
         if(!crmRequest){
@@ -604,6 +627,24 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
                 StringBuilder sb = new StringBuilder();
                 sb.append(request.getSecretKey()).append(request.getUser().getMobile()).append(request.isBlockUser());
                 String checksum = checksumService.calculateChecksumHmacSHA256(properties.getProperty(GlobalConstants.PAYMENTS_ENCRYPTION_KEY), sb.toString());
+                PreConditions.mustBeEqual(checksum, request.getChecksum(), ValidationError.INVALID_ENCRYPTION, validationResponse);
+            } catch (Exception e) {
+                validationResponse.addValidationError(ValidationError.INVALID_ENCRYPTION);
+            }
+        }
+        return updateValid(validationResponse);
+    }
+
+    private ValidationResponse validateEncryptionForPlanDetailsByVariant(PlanDetailsRequest request, ValidationResponse validationResponse) {
+        PreConditions.mustBeEqual(request.getSecretKey(), properties.getProperty(GlobalConstants.PAYMENTS_SECRET_KEY), ValidationError.INVALID_SECRET_KEY, validationResponse);
+        PreConditions.notEmpty(request.getChecksum(), ValidationError.INVALID_CHECKSUM, validationResponse);
+        validationResponse = updateValid(validationResponse);
+        if(validationResponse.isValid()){
+            try {
+                StringBuilder sb = new StringBuilder();
+                sb.append(request.getSecretKey()).append(request.getPlanId()).append(request.getVariantId()).append(request.getBusiness()).append(request.getChannel());
+                String checksum = checksumService.calculateChecksumHmacSHA256(properties.getProperty(GlobalConstants.PAYMENTS_ENCRYPTION_KEY), sb.toString());
+                System.out.println(checksum);
                 PreConditions.mustBeEqual(checksum, request.getChecksum(), ValidationError.INVALID_ENCRYPTION, validationResponse);
             } catch (Exception e) {
                 validationResponse.addValidationError(ValidationError.INVALID_ENCRYPTION);

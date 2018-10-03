@@ -111,6 +111,17 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
         return userSubscriptionModel;
     }
 
+    @Override
+    public SubscriptionPlanVariantResponse preparePlanDetailsByVariantResponse(SubscriptionPlanVariantResponse response, SubscriptionVariantModel model, ValidationResponse validationResponse) {
+        if(validationResponse.isValid()){
+            response = SubscriptionPlanVariantResponse.updateParams(response, model);
+            response = (SubscriptionPlanVariantResponse) ResponseUtil.createSuccessResponse(response);
+        }else{
+            response = (SubscriptionPlanVariantResponse) ResponseUtil.createFailureResponse(response, validationResponse, validationResponse.getMaxCategory());
+        }
+        return response;
+    }
+
     private PublishedUserStatusDTO getPublishedUserStatusDTO(UserSubscriptionModel userSubscriptionModel, SubscriptionStatusDTO cacheDTO){
         PublishedUserStatusDTO statusDTO = new PublishedUserStatusDTO();
         statusDTO.setMobile(userSubscriptionModel.getUser().getMobile());

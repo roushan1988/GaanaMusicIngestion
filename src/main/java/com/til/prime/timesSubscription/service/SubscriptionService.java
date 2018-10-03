@@ -11,6 +11,7 @@ import java.util.List;
 
 public interface SubscriptionService {
     PlanListResponse getAllPlans(PlanListRequest request);
+    SubscriptionPlanVariantResponse getPlanDetailsByVariant(PlanDetailsRequest request, boolean server);
     InitPurchaseResponse initPurchasePlan(InitPurchaseRequest request);
     InitPurchaseResponse initPurchasePlan(InitPurchaseRequest request, boolean crmRequest, boolean isFree);
     GenerateOrderResponse generateOrder(GenerateOrderRequest request);

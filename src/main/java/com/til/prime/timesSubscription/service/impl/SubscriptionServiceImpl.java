@@ -146,6 +146,19 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
+    public SubscriptionPlanVariantResponse getPlanDetailsByVariant(PlanDetailsRequest request, boolean server) {
+        ValidationResponse validationResponse = subscriptionValidationService.validatePrePlanDetailsByVariant(request, server);
+        SubscriptionPlanVariantResponse response = new SubscriptionPlanVariantResponse();
+        SubscriptionVariantModel variantModel = null;
+        if (validationResponse.isValid()) {
+            variantModel = subscriptionVariantRepository.findByIdAndSubscriptionPlanIdAndSubscriptionPlanBusinessAndDeletedFalse(request.getVariantId(), request.getPlanId(), request.getBusiness());
+            validationResponse = subscriptionValidationService.validatePostPlanDetailsByVariant(request, variantModel, validationResponse);
+        }
+        response = subscriptionServiceHelper.preparePlanDetailsByVariantResponse(response, variantModel, validationResponse);
+        return response;
+    }
+
+    @Override
     @Transactional
     public InitPurchaseResponse initPurchasePlan(InitPurchaseRequest request) {
         return initPurchasePlan(request, false, false);

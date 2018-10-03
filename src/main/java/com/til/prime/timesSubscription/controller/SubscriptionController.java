@@ -44,6 +44,19 @@ public class SubscriptionController {
     }
 
     @Loggable
+    @RequestMapping(path="/internal/getPlanDetailsByVariant", method = RequestMethod.POST)
+    @ResponseBody
+    public SubscriptionPlanVariantResponse getPlanDetailsByVariant(@RequestBody PlanDetailsRequest request){
+        try {
+            return subscriptionService.getPlanDetailsByVariant(request, true);
+        }catch (Exception e){
+            LOG.error("Exception in getPlanDetailsByVariant: ", e);
+            SubscriptionPlanVariantResponse response = new SubscriptionPlanVariantResponse();
+            return (SubscriptionPlanVariantResponse) ResponseUtil.createExceptionResponse(response, 10);
+        }
+    }
+
+    @Loggable
     @RequestMapping(path="/initPurchase", method = RequestMethod.POST)
     @ResponseBody
     public InitPurchaseResponse initPurchase(@RequestBody InitPurchaseRequest request){

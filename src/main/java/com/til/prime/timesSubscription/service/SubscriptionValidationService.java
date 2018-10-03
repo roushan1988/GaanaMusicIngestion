@@ -12,6 +12,8 @@ public interface SubscriptionValidationService {
     ValidationResponse validateSsoOtpRequest(SsoOtpRequest request);
     ValidationResponse validatePreAllPlans(PlanListRequest request);
     ValidationResponse validatePostAllPlans(UserModel userModel, ValidationResponse validationResponse);
+    ValidationResponse validatePrePlanDetailsByVariant(PlanDetailsRequest request, boolean server);
+    ValidationResponse validatePostPlanDetailsByVariant(PlanDetailsRequest request, SubscriptionVariantModel model, ValidationResponse validationResponse);
     ValidationResponse validatePreInitPurchasePlan(InitPurchaseRequest request, boolean crmRequest);
     ValidationResponse validatePostInitPurchasePlan(InitPurchaseRequest request, SubscriptionVariantModel variantModel, UserSubscriptionModel restrictedModel, UserSubscriptionModel lastUserSubscription, boolean crmRequest, ValidationResponse validationResponse);
     ValidationResponse validatePreGenerateOrder(GenerateOrderRequest request);

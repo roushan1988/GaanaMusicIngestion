@@ -1,6 +1,7 @@
 package com.til.prime.timesSubscription.dto.external;
 
 import com.til.prime.timesSubscription.enums.PlanTypeEnum;
+import com.til.prime.timesSubscription.model.SubscriptionVariantModel;
 
 import java.math.BigDecimal;
 
@@ -10,6 +11,14 @@ public class SubscriptionVariantDTO implements Comparable<SubscriptionVariantDTO
     private BigDecimal price;
     private Long durationInDays;
     private boolean recurring;
+
+    public SubscriptionVariantDTO(SubscriptionVariantModel variantModel) {
+        this.variantId = variantModel.getId();
+        this.planType = variantModel.getPlanType();
+        this.price = variantModel.getPrice();
+        this.durationInDays = variantModel.getDurationDays();
+        this.recurring = variantModel.isRecurring();
+    }
 
     public SubscriptionVariantDTO(Long variantId, String name, PlanTypeEnum planType, BigDecimal price, Long durationInDays, boolean recurring) {
         this.variantId = variantId;
