@@ -52,7 +52,7 @@ public interface SubscriptionService {
     PlanPriceUpdateResponse updatePlanPrice(PlanPriceUpdateRequest request, boolean bypassValidation);
     void reloadPriceCacheViaUrl();
     GenericResponse reloadPlanCache(PlanCacheReloadRequest request);
+    void saveUserSubscriptionAuditWithExternalUpdates(UserSubscriptionModel userSubscriptionModel, SubscriptionStatusDTO statusDTO, EventEnum event, boolean publishStatus, boolean updateSSO, boolean ssoIdUpdated, boolean publishDetailsUpdated);
     // don't call below method from anywhere except from saveSubscription or saveUser, this is just for async implementation
     void saveUserAuditAsync(UserModel userModel, EventEnum event);
-    void saveUserSubscriptionAuditWithExternalUpdatesAsync(UserSubscriptionModel userSubscriptionModel, SubscriptionStatusDTO statusDTO, EventEnum event, boolean publishStatus, boolean updateSSO, boolean ssoIdUpdated, boolean publishDetailsUpdated);
 }

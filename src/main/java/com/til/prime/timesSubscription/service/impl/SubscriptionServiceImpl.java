@@ -668,7 +668,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             try {
                 userSubscriptionModel = userSubscriptionRepository.save(userSubscriptionModel);
                 SubscriptionStatusDTO statusDTO = updateUserStatus(userSubscriptionModel);
-                applicationContext.getBean(SubscriptionService.class).saveUserSubscriptionAuditWithExternalUpdatesAsync(userSubscriptionModel, statusDTO, event, publishStatus, updateSSO, ssoIdUpdated, publishDetailsUpdated);
+                applicationContext.getBean(SubscriptionService.class).saveUserSubscriptionAuditWithExternalUpdates(userSubscriptionModel, statusDTO, event, publishStatus, updateSSO, ssoIdUpdated, publishDetailsUpdated);
                 break retryLoop;
             } catch (Exception e) {
                 retryCount--;
@@ -682,16 +682,21 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         return userSubscriptionModel;
     }
 
-    @Async
     @Override
     @Transactional
-    public void saveUserSubscriptionAuditWithExternalUpdatesAsync(UserSubscriptionModel userSubscriptionModel, SubscriptionStatusDTO statusDTO, EventEnum event, boolean publishStatus, boolean updateSSO, boolean ssoIdUpdated, boolean publishDetailsUpdated){
+    public void saveUserSubscriptionAuditWithExternalUpdates(UserSubscriptionModel userSubscriptionModel, SubscriptionStatusDTO statusDTO, EventEnum event, boolean publishStatus, boolean updateSSO, boolean ssoIdUpdated, boolean publishDetailsUpdated){
         if (userSubscriptionModel.isOrderCompleted()) {
             if(StatusEnum.VALID_SSO_UPDATE_STATUS_SET.contains(userSubscriptionModel.getStatus()) && updateSSO && (!userSubscriptionModel.isSsoCommunicated() || ssoIdUpdated)) {
+                Long startMillis = System.currentTimeMillis();
                 userSubscriptionModel = subscriptionServiceHelper.updateSSOStatus(userSubscriptionModel);
+                Long endMillis = System.currentTimeMillis();
+                LOG.info("SSO update took millis: "+(endMillis-startMillis));
             }
             if(publishStatus && publishDetailsUpdated){
+                Long startMillis = System.currentTimeMillis();
                 userSubscriptionModel = subscriptionServiceHelper.publishUserStatus(userSubscriptionModel, statusDTO);
+                Long endMillis = System.currentTimeMillis();
+                LOG.info("Kafka Status publish took millis: "+(endMillis-startMillis));
             }
             if((publishStatus || updateSSO) && (userSubscriptionModel.isSsoCommunicated() || userSubscriptionModel.isStatusPublished())){
                 userSubscriptionModel = userSubscriptionRepository.save(userSubscriptionModel);
