@@ -121,10 +121,11 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                     }
                 }
                 try {
+                    LOG.info("Get plan value prop details");
                     SubscriptionStatusDTO subscriptionStatusDTO = getUserStatusCacheWithUpdateByMobile(request.getUser().getMobile());
                     valuePropDTO = getPlanTexts(valuePropDTO, getPlanStatusEnum(subscriptionStatusDTO.getPlanStatus()), subscriptionStatusDTO.getEndDate(), subscriptionStatusDTO.getLastEndDate(), channel, format("₹{0}", price), daysForPayment);
                 } catch (RuntimeException e) {
-                    System.out.println(e.getMessage());
+                    LOG.error("Error in preparing value prop detail", e);
                 }
             } else {
                 if (request.getPlanId() != null) {
