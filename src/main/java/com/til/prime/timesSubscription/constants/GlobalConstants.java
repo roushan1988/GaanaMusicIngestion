@@ -22,10 +22,12 @@ public class GlobalConstants {
     public static final String TYPE = "type";
     public static final String CHANNEL = "channel";
     public static final String SSOID = "ssoid";
+    public static final String MOBILE = "mobile";
     public static final String STATUS = "status";
     public static final String PLATFORM = "platform";
     public static final String SSO_VALIDATION_API_TYPE = "json";
     public static final String SSO_VALIDATE_API_URL_KEY = "sso.validate.ticket.url";
+    public static final String SSO_UPDATE_PROFILE_OLD_URL_KEY = "sso.update.profile.old.url";
     public static final String SSO_UPDATE_PROFILE_URL_KEY = "sso.update.profile.url";
     public static final String TP_SITE_ID_KEY = "sso.tp.site.id";
     public static final String TP_CHANNEL_KEY = "sso.tp.channel";
