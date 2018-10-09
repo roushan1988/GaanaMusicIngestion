@@ -109,8 +109,7 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
 
     @Override
     public UserSubscriptionModel updateSSOStatus(UserSubscriptionModel userSubscriptionModel){
-        boolean success = communicateSSOOldApi(userSubscriptionModel);
-        success = success && communicateSSO(userSubscriptionModel);
+        boolean success = communicateSSO(userSubscriptionModel);
         userSubscriptionModel.setSsoCommunicated(success);
         return userSubscriptionModel;
     }
@@ -721,32 +720,6 @@ public class SubscriptionServiceHelperImpl implements SubscriptionServiceHelper 
             return new RefundInternalResponse(true, response.getRefundedAmount());
         }
         return new RefundInternalResponse(false, null);
-    }
-
-    private final boolean communicateSSOOldApi(UserSubscriptionModel userSubscriptionModel){
-        int retryCount = GlobalConstants.API_RETRY_COUNT;
-        RETRY_LOOP:
-        while (retryCount>0){
-            try{
-                Map<String, String> headers = Maps.newHashMap();
-                headers.put(GlobalConstants.CONTENT_TYPE, GlobalConstants.CONTENT_TYPE_JSON);
-                headers.put(GlobalConstants.CHANNEL, properties.getProperty(GlobalConstants.TP_CHANNEL_KEY));
-                headers.put(GlobalConstants.SSOID, userSubscriptionModel.getUser().getSsoId());
-                headers.put(GlobalConstants.STATUS, Integer.toString(userSubscriptionModel.getPlanStatus().getCode()));
-                headers.put(GlobalConstants.PLATFORM, userSubscriptionModel.getPlatform().getSsoChannel());
-                SSOGenericResponse response = httpConnectionUtils.requestWithHeaders(Maps.newHashMap(), headers, properties.getProperty(GlobalConstants.SSO_UPDATE_PROFILE_OLD_URL_KEY), SSOGenericResponse.class, GlobalConstants.POST);
-                if(response.getCode()==200 && GlobalConstants.SUCCESS.equals(response.getStatus()) && GlobalConstants.OK.equals(response.getMessage())){
-                    return true;
-                }
-                return false;
-            }catch (Exception e){
-                retryCount--;
-                if(retryCount>0){
-                    continue RETRY_LOOP;
-                }
-            }
-        }
-        return false;
     }
 
     private final boolean communicateSSO(UserSubscriptionModel userSubscriptionModel){
