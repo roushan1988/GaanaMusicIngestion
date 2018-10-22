@@ -3,9 +3,9 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.til.prime</groupId>
   <artifactId>timesSubscription</artifactId>
-  <packaging>war</packaging>
+  <packaging>pom</packaging>
   <version>1.0.0-SNAPSHOT</version>
-  <name>timesSubscription Maven Webapp</name>
+  <name>TimesSubscription</name>
   <url>http://maven.apache.org</url>
   <properties>
     <spring.version>5.0.4.RELEASE</spring.version>
@@ -13,6 +13,10 @@
     <jdk.version>1.8</jdk.version>
     <hibernate.version>5.0.6.Final</hibernate.version>
   </properties>
+	<modules>
+		<module>SubscriptionBase</module>
+		<module>SubscriptionMain</module>
+	</modules>
 
   <dependencies>
     <dependency>
