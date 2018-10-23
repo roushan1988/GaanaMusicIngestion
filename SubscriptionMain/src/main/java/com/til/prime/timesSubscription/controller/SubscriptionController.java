@@ -121,6 +121,31 @@ public class SubscriptionController {
     }
 
     @Loggable
+    @RequestMapping(path="/middle/getPurchaseHistory", method = RequestMethod.GET)
+    @ResponseBody
+    public PurchaseHistoryResponse getPurchaseHistoryMiddleware(@RequestParam(value = "ssoId") String ssoId,
+                                                                @RequestParam(value = "ticketId") String ticketId,
+                                                                @RequestParam(value = "mobile") String mobile,
+                                                                @RequestParam(value = "business") String business,
+                                                                @RequestParam(value = "currentSubscription", required = false) boolean currentSubscription,
+                                                                @RequestParam(value = "includeDeleted", required = false) boolean includeDeleted){
+        PurchaseHistoryRequest request = new PurchaseHistoryRequest();
+        RequestUpdateUtil.updateRequest(request, ssoId, ticketId, mobile);
+        if(StringUtils.isNotEmpty(business)){
+            request.setBusiness(business);
+        }
+        request.setCurrentSubscription(currentSubscription);
+        request.setIncludeDeleted(includeDeleted);
+        try {
+            return subscriptionService.getPurchaseHistory(request);
+        }catch (Exception e){
+            LOG.error("Exception in getPurchaseHistory: ", e);
+            PurchaseHistoryResponse response = new PurchaseHistoryResponse();
+            return (PurchaseHistoryResponse) ResponseUtil.createExceptionResponse(response, 10);
+        }
+    }
+
+    @Loggable
     @RequestMapping(path="/app/cancelSubscription", method = RequestMethod.POST)
     @ResponseBody
     public CancelSubscriptionResponse cancelSubscriptionViaApp(@RequestBody CancelSubscriptionRequest request){
@@ -134,7 +159,7 @@ public class SubscriptionController {
     }
 
     @Loggable
-    @RequestMapping(path="/checkEligibility", method = RequestMethod.GET)
+    @RequestMapping(path="/checkEligibility", method = {RequestMethod.GET, RequestMethod.POST})
     @ResponseBody
     public GenericValidationResponse checkEligibility(@RequestBody CheckEligibilityRequest request){
         try {

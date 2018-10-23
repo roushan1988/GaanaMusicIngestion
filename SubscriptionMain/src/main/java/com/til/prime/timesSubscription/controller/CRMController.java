@@ -32,7 +32,7 @@ public class CRMController {
     PropertyService propertyService;
     
     @Loggable
-    @RequestMapping(path="/getPurchaseHistory", method = RequestMethod.GET)
+    @RequestMapping(path="/getPurchaseHistory", method = {RequestMethod.POST, RequestMethod.GET})
     @ResponseBody
     public PurchaseHistoryResponse getPurchaseHistory(@RequestBody PurchaseHistoryRequest request){
         try {
