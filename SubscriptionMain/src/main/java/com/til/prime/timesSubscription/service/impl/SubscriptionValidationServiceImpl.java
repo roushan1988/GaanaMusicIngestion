@@ -55,7 +55,7 @@ public class SubscriptionValidationServiceImpl implements SubscriptionValidation
     public ValidationResponse validatePreAllPlans(PlanListRequest request) {
         ValidationResponse validationResponse = new ValidationResponse();
         if(request.getUser()!=null){
-            validationResponse = validateUser(request, validationResponse);
+//            validationResponse = validateUser(request, validationResponse);
         }
         PreConditions.notNull(request.getBusiness(), ValidationError.INVALID_BUSINESS, validationResponse);
         PreConditions.notNull(request.getCountry(), ValidationError.INVALID_COUNTRY, validationResponse);

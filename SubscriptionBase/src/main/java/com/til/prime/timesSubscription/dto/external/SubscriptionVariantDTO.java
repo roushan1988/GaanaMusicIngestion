@@ -11,6 +11,10 @@ public class SubscriptionVariantDTO implements Comparable<SubscriptionVariantDTO
     private Long durationInDays;
     private boolean recurring;
 
+    public SubscriptionVariantDTO(){
+
+    }
+
     public SubscriptionVariantDTO(Long variantId, String name, PlanTypeEnum planType, BigDecimal price, Long durationInDays, boolean recurring) {
         this.variantId = variantId;
         this.planType = planType;
