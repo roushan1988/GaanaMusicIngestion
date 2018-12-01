@@ -18,13 +18,6 @@
     <jdk.version>1.8</jdk.version>
     <hibernate.version>5.0.6.Final</hibernate.version>
   </properties>
-  <dependencies>
-    <dependency>
-      <groupId>com.til.prime</groupId>
-      <artifactId>subscriptionBase</artifactId>
-      <version>1.0.0-SNAPSHOT</version>
-    </dependency>
-  </dependencies>
 
   <build>
     <finalName>ROOT</finalName>

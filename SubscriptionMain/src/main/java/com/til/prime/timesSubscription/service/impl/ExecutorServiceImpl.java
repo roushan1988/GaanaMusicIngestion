@@ -13,10 +13,10 @@ public class ExecutorServiceImpl implements ExecutorService {
     private final java.util.concurrent.ExecutorService executorService;
 
     private ExecutorServiceImpl() {
-        int corePoolSize = 20;
-        int maxPoolSize = 400;
+        int corePoolSize = 150;
+        int maxPoolSize = 170;
         long keepAliveTime = 2L;
-        final BlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<Runnable>(50000);
+        final BlockingQueue<Runnable> workQueue = new LinkedBlockingQueue<Runnable>(200000);
 
         executorService = new ThreadPoolExecutor(corePoolSize, maxPoolSize, keepAliveTime, TimeUnit.MINUTES, workQueue, new ThreadFactory() {
             final AtomicInteger threadCounter = new AtomicInteger();

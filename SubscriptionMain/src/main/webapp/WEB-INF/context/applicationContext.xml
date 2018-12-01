@@ -27,7 +27,7 @@
     <mvc:resources mapping="/static/**" location="/static/" />
     <mvc:resources mapping="/favicon.ico" location="/static/images/" />
     <mvc:view-controller path="error" view-name="/WEB-INF/views/error" />
-    <context:property-placeholder location="file:///opt/timesSubscription/mysql.properties, file:///opt/timesSubscription/application.properties, WEB-INF/application.properties" />
+    <context:property-placeholder location="WEB-INF/application.properties" />
     <bean id="restTemplate" class="org.springframework.web.client.RestTemplate" />
     <bean class="org.springframework.validation.DefaultMessageCodesResolver"
           p:prefix="validation." />
@@ -51,7 +51,6 @@
         <property name="locations">
             <list>
                 <value>WEB-INF/application.properties</value>
-                <value>file:///opt/timesSubscription/application.properties</value>
             </list>
         </property>
     </bean>
@@ -64,22 +63,22 @@
         <property name="entityManagerFactory" ref="entityManagerFactory" />
     </bean>
     <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
-        <property name="driverClass" value="${mysql.db.driver}" />
-        <property name="jdbcUrl" value="${mysql.db.url}" />
-        <property name="user" value="${mysql.db.user}" />
-        <property name="password" value="${mysql.db.pass}" />
-        <property name="initialPoolSize" value="${jdbc.initialpoolsize}" />
-        <property name="maxPoolSize" value="${jdbc.maxpoolsize}" />
-        <property name="minPoolSize" value="${jdbc.minpoolsize}" />
-        <property name="acquireIncrement" value="${jdbc.acquireIncrement}" />
-        <property name="checkoutTimeout" value="${jdbc.checkoutTimeout}" />
-        <property name="maxStatements" value="${jdbc.maxStatements}" />
+        <property name="driverClass" value="com.mysql.jdbc.Driver" />
+        <property name="jdbcUrl" value="jdbc:mysql://localhost:3306/gaana?autoReconnect=true" />
+        <property name="user" value="root" />
+        <property name="password" value="" />
+        <property name="initialPoolSize" value="15" />
+        <property name="maxPoolSize" value="20" />
+        <property name="minPoolSize" value="10" />
+        <property name="acquireIncrement" value="2" />
+        <property name="checkoutTimeout" value="20000" />
+        <property name="maxStatements" value="500" />
         <property name="testConnectionOnCheckin" value="false" />
         <property name="testConnectionOnCheckout" value="true" />
-        <property name="maxIdleTime" value="${jdbc.maxIdleTime}" />
-        <property name="maxIdleTimeExcessConnections" value="${jdbc.maxIdleTimeExcessConnections}" />
-        <property name="idleConnectionTestPeriod" value="${jdbc.idleConnectionTestPeriod}" />
-        <property name="numHelperThreads" value="${jdbc.numHelperThreads}"/>
+        <property name="maxIdleTime" value="3600" />
+        <property name="maxIdleTimeExcessConnections" value="300" />
+        <property name="idleConnectionTestPeriod" value="300" />
+        <property name="numHelperThreads" value="3"/>
     </bean>
     <bean id="jpaVendorAdapter"
           class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">

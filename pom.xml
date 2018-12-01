@@ -45,6 +45,12 @@
       <version>${spring.version}</version>
     </dependency>
 
+    <dependency>
+      <groupId>com.opencsv</groupId>
+      <artifactId>opencsv</artifactId>
+      <version>4.1</version>
+    </dependency>
+
     <!-- https://mvnrepository.com/artifact/org.springframework/spring-test -->
     <dependency>
       <groupId>org.springframework</groupId>
@@ -204,12 +210,12 @@
       <artifactId>javax.mail-api</artifactId>
       <version>1.5.3</version>
     </dependency>
-    <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-text -->
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-text</artifactId>
-      <version>1.1</version>
-    </dependency>
+    <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-title -->
+    <!--<dependency>-->
+      <!--<groupId>org.apache.commons</groupId>-->
+      <!--<artifactId>commons-title</artifactId>-->
+      <!--<version>1.1</version>-->
+    <!--</dependency>-->
     <dependency>
       <groupId>log4j</groupId>
       <artifactId>log4j</artifactId>
