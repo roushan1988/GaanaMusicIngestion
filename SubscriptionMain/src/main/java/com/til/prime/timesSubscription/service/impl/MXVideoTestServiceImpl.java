@@ -121,14 +121,14 @@ public class MXVideoTestServiceImpl implements MXVideoTestService {
         }
     }
 
-    private Map<String, List<YTVideoCrawlerResponseItem>> searchVideosNew(List<String> titles){
+    private LinkedHashMap<String, List<YTVideoCrawlerResponseItem>> searchVideosNew(List<String> titles){
         String q = StringUtils.join(titles, ",");
         LOG.info("searching for: "+ q);
         int retryCount = GlobalConstants.API_RETRY_COUNT;
         RETRY_LOOP:
         while(retryCount>0){
             try{
-                Map<String, List<YTVideoCrawlerResponseItem>> response = (Map<String, List<YTVideoCrawlerResponseItem>>)httpConnectionUtils.requestForObject("", createVideoSearchUrl(q), Map.class, GlobalConstants.GET);
+                LinkedHashMap<String, List<YTVideoCrawlerResponseItem>> response = (LinkedHashMap<String, List<YTVideoCrawlerResponseItem>>)httpConnectionUtils.requestForObject("", createVideoSearchUrl(q), Map.class, GlobalConstants.GET);
                 LOG.info("Response: "+response);
                 return response;
             }catch (Exception e){
@@ -141,28 +141,30 @@ public class MXVideoTestServiceImpl implements MXVideoTestService {
     }
 
     private void updateViews(YTVideoCrawlerResponseItem item){
-        try {
-            String views = item.getViews();
-            views = views.replaceAll(" views", "");
-            views = views.replaceAll(",", "");
-            if (views.endsWith("B")) {
-                views = views.replaceAll("B", "");
-                Double d = Double.parseDouble(views.trim());
-                d = d * 1000000000d;
-                item.setViewCount(d.longValue());
-            } else if (views.endsWith("M")) {
-                views = views.replaceAll("M", "");
-                Double d = Double.parseDouble(views.trim());
-                d = d * 1000000d;
-                item.setViewCount(d.longValue());
-            } else if (views.endsWith("K")) {
-                views = views.replaceAll("K", "");
-                Double d = Double.parseDouble(views.trim());
-                d = d * 1000d;
-                item.setViewCount(d.longValue());
+        if(item!=null) {
+            try {
+                String views = item.getViews();
+                views = views.replaceAll(" views", "");
+                views = views.replaceAll(",", "");
+                if (views.endsWith("B")) {
+                    views = views.replaceAll("B", "");
+                    Double d = Double.parseDouble(views.trim());
+                    d = d * 1000000000d;
+                    item.setViewCount(d.longValue());
+                } else if (views.endsWith("M")) {
+                    views = views.replaceAll("M", "");
+                    Double d = Double.parseDouble(views.trim());
+                    d = d * 1000000d;
+                    item.setViewCount(d.longValue());
+                } else if (views.endsWith("K")) {
+                    views = views.replaceAll("K", "");
+                    Double d = Double.parseDouble(views.trim());
+                    d = d * 1000d;
+                    item.setViewCount(d.longValue());
+                }
+            } catch (Exception e) {
+                LOG.error("Exception", e);
             }
-        }catch (Exception e){
-            LOG.error("Exception", e);
         }
     }
 
@@ -188,37 +190,37 @@ public class MXVideoTestServiceImpl implements MXVideoTestService {
                     break loop1;
                 }
                 List<String> qList = models.stream().map(i -> i.getTrackTitle().replaceAll(" ", "+")).collect(Collectors.toList());
-                Map<String, List<YTVideoCrawlerResponseItem>> response = searchVideosNew(qList);
-                Map<String, List<YTVideoCrawlerResponseItem>> map = new HashMap<>();
+                List<Long> idList = models.stream().map(MxGaanaDbEntity::getId).collect(Collectors.toList());
+                LinkedHashMap<String, List<YTVideoCrawlerResponseItem>> response = searchVideosNew(qList);
+                Map<Long, List<YTVideoCrawlerResponseItem>> map = new HashMap<>();
+                for(Long id: idList){
+                    map.put(id, new ArrayList<>());
+                }
                 if (MapUtils.isNotEmpty(response)) {
-                    for (String key : response.keySet()) {
-                        if (CollectionUtils.isNotEmpty(response.get(key))) {
-                            for (Object item : response.get(key)) {
-                                if (map.get(key) == null) {
-                                    map.put(key, new ArrayList<>());
-                                }
-                                if (item instanceof YTVideoCrawlerResponseItem) {
-                                    updateViews((YTVideoCrawlerResponseItem) item);
-                                    map.get(key).add((YTVideoCrawlerResponseItem) item);
-                                }
-                                if (item instanceof LinkedHashMap) {
-                                    YTVideoCrawlerResponseItem item1 = new YTVideoCrawlerResponseItem();
-                                    item1.setLink((String) ((LinkedHashMap) item).get("link"));
-                                    item1.setTitle((String) ((LinkedHashMap) item).get("title"));
-                                    item1.setPublisher((String) ((LinkedHashMap) item).get("publisher"));
-                                    item1.setViews((String) ((LinkedHashMap) item).get("views"));
-                                    item1.setTime((String) ((LinkedHashMap) item).get("time"));
-                                    item1.setImg_thumbnail((String) ((LinkedHashMap) item).get("img_thumbnail"));
-                                    item1.setImg_max_resolution((String) ((LinkedHashMap) item).get("img_max_resolution"));
-                                    updateViews(item1);
-                                    map.get(key).add(item1);
-                                }
+                    List<List<YTVideoCrawlerResponseItem>> resList = new ArrayList<>(response.values());
+                    for (int i=0; i<resList.size(); i++) {
+                        for (Object item : resList.get(i)) {
+                            if (item instanceof YTVideoCrawlerResponseItem) {
+                                updateViews((YTVideoCrawlerResponseItem) item);
+                                map.get(idList.get(i)).add((YTVideoCrawlerResponseItem) item);
+                            }
+                            if (item instanceof LinkedHashMap) {
+                                YTVideoCrawlerResponseItem item1 = new YTVideoCrawlerResponseItem();
+                                item1.setLink((String) ((LinkedHashMap) item).get("link"));
+                                item1.setTitle((String) ((LinkedHashMap) item).get("title"));
+                                item1.setPublisher((String) ((LinkedHashMap) item).get("publisher"));
+                                item1.setViews((String) ((LinkedHashMap) item).get("views"));
+                                item1.setTime((String) ((LinkedHashMap) item).get("time"));
+                                item1.setImg_thumbnail((String) ((LinkedHashMap) item).get("img_thumbnail"));
+                                item1.setImg_max_resolution((String) ((LinkedHashMap) item).get("img_max_resolution"));
+                                updateViews(item1);
+                                map.get(idList.get(i)).add(item1);
                             }
                         }
                     }
                 }
                 for (MxGaanaDbEntity model : models) {
-                    updateYTUrl(model, map.get(model.getTrackTitle().replaceAll(" ", "+")));
+                    updateYTUrl(model, map.get(model.getId()));
                 }
                 gaanaDao.saveAll(models);
                 for (MxGaanaDbEntity model : models) {
