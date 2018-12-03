@@ -189,7 +189,7 @@ public class MXVideoTestServiceImpl implements MXVideoTestService {
                 if (CollectionUtils.isEmpty(models)) {
                     break loop1;
                 }
-                List<String> qList = models.stream().map(i -> i.getTrackTitle().replaceAll(" ", "+").replaceAll(",", "+").replaceAll("\\?", "+")).collect(Collectors.toList());
+                List<String> qList = models.stream().map(i -> i.getTrackTitle().replaceAll(" ", "+").replaceAll(",", "+").replaceAll("\\?", "+").replaceAll("\\{", "(").replaceAll("\\}", ")")).collect(Collectors.toList());
                 List<Long> idList = models.stream().map(MxGaanaDbEntity::getId).collect(Collectors.toList());
                 LinkedHashMap<String, List<YTVideoCrawlerResponseItem>> response = searchVideosNew(qList);
                 Map<Long, List<YTVideoCrawlerResponseItem>> map = new HashMap<>();
