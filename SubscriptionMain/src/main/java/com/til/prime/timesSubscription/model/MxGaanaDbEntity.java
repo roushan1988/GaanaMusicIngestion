@@ -35,6 +35,10 @@ public class MxGaanaDbEntity extends BaseModel {
     @Temporal(TemporalType.DATE)
     private Date releaseDate;
 
+    @Column(name = "album_release_date", nullable = true)
+    @Temporal(TemporalType.DATE)
+    private Date albumReleaseDate;
+
     @Column(name = "singer", nullable = true)
     private String singer;
 
@@ -80,6 +84,12 @@ public class MxGaanaDbEntity extends BaseModel {
     @Column(name="max_resolution_thumbnail")
     private String maxResolutionThumbnail;
 
+    @Column(name="s3_album_thumbnail_path")
+    private String s3AlbumThumbnailPath;
+
+    @Column(name="s3_video_thumbnail_path")
+    private String s3VideoThumbnailPath;
+
     public Long getTrackId() {
         return trackId;
     }
@@ -118,6 +128,14 @@ public class MxGaanaDbEntity extends BaseModel {
 
     public void setReleaseDate(Date releaseDate) {
         this.releaseDate = releaseDate;
+    }
+
+    public Date getAlbumReleaseDate() {
+        return albumReleaseDate;
+    }
+
+    public void setAlbumReleaseDate(Date albumReleaseDate) {
+        this.albumReleaseDate = albumReleaseDate;
     }
 
     public String getSinger() {
@@ -250,5 +268,21 @@ public class MxGaanaDbEntity extends BaseModel {
 
     public void setMaxResolutionThumbnail(String maxResolutionThumbnail) {
         this.maxResolutionThumbnail = maxResolutionThumbnail;
+    }
+
+    public String getS3AlbumThumbnailPath() {
+        return s3AlbumThumbnailPath;
+    }
+
+    public void setS3AlbumThumbnailPath(String s3AlbumThumbnailPath) {
+        this.s3AlbumThumbnailPath = s3AlbumThumbnailPath;
+    }
+
+    public String getS3VideoThumbnailPath() {
+        return s3VideoThumbnailPath;
+    }
+
+    public void setS3VideoThumbnailPath(String s3VideoThumbnailPath) {
+        this.s3VideoThumbnailPath = s3VideoThumbnailPath;
     }
 }

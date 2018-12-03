@@ -27,7 +27,7 @@
     <mvc:resources mapping="/static/**" location="/static/" />
     <mvc:resources mapping="/favicon.ico" location="/static/images/" />
     <mvc:view-controller path="error" view-name="/WEB-INF/views/error" />
-    <context:property-placeholder location="WEB-INF/application.properties" />
+    <context:property-placeholder location="WEB-INF/application.properties, file:///opt/config/application.properties" />
     <bean id="restTemplate" class="org.springframework.web.client.RestTemplate" />
     <bean class="org.springframework.validation.DefaultMessageCodesResolver"
           p:prefix="validation." />
@@ -51,6 +51,7 @@
         <property name="locations">
             <list>
                 <value>WEB-INF/application.properties</value>
+                <value>file:///opt/config/application.properties</value>
             </list>
         </property>
     </bean>

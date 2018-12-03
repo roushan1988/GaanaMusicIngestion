@@ -5,14 +5,19 @@ import com.til.prime.timesSubscription.constants.GlobalConstants;
 import com.til.prime.timesSubscription.dao.GaanaDataRepository;
 import com.til.prime.timesSubscription.model.MxGaanaDbEntity;
 import com.til.prime.timesSubscription.model.YTSearchResultsEntity;
+import com.til.prime.timesSubscription.pojo.GaanaMusicRESTResponse;
+import com.til.prime.timesSubscription.pojo.Genre;
+import com.til.prime.timesSubscription.pojo.Track;
 import com.til.prime.timesSubscription.service.ExecutorService;
 import com.til.prime.timesSubscription.service.MXVideoTestService;
+import com.til.prime.timesSubscription.service.S3FileOperations;
 import com.til.prime.timesSubscription.util.HttpConnectionUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
@@ -20,9 +25,24 @@ import java.io.FileReader;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+
 @Service
 public class MXVideoTestServiceImpl implements MXVideoTestService {
     private static final Logger LOG = Logger.getLogger(MXVideoTestServiceImpl.class);
+
+    @Autowired
+    S3FileOperations s3FileOperations;
+
+    @Value("${mx.gaana.s3.bucket}")
+    private String mxGaanaS3Bucket;
+
+    @Value("${mx.gaana.artifacts.path.s3}")
+    private String s3BasePath;
+
+    private static final String ALBUM_FOLDER = "/album";
+
+    private static final String VIDEO_FOLDER = "/video";
 
     private static final List<String> keys = Arrays.asList(
             "AIzaSyARh-cwvt1c2PnEBLmFHlRs6hvVaTetUfE",
@@ -51,8 +71,6 @@ public class MXVideoTestServiceImpl implements MXVideoTestService {
     @Autowired
     private GaanaDataRepository gaanaDao;
 
-    private static int validCount=0;
-    private static int invalidCount=0;
 
     @Override
     @PostConstruct
@@ -91,7 +109,7 @@ public class MXVideoTestServiceImpl implements MXVideoTestService {
                             continue loop;
                         }
                         if (times.length == 1) {
-                            model.setYoutubeId(item.getLink());
+                            model.setYoutubeId("https://www.youtube.com"+item.getLink());
                             model.setThumbnail(item.getImg_thumbnail());
                             model.setMaxResolutionThumbnail(item.getImg_max_resolution());
                             flag = true;
@@ -101,7 +119,7 @@ public class MXVideoTestServiceImpl implements MXVideoTestService {
                             if (Integer.parseInt(times[0]) > 15) {
                                 continue loop;
                             } else {
-                                model.setYoutubeId(item.getLink());
+                                model.setYoutubeId("https://www.youtube.com"+item.getLink());
                                 model.setThumbnail(item.getImg_thumbnail());
                                 model.setMaxResolutionThumbnail(item.getImg_max_resolution());
                                 flag = true;
@@ -180,11 +198,83 @@ public class MXVideoTestServiceImpl implements MXVideoTestService {
         return sb.toString();
     }
 
+    private GaanaMusicRESTResponse getGaanaInfo(MxGaanaDbEntity model){
+        //http://api.gaana.com/?type=song&subtype=song_detail&track_id=22540280
+        int retryCount = GlobalConstants.API_RETRY_COUNT;
+        RETRY_LOOP:
+        while(retryCount>0){
+            try{
+                GaanaMusicRESTResponse response = httpConnectionUtils.requestForObject("", new StringBuilder("http://api.gaana.com/?type=song&subtype=song_detail&track_id=").append(model.getTrackId()).toString(), GaanaMusicRESTResponse.class, GlobalConstants.GET);
+                return response;
+            }catch (Exception e){
+                LOG.error("Exception", e);
+                retryCount--;
+                continue RETRY_LOOP;
+            }
+        }
+        return null;
+    }
+
+    private static String getNonEmptyString(String... input) {
+        for (String x : input) {
+            if (StringUtils.isNotEmpty(x)) {
+                return x;
+            }
+        }
+        return null;
+    }
+
+    public static String getArtworkPath(Track track) {
+        return getNonEmptyString(track.getArtworkLarge(), track.getArtworkWeb(), track.getAtw());
+    }
+
+    private void enrichWithGaanaInfo(MxGaanaDbEntity model) {
+        if(StringUtils.isEmpty(model.getGenres()) || StringUtils.isEmpty(model.getS3AlbumThumbnailPath())){
+            LOG.debug("Contacting Gaana API for Music Batch Object Enrichment..");
+            GaanaMusicRESTResponse response = getGaanaInfo(model);
+            if (response != null && isNotEmpty(response.getTracks())) {
+                Track track = response.getTracks().get(0);
+                model.setAlbumThumbnailPath(getArtworkPath(track));
+                List<String> genres = track
+                        .getGeners()
+                        .stream()
+                        .map(Genre::getName)
+                        .filter(x -> StringUtils.isNotEmpty(x))
+                        .collect(Collectors.toList());
+                model.setGenres(StringUtils.join(genres, ", "));
+            }
+        }
+    }
+
+    private String getS3Path(MxGaanaDbEntity model){
+        String filePath = new StringBuilder(s3BasePath).append("/").append(model.getGenres().replaceAll(" ","")).append("/").append(model.getTrackId()).toString();
+        return filePath;
+    }
+
+    private void uploadAlbumThumbnailToS3AndUpdate(MxGaanaDbEntity model){
+        if(StringUtils.isEmpty(model.getS3AlbumThumbnailPath())){
+            String s3ArtifactsUrl = s3FileOperations.uploadFromUrl(model.getAlbumThumbnailPath(), mxGaanaS3Bucket, getS3Path(model) + ALBUM_FOLDER, model.getTrackId(), "AUDIO");
+            model.setS3AlbumThumbnailPath(s3ArtifactsUrl);
+        }
+    }
+
+    private void uploadVideoThumbnailToS3AndUpdate(MxGaanaDbEntity model){
+        if(StringUtils.isEmpty(model.getS3VideoThumbnailPath())){
+            String s3ArtifactsUrl = s3FileOperations.uploadFromUrl(model.getMaxResolutionThumbnail(), mxGaanaS3Bucket, getS3Path(model) + VIDEO_FOLDER, model.getTrackId(), "VIDEO");
+            if(StringUtils.isEmpty(s3ArtifactsUrl)){
+                s3ArtifactsUrl = s3FileOperations.uploadFromUrl(model.getThumbnail(), mxGaanaS3Bucket, getS3Path(model) + VIDEO_FOLDER, model.getTrackId(), "AUDIO");
+            }
+            model.setS3VideoThumbnailPath(s3ArtifactsUrl);
+        }
+    }
+
     private void populateURLs() throws Exception{
         int page = 0;
         loop1:
         while(true) {
             try {
+                long start = System.currentTimeMillis();
+                LOG.info("Starting with this batch");
                 List<MxGaanaDbEntity> models = gaanaDao.findFirst10ByYoutubeIdNullOrderByPopularityIndexDesc();
                 if (CollectionUtils.isEmpty(models)) {
                     break loop1;
@@ -222,12 +312,13 @@ public class MXVideoTestServiceImpl implements MXVideoTestService {
                 for (MxGaanaDbEntity model : models) {
                     updateYTUrl(model, map.get(model.getId()));
                 }
+                models.stream().forEach(model -> {
+                    enrichWithGaanaInfo(model);
+                    uploadVideoThumbnailToS3AndUpdate(model);
+                    uploadAlbumThumbnailToS3AndUpdate(model);
+                });
                 gaanaDao.saveAll(models);
-                for (MxGaanaDbEntity model : models) {
-                    System.out.println("===============================================");
-                    LOG.info("track: " + model.getTrackTitle() + ", url: " + model.getYoutubeId());
-                    System.out.println("===============================================");
-                }
+                LOG.info("Done with this batch in millis: "+(System.currentTimeMillis()-start));
             }catch (Exception e){
                 LOG.error("Exception in batch: ", e);
             }
