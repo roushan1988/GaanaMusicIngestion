@@ -21,7 +21,9 @@
     <mvc:annotation-driven />
     <tx:annotation-driven order="100" transaction-manager="transactionManager" />
     <bean id="responseInterceptor" class="com.til.prime.timesSubscription.aspect.ResponseInterceptor"/>
-    <task:annotation-driven />
+    <task:annotation-driven executor="myExecutor" scheduler="myScheduler"/>
+    <task:executor id="myExecutor" pool-size="5"/>
+    <task:scheduler id="myScheduler" pool-size="10"/>
     <context:annotation-config />
     <aop:aspectj-autoproxy />
     <mvc:resources mapping="/static/**" location="/static/" />

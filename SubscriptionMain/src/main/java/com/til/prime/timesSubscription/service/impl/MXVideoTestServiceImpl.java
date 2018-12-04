@@ -18,9 +18,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.io.FileReader;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -73,7 +73,7 @@ public class MXVideoTestServiceImpl implements MXVideoTestService {
 
 
     @Override
-    @PostConstruct
+    @Scheduled(initialDelay = 1000, fixedDelay = 31536000000000l)
     public void test() throws Exception{
         populateURLs();
     }

@@ -57,8 +57,9 @@ public class FileWriterServiceImpl implements FileWriterService {
     private MailSender mailSender;
 
     @Override
-    @Scheduled(cron = "${gaana.sheet.mail.cron}")
+    @Scheduled(cron = "${mx.gaana.sheet.mail.cron}")
     public void prepareExcel(){
+        LOG.info("Starting with file write and mailing");
         Date date = new Date();
         JobEntity job = jobDao.findByName(JobEnum.GAANA_SHEET_MAIL_SENDER);
         boolean success = prepareExcel(TimeUtils.addMillisInDate(job.getEndTime(), -1000), date, job);
