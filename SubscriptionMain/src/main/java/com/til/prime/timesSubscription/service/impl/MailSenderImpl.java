@@ -30,7 +30,7 @@ public class MailSenderImpl implements MailSender {
     private String SMTP_AUTH_PWD;
 
     @Override
-    public void sendMail(String subject, String text, String[] toEmailIds, String[] attachFiles){
+    public void sendMail(String subject, String text, String[] toEmailIds, String[] ccIds,  String[] attachFiles){
         LOG.info("Subject:"+subject+". text: "+text);
 
         //Get the session object
@@ -51,13 +51,21 @@ public class MailSenderImpl implements MailSender {
         try{
             MimeMessage message = new MimeMessage(session);
             List<InternetAddress> internetAddresses = new ArrayList<>();
+            List<InternetAddress> ccAddresses = new ArrayList<>();
             if(toEmailIds!=null && toEmailIds.length>0){
                 for(String toEmailId: toEmailIds){
                     internetAddresses.add(new InternetAddress(toEmailId));
                 }
             }
+            if(ccIds!=null && ccIds.length>0){
+                for(String ccEmailId: ccIds){
+                    ccAddresses.add(new InternetAddress(ccEmailId));
+                }
+            }
             InternetAddress[] array = internetAddresses.toArray(new InternetAddress[internetAddresses.size()]);
+            InternetAddress[] ccArray = ccAddresses.toArray(new InternetAddress[internetAddresses.size()]);
             message.addRecipients(Message.RecipientType.TO, array);
+            message.addRecipients(Message.RecipientType.CC, ccArray);
             message.setSubject(subject);
             message.setText(text);
             Multipart multipart = new MimeMultipart();
@@ -82,77 +90,4 @@ public class MailSenderImpl implements MailSender {
             LOG.error("Exception while sending mail", e);
         }
     }
-//    private static final Logger LOGGER = org.apache.log4j.Logger.getLogger(MailSenderImpl.class);
-//
-//    @Value("${mx.gaana.s3.bucket}")
-//    private String s3Bucket;
-//
-//    @Value("${mx.gaana.excel.path.s3}")
-//    private String s3Folder;
-//
-//    @Value("${mx.gaana.excel.path.local}")
-//    private String localFolder;
-//
-//    @Autowired
-//    private S3FileOperations s3FileOperations;
-//
-//    @Value("${mx.gaana.email.sendTo}")
-//    private String sendTo;
-//
-//    @Value("${mx.gaana.email.subject}")
-//    private String subject;
-//
-//    private static JavaMailSender mailSender = new JavaMailSenderImpl();
-//
-//    @Override
-//    public void sendMail(String filePath) {
-//        File file = new File(filePath);
-//        if (file != null) {
-//            sendMail(file);
-//            uploadToS3Bucket(file);
-//            file.delete();
-//        }
-//    }
-//
-//    public void call(MimeMessage mimeMessage) throws MailException {
-//        try {
-//            LOGGER.debug("Sending email: " + mimeMessage);
-//            mailSender.send(mimeMessage);
-//        } catch (MailException e) {
-//            LOGGER.error("Error while sending email: " + e);
-//            throw e;
-//        }
-//
-//    }
-//
-//    private void sendMail(File file) {
-//        try {
-//            MimeMessage message = createMimeMessage(file);
-//            call(message);
-//            LOGGER.info("Excel sheet report generated is mailed successfully!");
-//        } catch (Exception e) {
-//            LOGGER.error("Exception", e);
-//        }
-//    }
-//
-//    private void uploadToS3Bucket(File file) {
-//        String s3ExcelPath = s3FileOperations.uploadFile(file, s3Bucket, s3Folder);
-//        LOGGER.info("Excel sheet report generated is uploaded to S3: " + s3ExcelPath);
-//    }
-//
-//    private MimeMessage createMimeMessage(File file) {
-//        MimeMessage mimeMessage = mailSender.createMimeMessage();
-//        MimeMessageHelper helper;
-//        try {
-//            helper = new MimeMessageHelper(mimeMessage, true);
-//            helper.setTo(InternetAddress.parse(sendTo));
-//            helper.setText(subject);
-//            helper.setSubject(subject);
-//            helper.addAttachment(file.getName(), file);
-//        } catch (MessagingException e) {
-//            LOGGER.error("Error while creating email mime message: " ,e);
-//            throw new RuntimeException(e);
-//        }
-//        return mimeMessage;
-//    }
 }

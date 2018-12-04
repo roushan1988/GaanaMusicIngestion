@@ -53,6 +53,9 @@ public class FileWriterServiceImpl implements FileWriterService {
     @Value("${mx.gaana.email.sendTo}")
     private String recipients;
 
+    @Value("${mx.gaana.email.sendTo.cc}")
+    private String ccList;
+
     @Autowired
     private MailSender mailSender;
 
@@ -99,7 +102,7 @@ public class FileWriterServiceImpl implements FileWriterService {
             try {
                 boolean success = writeDetailsToFile(list2, gaanaFile);
                 if(success){
-                    mailSender.sendMail(emailSubject, "Please find the song upload file attached below.", recipients.split(","), new String[]{gaanaOutputDirectoryPath});
+                    mailSender.sendMail(emailSubject, "Please find the song upload file attached below.", recipients.split(","), ccList.split(","), new String[]{gaanaOutputDirectoryPath});
                 }
                 return success;
             } catch (IOException e) {
