@@ -275,11 +275,11 @@ public class MXVideoTestServiceImpl implements MXVideoTestService {
             try {
                 long start = System.currentTimeMillis();
                 LOG.info("Starting with this batch");
-                List<MxGaanaDbEntity> models = gaanaDao.findFirst10ByYoutubeIdNullOrderByPopularityIndexDesc();
+                List<MxGaanaDbEntity> models = gaanaDao.findFirst10ByLanguageAndYoutubeIdNullOrderByPopularityIndexDesc("Hindi");
                 if (CollectionUtils.isEmpty(models)) {
                     break loop1;
                 }
-                List<String> qList = models.stream().map(i -> i.getTrackTitle().replaceAll(" ", "+").replaceAll(",", "+").replaceAll("\\?", "+").replaceAll("\\{", "(").replaceAll("\\}", ")")).collect(Collectors.toList());
+                List<String> qList = models.stream().map(i -> new StringBuilder(i.getTrackTitle()).append("+").append(i.getSinger()).toString().replaceAll(" ", "+").replaceAll(",", "+").replaceAll("\\?", "+").replaceAll("\\{", "(").replaceAll("\\}", ")")).collect(Collectors.toList());
                 List<Long> idList = models.stream().map(MxGaanaDbEntity::getId).collect(Collectors.toList());
                 LinkedHashMap<String, List<YTVideoCrawlerResponseItem>> response = searchVideosNew(qList);
                 Map<Long, List<YTVideoCrawlerResponseItem>> map = new HashMap<>();

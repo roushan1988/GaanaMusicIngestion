@@ -14,6 +14,7 @@ public interface GaanaDataRepository extends GenericJpaRepository<MxGaanaDbEntit
     List<MxGaanaDbEntity> findByYoutubeIdNotNullAndValidNullOrderById(Pageable pageable);
     List<MxGaanaDbEntity> findAllByOrderByPopularityIndexDesc(Pageable pageable);
     List<MxGaanaDbEntity> findFirst10ByYoutubeIdNullOrderByPopularityIndexDesc();
+    List<MxGaanaDbEntity> findFirst10ByLanguageAndYoutubeIdNullOrderByPopularityIndexDesc(String language);
     List<MxGaanaDbEntity> findFirst1000ByYoutubeIdNullOrderByPopularityIndexDesc();
     List<MxGaanaDbEntity> findFirst10ByOrderByPopularityIndexDesc();
     List<MxGaanaDbEntity> findFirst1000ByOrderByPopularityIndexDesc();
