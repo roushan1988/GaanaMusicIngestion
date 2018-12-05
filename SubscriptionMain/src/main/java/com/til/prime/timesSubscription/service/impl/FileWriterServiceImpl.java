@@ -90,7 +90,7 @@ public class FileWriterServiceImpl implements FileWriterService {
                 }
             }
             for (MxGaanaDbEntity entity : list) {
-                if (!entity.getYoutubeId().equals("NA")) {
+                if (!entity.getYoutubeId().equals("NA") && StringUtils.isNotEmpty(entity.getS3AlbumThumbnailPath()) && StringUtils.isNotEmpty(entity.getS3VideoThumbnailPath())) {
                     list2.add(entity);
                 }
             }

@@ -85,7 +85,7 @@ public class S3FileOperationsImpl implements S3FileOperations {
             file.delete();
             System.out.println("file: "+filename+", s3Path: "+s3Path);
         } catch (IOException e) {
-//            LOGGER.error("Exception", e);
+            LOGGER.error("Exception", e);
         }
         return s3Path;
     }

@@ -2,6 +2,7 @@ package com.til.prime.timesSubscription.dao;
 
 import com.til.prime.timesSubscription.model.MxGaanaDbEntity;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.Date;
@@ -28,4 +29,10 @@ public interface GaanaDataRepository extends GenericJpaRepository<MxGaanaDbEntit
     List<MxGaanaDbEntity> findFirst1000ByS3VideoThumbnailPathNullAndYoutubeIdNotNullOrderByPopularityIndexDesc();
     List<MxGaanaDbEntity> findFirst1000ByS3VideoThumbnailPathNullAndYoutubeIdNotNullAndYoutubeIdNotOrderByPopularityIndexDesc(String na);
     List<MxGaanaDbEntity> findFirst10ByS3VideoThumbnailPathNullAndYoutubeIdNotNullAndYoutubeIdNotOrderByPopularityIndexDesc(String na);
+    List<MxGaanaDbEntity> findAllByYoutubeIdNotNullAndThumbnailNotNullAndS3VideoThumbnailPathNull();
+    List<MxGaanaDbEntity> findAllByYoutubeIdNotNullAndS3AlbumThumbnailPathNull();
+    @Query(value="select m from MxGaanaDbEntity m where m.youtubeId is null and (length(m.actor)>0 or length(m.actress)>0)")
+    List<MxGaanaDbEntity> findAllByYTNullAndActorOrActressPresent(Pageable pageable);
+    @Query(value="select count(m) from MxGaanaDbEntity m where m.youtubeId is null and (length(m.actor)>0 or length(m.actress)>0)")
+    Long countByYTNullAndActorOrActressPresent();
 }

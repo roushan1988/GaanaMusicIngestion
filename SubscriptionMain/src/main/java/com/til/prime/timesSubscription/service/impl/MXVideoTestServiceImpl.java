@@ -18,6 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -52,7 +53,6 @@ public class MXVideoTestServiceImpl implements MXVideoTestService {
 
     @Autowired
     private GaanaDataRepository gaanaDao;
-
 
     @Override
     @Scheduled(initialDelay = 1000, fixedDelay = 31536000000000l)
@@ -224,8 +224,13 @@ public class MXVideoTestServiceImpl implements MXVideoTestService {
     }
 
     private String getS3Path(MxGaanaDbEntity model){
-        String filePath = new StringBuilder(s3BasePath).append("/").append(model.getGenres().replaceAll(" ","")).append("/").append(model.getTrackId()).toString();
-        return filePath;
+        StringBuilder filePath = new StringBuilder(s3BasePath).append("/");
+
+        if(StringUtils.isNotEmpty(model.getGenres())){
+            filePath.append(model.getGenres().replaceAll(" ","")).append("/");
+        }
+        filePath.append(model.getTrackId());
+        return filePath.toString();
     }
 
     private void uploadAlbumThumbnailToS3AndUpdate(MxGaanaDbEntity model){
@@ -245,6 +250,17 @@ public class MXVideoTestServiceImpl implements MXVideoTestService {
         }
     }
 
+    private String generateSearchQuery(MxGaanaDbEntity i){
+        StringBuilder sb = new StringBuilder(i.getTrackTitle());
+        if(StringUtils.isNotEmpty(i.getActor())){
+            sb.append("+").append(i.getActor());
+        }
+        if(StringUtils.isNotEmpty(i.getActress())){
+            sb.append("+").append(i.getActress());
+        }
+        return sb.toString().replaceAll(" ", "+").replaceAll(",", "+").replaceAll("\\?", "+").replaceAll("\\{", "(").replaceAll("\\}", ")");
+    }
+
     private void populateURLs() throws Exception{
         int page = 0;
         loop1:
@@ -252,11 +268,11 @@ public class MXVideoTestServiceImpl implements MXVideoTestService {
             try {
                 long start = System.currentTimeMillis();
                 LOG.info("Starting with this batch");
-                List<MxGaanaDbEntity> models = gaanaDao.findFirst10ByLanguageAndYoutubeIdNullOrderByPopularityIndexDesc("Hindi");
+                List<MxGaanaDbEntity> models = gaanaDao.findAllByYTNullAndActorOrActressPresent(new PageRequest(page++, 10));
                 if (CollectionUtils.isEmpty(models)) {
                     break loop1;
                 }
-                List<String> qList = models.stream().map(i -> new StringBuilder(i.getTrackTitle()).append("+").append(i.getSinger()).toString().replaceAll(" ", "+").replaceAll(",", "+").replaceAll("\\?", "+").replaceAll("\\{", "(").replaceAll("\\}", ")")).collect(Collectors.toList());
+                List<String> qList = models.stream().map(i -> generateSearchQuery(i)).collect(Collectors.toList());
                 List<Long> idList = models.stream().map(MxGaanaDbEntity::getId).collect(Collectors.toList());
                 LinkedHashMap<String, List<YTVideoCrawlerResponseItem>> response = searchVideosNew(qList);
                 Map<Long, List<YTVideoCrawlerResponseItem>> map = new HashMap<>();
