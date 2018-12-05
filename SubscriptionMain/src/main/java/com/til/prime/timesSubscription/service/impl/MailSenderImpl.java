@@ -63,7 +63,7 @@ public class MailSenderImpl implements MailSender {
                 }
             }
             InternetAddress[] array = internetAddresses.toArray(new InternetAddress[internetAddresses.size()]);
-            InternetAddress[] ccArray = ccAddresses.toArray(new InternetAddress[internetAddresses.size()]);
+            InternetAddress[] ccArray = ccAddresses.toArray(new InternetAddress[ccAddresses.size()]);
             message.addRecipients(Message.RecipientType.TO, array);
             message.addRecipients(Message.RecipientType.CC, ccArray);
             message.setSubject(subject);

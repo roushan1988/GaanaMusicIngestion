@@ -44,24 +44,6 @@ public class MXVideoTestServiceImpl implements MXVideoTestService {
 
     private static final String VIDEO_FOLDER = "/video";
 
-    private static final List<String> keys = Arrays.asList(
-            "AIzaSyARh-cwvt1c2PnEBLmFHlRs6hvVaTetUfE",
-            "AIzaSyAZeoIX4JlyCCQX1gorPjch1Z1EKsga2dA",
-            "AIzaSyDxjjdtx153deJMa5a9rQHd-nYk_9emAG0",
-            "AIzaSyB5-n6BnZh0k1RqEtlG6oJ3kUu0rFiQnkI",
-            "AIzaSyDCuZCy7jzN5eqGz9K0IbHjpi6Ve9UrJ_4",
-            "AIzaSyABOXjAkQgwHHVTyPJp-6nm_4TR7L9-ApQ",
-            "AIzaSyAtca1qXkDEE2-_d4SH0XaMLmqaI6mwHmM",
-            "AIzaSyDkRD7vZsLFLsYks0zz4ObrqeTCFJcsshc",
-            "AIzaSyC9IqjuBB1DrA6Kw5qA28yGAlxfjeiHR24");
-
-    private static final Random rand = new Random();
-    public static String getRandomKey(){
-        int randomIndex = rand.nextInt(keys.size());
-        String randomElement = keys.get(randomIndex);
-        return randomElement;
-    }
-
     @Autowired
     private HttpConnectionUtils httpConnectionUtils;
 
@@ -186,11 +168,6 @@ public class MXVideoTestServiceImpl implements MXVideoTestService {
         }
     }
 
-    private String createVideoStatsFetchUrl(String videoId, String key){
-        StringBuilder sb = new StringBuilder();
-        sb.append("https://www.googleapis.com/youtube/v3/videos?part=statistics&type=video&id=").append(videoId).append("&key=").append(key);
-        return sb.toString();
-    }
 
     private String createVideoSearchUrl(String query){
         StringBuilder sb = new StringBuilder();
@@ -317,7 +294,11 @@ public class MXVideoTestServiceImpl implements MXVideoTestService {
                     uploadVideoThumbnailToS3AndUpdate(model);
                     uploadAlbumThumbnailToS3AndUpdate(model);
                 });
-                gaanaDao.saveAll(models);
+                try {
+                    gaanaDao.saveAll(models);
+                }catch (Exception e){
+                    LOG.error("Exception", e);
+                }
                 LOG.info("Done with this batch in millis: "+(System.currentTimeMillis()-start));
             }catch (Exception e){
                 LOG.error("Exception in batch: ", e);
@@ -338,132 +319,113 @@ public class MXVideoTestServiceImpl implements MXVideoTestService {
         }
     }
 
-    static class UrlPopulationTask implements Runnable {
-        private List<MxGaanaDbEntity> modelList;
-        private HttpConnectionUtils httpConnectionUtils;
-        private GaanaDataRepository gaanaDao;
-
-        public UrlPopulationTask(List<MxGaanaDbEntity> modelList, HttpConnectionUtils httpConnectionUtils, GaanaDataRepository gaanaDao) {
-            this.modelList = modelList;
-            this.httpConnectionUtils = httpConnectionUtils;
-            this.gaanaDao = gaanaDao;
-        }
-
-        private void updateYTUrl(MxGaanaDbEntity model, List<YTVideoCrawlerResponseItem> items){
-            List<YTSearchResultsEntity> results = new ArrayList<>();
-            if(model.getSongs()==null){
-                model.setSongs(new ArrayList<>());
-            }
-            if(CollectionUtils.isNotEmpty(items)){
-                model.setYoutubeId(items.get(0).getLink());
-                for(YTVideoCrawlerResponseItem item: items){
-                    YTSearchResultsEntity result = new YTSearchResultsEntity();
-                    result.setTitle(item.getTitle());
-                    result.setUrl(item.getLink());
-                    result.setChannel(item.getPublisher());
-                    result.setViewCount(item.getViewCount());
-                    result.setSong(model);
-                    model.getSongs().add(result);
-                }
-            }
-        }
-
-        @Override
-        public void run() {
-            try{
-                Map<String, List<YTVideoCrawlerResponseItem>> response = searchVideosNew(modelList.stream().map(MxGaanaDbEntity::getTrackTitle).collect(Collectors.toList()));
-                if(MapUtils.isNotEmpty(response)){
-                    for(String key: response.keySet()){
-                        if(CollectionUtils.isNotEmpty(response.get(key))){
-                            for(YTVideoCrawlerResponseItem item: response.get(key)){
-                                updateLikes(item);
-                            }
-                        }
-                    }
-                }
-                for(MxGaanaDbEntity model: modelList){
-                    updateYTUrl(model, response.get(model.getTrackTitle()));
-                }
-                gaanaDao.saveAll(modelList);
-                for(MxGaanaDbEntity model: modelList){
-                    System.out.println("===============================================");
-                    LOG.info("track: "+ model.getTrackTitle()+", url: "+ model.getYoutubeId());
-                    System.out.println("===============================================");
-                }
-            }catch (Exception e){
-                LOG.error("Exception", e);
-            }
-        }
-
-        private Map<String, List<YTVideoCrawlerResponseItem>> searchVideosNew(List<String> titles){
-            int retryCount = GlobalConstants.API_RETRY_COUNT;
-            RETRY_LOOP:
-            while(retryCount>0){
-                try{
-                    Map<String, List<YTVideoCrawlerResponseItem>> response = (Map<String, List<YTVideoCrawlerResponseItem>>)httpConnectionUtils.requestForObject("", createVideoSearchUrl(StringUtils.join(titles, ","), null, null), Map.class, GlobalConstants.GET);
-                    return response;
-                }catch (Exception e){
-                    LOG.error("Exception", e);
-                    retryCount--;
-                    continue RETRY_LOOP;
-                }
-            }
-            return null;
-        }
-
-        private void updateLikes(YTVideoCrawlerResponseItem item){
-            String views = item.getViews();
-            Long count = 0l;
-            views = views.replaceAll(",", "");
-            if(views.endsWith("B")){
-                views = views.replaceAll("B", "");
-                Double d = Double.parseDouble(views.trim());
-                d = d * 1000000000d;
-                item.setViewCount(d.longValue());
-            }else if(views.endsWith("M")){
-                views = views.replaceAll("M", "");
-                Double d = Double.parseDouble(views.trim());
-                d = d * 1000000d;
-                item.setViewCount(d.longValue());
-            }else if(views.endsWith("K")){
-                views = views.replaceAll("K", "");
-                Double d = Double.parseDouble(views.trim());
-                d = d * 1000d;
-                item.setViewCount(d.longValue());
-            }
-        }
-
-        private String createVideoStatsFetchUrl(String videoId, String key){
-            StringBuilder sb = new StringBuilder();
-            sb.append("https://www.googleapis.com/youtube/v3/videos?part=statistics&type=video&id=").append(videoId).append("&key=").append(key);
-            return sb.toString();
-        }
-
-        private String createVideoSearchUrl(String title, String singer, String key){
-            StringBuilder sb = new StringBuilder();
-            String searchQuery = new StringBuilder(title).append(" ").append(singer).append(" full video song").toString();
-            searchQuery = searchQuery.replaceAll(" ", "+").replaceAll(",","+");
-            sb.append("https://www.googleapis.com/youtube/v3/search?part=id,snippet&order=relevance&type=video&maxResults=10&key=").append(key).append("&q=").append(searchQuery);
-            return sb.toString();
-        }
-    }
-
-
-//    private YTVideoResponse fetchVideoStats(String videoId){
-//        int retryCount = GlobalConstants.API_RETRY_COUNT;
-//        RETRY_LOOP:
-//        while(retryCount>0){
-//            try{
-//                YTVideoResponse response = httpConnectionUtils.requestForObject("", createVideoStatsFetchUrl(videoId, getRandomKey()), YTVideoResponse.class, GlobalConstants.GET);
-//                return response;
-//            }catch (Exception e){
-//                LOG.error("Exception", e);
-//                retryCount--;
-//                continue RETRY_LOOP;
+//    static class UrlPopulationTask implements Runnable {
+//        private List<MxGaanaDbEntity> modelList;
+//        private HttpConnectionUtils httpConnectionUtils;
+//        private GaanaDataRepository gaanaDao;
+//
+//        public UrlPopulationTask(List<MxGaanaDbEntity> modelList, HttpConnectionUtils httpConnectionUtils, GaanaDataRepository gaanaDao) {
+//            this.modelList = modelList;
+//            this.httpConnectionUtils = httpConnectionUtils;
+//            this.gaanaDao = gaanaDao;
+//        }
+//
+//        private void updateYTUrl(MxGaanaDbEntity model, List<YTVideoCrawlerResponseItem> items){
+//            List<YTSearchResultsEntity> results = new ArrayList<>();
+//            if(model.getSongs()==null){
+//                model.setSongs(new ArrayList<>());
+//            }
+//            if(CollectionUtils.isNotEmpty(items)){
+//                model.setYoutubeId(items.get(0).getLink());
+//                for(YTVideoCrawlerResponseItem item: items){
+//                    YTSearchResultsEntity result = new YTSearchResultsEntity();
+//                    result.setTitle(item.getTitle());
+//                    result.setUrl(item.getLink());
+//                    result.setChannel(item.getPublisher());
+//                    result.setViewCount(item.getViewCount());
+//                    result.setSong(model);
+//                    model.getSongs().add(result);
+//                }
 //            }
 //        }
-//        return null;
+//
+//        @Override
+//        public void run() {
+//            try{
+//                Map<String, List<YTVideoCrawlerResponseItem>> response = searchVideosNew(modelList.stream().map(MxGaanaDbEntity::getTrackTitle).collect(Collectors.toList()));
+//                if(MapUtils.isNotEmpty(response)){
+//                    for(String key: response.keySet()){
+//                        if(CollectionUtils.isNotEmpty(response.get(key))){
+//                            for(YTVideoCrawlerResponseItem item: response.get(key)){
+//                                updateLikes(item);
+//                            }
+//                        }
+//                    }
+//                }
+//                for(MxGaanaDbEntity model: modelList){
+//                    updateYTUrl(model, response.get(model.getTrackTitle()));
+//                }
+//                gaanaDao.saveAll(modelList);
+//                for(MxGaanaDbEntity model: modelList){
+//                    System.out.println("===============================================");
+//                    LOG.info("track: "+ model.getTrackTitle()+", url: "+ model.getYoutubeId());
+//                    System.out.println("===============================================");
+//                }
+//            }catch (Exception e){
+//                LOG.error("Exception", e);
+//            }
+//        }
+//
+//        private Map<String, List<YTVideoCrawlerResponseItem>> searchVideosNew(List<String> titles){
+//            int retryCount = GlobalConstants.API_RETRY_COUNT;
+//            RETRY_LOOP:
+//            while(retryCount>0){
+//                try{
+//                    Map<String, List<YTVideoCrawlerResponseItem>> response = (Map<String, List<YTVideoCrawlerResponseItem>>)httpConnectionUtils.requestForObject("", createVideoSearchUrl(StringUtils.join(titles, ","), null, null), Map.class, GlobalConstants.GET);
+//                    return response;
+//                }catch (Exception e){
+//                    LOG.error("Exception", e);
+//                    retryCount--;
+//                    continue RETRY_LOOP;
+//                }
+//            }
+//            return null;
+//        }
+//
+//        private void updateLikes(YTVideoCrawlerResponseItem item){
+//            String views = item.getViews();
+//            Long count = 0l;
+//            views = views.replaceAll(",", "");
+//            if(views.endsWith("B")){
+//                views = views.replaceAll("B", "");
+//                Double d = Double.parseDouble(views.trim());
+//                d = d * 1000000000d;
+//                item.setViewCount(d.longValue());
+//            }else if(views.endsWith("M")){
+//                views = views.replaceAll("M", "");
+//                Double d = Double.parseDouble(views.trim());
+//                d = d * 1000000d;
+//                item.setViewCount(d.longValue());
+//            }else if(views.endsWith("K")){
+//                views = views.replaceAll("K", "");
+//                Double d = Double.parseDouble(views.trim());
+//                d = d * 1000d;
+//                item.setViewCount(d.longValue());
+//            }
+//        }
+//
+//
+//        private String createVideoSearchUrl(String title, String singer, String key){
+//            StringBuilder sb = new StringBuilder();
+//            String searchQuery = new StringBuilder(title).append(" ").append(singer).append(" full video song").toString();
+//            searchQuery = searchQuery.replaceAll(" ", "+").replaceAll(",","+");
+//            sb.append("https://www.googleapis.com/youtube/v3/search?part=id,snippet&order=relevance&type=video&maxResults=10&key=").append(key).append("&q=").append(searchQuery);
+//            return sb.toString();
+//        }
 //    }
+
+
+
 
 //    private YTSearchResponse searchVideos(String title, String singer){
 //        int retryCount = GlobalConstants.API_RETRY_COUNT;
@@ -550,65 +512,6 @@ public class MXVideoTestServiceImpl implements MXVideoTestService {
 //
 
 
-    static class YTVideoStatistics {
-        private Long viewCount;
-        private Long likeCount;
-        private Long dislikeCount;
-        private Long favouriteCount;
-        private Long commentCount;
-
-        public Long getViewCount() {
-            return viewCount;
-        }
-
-        public void setViewCount(Long viewCount) {
-            this.viewCount = viewCount;
-        }
-
-        public Long getLikeCount() {
-            return likeCount;
-        }
-
-        public void setLikeCount(Long likeCount) {
-            this.likeCount = likeCount;
-        }
-
-        public Long getDislikeCount() {
-            return dislikeCount;
-        }
-
-        public void setDislikeCount(Long dislikeCount) {
-            this.dislikeCount = dislikeCount;
-        }
-
-        public Long getFavouriteCount() {
-            return favouriteCount;
-        }
-
-        public void setFavouriteCount(Long favouriteCount) {
-            this.favouriteCount = favouriteCount;
-        }
-
-        public Long getCommentCount() {
-            return commentCount;
-        }
-
-        public void setCommentCount(Long commentCount) {
-            this.commentCount = commentCount;
-        }
-
-        @Override
-        public String toString() {
-            final StringBuilder sb = new StringBuilder("YTVideoStatistics{");
-            sb.append("viewCount=").append(viewCount);
-            sb.append(", likeCount=").append(likeCount);
-            sb.append(", dislikeCount=").append(dislikeCount);
-            sb.append(", favouriteCount=").append(favouriteCount);
-            sb.append(", commentCount=").append(commentCount);
-            sb.append('}');
-            return sb.toString();
-        }
-    }
 
     static class YTVideoIdentifier{
         private String videoId;
@@ -690,17 +593,7 @@ public class MXVideoTestServiceImpl implements MXVideoTestService {
         }
     }
 
-    static class YTVideoResponse{
-        private Map<String, List<YTVideoResponseItem>> items;
 
-        public Map<String, List<YTVideoResponseItem>> getItems() {
-            return items;
-        }
-
-        public void setItems(Map<String, List<YTVideoResponseItem>> items) {
-            this.items = items;
-        }
-    }
 
     static class YTVideoCrawlerResponseItem{
         private String link;
@@ -808,36 +701,6 @@ public class MXVideoTestServiceImpl implements MXVideoTestService {
             sb.append(", time='").append(time).append('\'');
             sb.append(", img_thumbnail='").append(img_thumbnail).append('\'');
             sb.append(", img_max_resolution='").append(img_max_resolution).append('\'');
-            sb.append('}');
-            return sb.toString();
-        }
-    }
-
-    static class YTVideoResponseItem{
-        private String id;
-        private YTVideoStatistics statistics;
-
-        public String getId() {
-            return id;
-        }
-
-        public void setId(String id) {
-            this.id = id;
-        }
-
-        public YTVideoStatistics getStatistics() {
-            return statistics;
-        }
-
-        public void setStatistics(YTVideoStatistics statistics) {
-            this.statistics = statistics;
-        }
-
-        @Override
-        public String toString() {
-            final StringBuilder sb = new StringBuilder("YTVideoResponseItem{");
-            sb.append("id='").append(id).append('\'');
-            sb.append(", statistics=").append(statistics);
             sb.append('}');
             return sb.toString();
         }
