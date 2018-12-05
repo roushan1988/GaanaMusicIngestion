@@ -23,7 +23,7 @@ public interface GaanaDataRepository extends GenericJpaRepository<MxGaanaDbEntit
     List<MxGaanaDbEntity> findFirst10ByOrderByPopularityIndexDesc();
     List<MxGaanaDbEntity> findFirst1000ByOrderByPopularityIndexDesc();
     List<MxGaanaDbEntity> findByYoutubeIdNotNullAndPopularityIndexBetweenOrderByPopularityIndexDesc(long min, long max, Pageable pageable);
-    List<MxGaanaDbEntity> findByYoutubeIdNotNullAndUpdatedBetweenOrderByPopularityIndexDesc(Date start, Date end, Pageable pageable);
+    List<MxGaanaDbEntity> findByJobTagAndYoutubeIdNotNullAndUpdatedBetweenOrderByPopularityIndexDesc(String jobTag, Date start, Date end, Pageable pageable);
     List<MxGaanaDbEntity> findByYoutubeIdNotNullAndValidTrueAndUpdatedBetweenOrderByPopularityIndexDesc(Date start, Date end, Pageable pageable);
     List<MxGaanaDbEntity> findFirst1000ByS3VideoThumbnailPathNullOrderByPopularityIndexDesc();
     List<MxGaanaDbEntity> findFirst1000ByS3VideoThumbnailPathNullAndYoutubeIdNotNullOrderByPopularityIndexDesc();

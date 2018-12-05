@@ -79,7 +79,7 @@ public class FileWriterServiceImpl implements FileWriterService {
             loop1:
             while (true) {
                 try {
-                    List<MxGaanaDbEntity> models = gaanaDao.findByYoutubeIdNotNullAndUpdatedBetweenOrderByPopularityIndexDesc(start, end, new PageRequest(page, 1000));
+                    List<MxGaanaDbEntity> models = gaanaDao.findByJobTagAndYoutubeIdNotNullAndUpdatedBetweenOrderByPopularityIndexDesc(MXVideoTestServiceImpl.CURRENT_JOB_TAG, start, end, new PageRequest(page, 1000));
                     page++;
                     if (CollectionUtils.isEmpty(models)) {
                         break loop1;

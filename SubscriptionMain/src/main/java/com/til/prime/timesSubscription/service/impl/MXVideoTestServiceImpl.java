@@ -31,6 +31,7 @@ import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 @Service
 public class MXVideoTestServiceImpl implements MXVideoTestService {
     private static final Logger LOG = Logger.getLogger(MXVideoTestServiceImpl.class);
+    public static final String CURRENT_JOB_TAG = "ActorActressSearchExcludingAlreadyValidGaanaYoutubeIds";
 
     @Autowired
     S3FileOperations s3FileOperations;
@@ -309,6 +310,7 @@ public class MXVideoTestServiceImpl implements MXVideoTestService {
                     enrichWithGaanaInfo(model);
                     uploadVideoThumbnailToS3AndUpdate(model);
                     uploadAlbumThumbnailToS3AndUpdate(model);
+                    model.setJobTag(CURRENT_JOB_TAG);
                 });
                 try {
                     gaanaDao.saveAll(models);

@@ -90,6 +90,9 @@ public class MxGaanaDbEntity extends BaseModel {
     @Column(name="s3_video_thumbnail_path")
     private String s3VideoThumbnailPath;
 
+    @Column(name="job_tag")
+    private String jobTag;
+
     public Long getTrackId() {
         return trackId;
     }
@@ -284,5 +287,13 @@ public class MxGaanaDbEntity extends BaseModel {
 
     public void setS3VideoThumbnailPath(String s3VideoThumbnailPath) {
         this.s3VideoThumbnailPath = s3VideoThumbnailPath;
+    }
+
+    public String getJobTag() {
+        return jobTag;
+    }
+
+    public void setJobTag(String jobTag) {
+        this.jobTag = jobTag;
     }
 }
