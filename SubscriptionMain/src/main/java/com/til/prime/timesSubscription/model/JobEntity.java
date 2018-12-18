@@ -49,4 +49,35 @@ public class JobEntity extends BaseModel {
     public void setRecordCount(Integer recordCount) {
         this.recordCount = recordCount;
     }
+
+    @Column(name="created")
+    private Date created;
+    @Column(name="updated", insertable=false, updatable = false)
+    private Date updated;
+    @Column(name="deleted")
+    private boolean deleted;
+
+    public Date getCreated() {
+        return created;
+    }
+
+    public void setCreated(Date created) {
+        this.created = created;
+    }
+
+    public Date getUpdated() {
+        return updated;
+    }
+
+    public void setUpdated(Date updated) {
+        this.updated = updated;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
+    }
 }

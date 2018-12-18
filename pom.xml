@@ -290,6 +290,29 @@
       <artifactId>spring-rabbit</artifactId>
       <version>1.7.4.RELEASE</version>
     </dependency>
+
+    <dependency>
+      <groupId>org.springframework.data</groupId>
+      <artifactId>spring-data-elasticsearch</artifactId>
+      <version>3.0.5.RELEASE</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.elasticsearch</groupId>
+          <artifactId>elasticsearch</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/org.elasticsearch.client/rest -->
+    <dependency>
+      <groupId>org.elasticsearch</groupId>
+      <artifactId>elasticsearch</artifactId>
+      <version>5.5.2</version>
+    </dependency>
+    <dependency>
+      <groupId>org.elasticsearch.client</groupId>
+      <artifactId>transport</artifactId>
+      <version>5.5.2</version>
+    </dependency>
     <!-- https://mvnrepository.com/artifact/org.springframework.amqp/spring-amqp -->
     <dependency>
       <groupId>org.springframework.amqp</groupId>

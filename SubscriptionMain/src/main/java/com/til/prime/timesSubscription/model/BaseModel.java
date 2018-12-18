@@ -1,20 +1,19 @@
 package com.til.prime.timesSubscription.model;
 
 import javax.persistence.*;
-import java.util.Date;
 
 @MappedSuperclass
-public class BaseModel implements IBaseModel{
+public class BaseModel{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
-    @Column(name="created")
-    private Date created;
-    @Column(name="updated", insertable=false, updatable = false)
-    private Date updated;
-    @Column(name="deleted")
-    private boolean deleted;
+//    @Column(name="created")
+//    private Date created;
+//    @Column(name="updated", insertable=false, updatable = false)
+//    private Date updated;
+//    @Column(name="deleted")
+//    private boolean deleted;
 
     public Long getId() {
         return id;
@@ -24,27 +23,27 @@ public class BaseModel implements IBaseModel{
         this.id = id;
     }
 
-    public Date getCreated() {
-        return created;
-    }
-
-    public void setCreated(Date created) {
-        this.created = created;
-    }
-
-    public Date getUpdated() {
-        return updated;
-    }
-
-    public void setUpdated(Date updated) {
-        this.updated = updated;
-    }
-
-    public boolean isDeleted() {
-        return deleted;
-    }
-
-    public void setIsDelete(boolean delete) {
-        this.deleted = delete;
-    }
+//    public Date getCreated() {
+//        return created;
+//    }
+//
+//    public void setCreated(Date created) {
+//        this.created = created;
+//    }
+//
+//    public Date getUpdated() {
+//        return updated;
+//    }
+//
+//    public void setUpdated(Date updated) {
+//        this.updated = updated;
+//    }
+//
+//    public boolean isDeleted() {
+//        return deleted;
+//    }
+//
+//    public void setIsDelete(boolean delete) {
+//        this.deleted = delete;
+//    }
 }

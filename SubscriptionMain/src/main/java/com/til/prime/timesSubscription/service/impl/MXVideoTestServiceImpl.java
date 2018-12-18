@@ -19,7 +19,6 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.FileReader;
@@ -56,7 +55,7 @@ public class MXVideoTestServiceImpl implements MXVideoTestService {
     private GaanaDataRepository gaanaDao;
 
     @Override
-    @Scheduled(initialDelay = 1000, fixedDelay = 31536000000000l)
+//    @Scheduled(initialDelay = 1000, fixedDelay = 31536000000000l)
     public void test() throws Exception{
         populateURLs();
     }
@@ -78,7 +77,7 @@ public class MXVideoTestServiceImpl implements MXVideoTestService {
                     result.setMaxResolutionThumbnail(item.getImg_max_resolution());
                     result.setTime(item.getTime());
                     result.setSong(model);
-                    result.setCreated(new Date());
+//                    result.setCreated(new Date());
                     model.getSongs().add(result);
                     //                LOG.info(result.getViewCount());
                 }
