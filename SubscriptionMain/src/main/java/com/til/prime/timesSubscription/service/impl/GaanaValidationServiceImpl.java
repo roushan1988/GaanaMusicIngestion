@@ -9,7 +9,6 @@ import com.til.prime.timesSubscription.util.HttpConnectionUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -39,7 +38,7 @@ public class GaanaValidationServiceImpl implements GaanaValidationService {
             try {
                 long start = System.currentTimeMillis();
                 LOG.info("Starting with this batch");
-                List<MxGaanaDbEntity> models = gaanaDao.findByYoutubeIdNotNullAndValidNullOrderById(new PageRequest(page++, 1000));
+                List<MxGaanaDbEntity> models = gaanaDao.findByJobTagAndYoutubeIdNotNull("FINAL_URL_LIST_FROM_GAABA");
                 if (CollectionUtils.isEmpty(models)) {
                     break loop1;
                 }
@@ -49,6 +48,7 @@ public class GaanaValidationServiceImpl implements GaanaValidationService {
                     List<MxGaanaDbEntity> sublist = models.subList(i, end);
                     executorService.getExecutorService().submit(new ValidationTask(sublist, httpConnectionUtils, gaanaDao));
                 }
+                break loop1;
             }catch (Exception e){
                 LOG.error("Exception", e);
             }

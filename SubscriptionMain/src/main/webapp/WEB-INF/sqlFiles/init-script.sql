@@ -416,3 +416,101 @@ CREATE TABLE `yt_search_results`(
   INDEX `INDEX_VERIFIED` (`channel_verified`),
   CONSTRAINT `FK_GAANA` FOREIGN KEY (`gaana_id`) REFERENCES `poc_gaana_songs` (`id`)
 );
+
+
+// all songs with youtube links received by Abhishek on December 19
+CREATE TABLE `all_gaana_songs_with_urls` (
+  `track_id` int(11) NOT NULL,
+  `url` varchar(255) DEFAULT NULL,
+  `is_active` tinyint(1) not null default false,
+  PRIMARY KEY (`track_id`),
+  KEY `INDEX_URL` (`url`)
+);
+
+CREATE TABLE `top_play_count_songs` (
+  `track_id` int(11) NOT NULL,
+  `track_title` varchar(255) NOT NULL,
+  `track_url` varchar(255) DEFAULT NULL,
+  `is_active` tinyint(1) not null default false,
+  `plays_in_thousands` int(11) not NULL,
+  `track_rank` int(11) not NULL,
+  PRIMARY KEY (`track_id`)
+);
+
+load data local infile 'available_track_urls.csv' into table all_gaana_songs_with_urls fields terminated by ',' enclosed by '"' lines terminated by '\n' (track_id, url, is_active);
+load data local infile 'top_tracks_with_url_v1.csv' into table top_play_count_songs fields terminated by ',' enclosed by '"' lines terminated by '\n' (track_id, track_title, track_url, is_active, plays_in_thousands, track_rank);
+delete from all_gaana_songs_with_urls where track_id=0;
+update all_gaana_songs_with_urls set url ="https://www.youtube.com/embed/6qWVoFAMVHA" where track_id=101185;
+update all_gaana_songs_with_urls set url ="https://www.youtube.com/embed/1dLcbGzsurk" where track_id=103148;
+update all_gaana_songs_with_urls set url ="https://www.youtube.com/embed/a8CaYf78K4w" where track_id=507475;
+update all_gaana_songs_with_urls set url ="https://www.youtube.com/embed/r9jmusgMgro" where track_id=2207798;
+update all_gaana_songs_with_urls set url  = replace(url ,'https://www.youtube.com/embed/','https://www.youtube.com/watch?v=');
+update all_gaana_songs_with_urls set url  = replace(url ,'https://youtu.be/','https://www.youtube.com/watch?v=');
+delete from all_gaana_songs_with_urls where url not like '%https://www.youtube.com/watch?v=%';
+delete from all_gaana_songs_with_urls where length(url)<43;
+update all_gaana_songs_with_urls set url  = replace(url ,' ','');
+update all_gaana_songs_with_urls set url= substring(url, 1, 43) where length(url)!=43;
+
+
+
+
+
+
+
+
+update poc_gaana_songs set poc_gaana_songs.youtube_id = a.QuestionID from QuestionTrackings q inner join QuestionAnswers a on q.AnswerID = a.AnswerID where q.QuestionID is null
+
+UPDATE poc_gaana_songs t1 INNER JOIN all_gaana_songs_with_urls t2 ON t1.track_id = t2.track_id SET t1.youtube_id = t2.url;
+
+
+
+
+
+
+
+insert into poc_gaana_songs select * from tg_album_enrich where track_id in (select track_id from all_gaana_songs_with_urls);
+
+
+
+CREATE TABLE `gaana_top_songs` (
+  `track_id` int(11) DEFAULT NULL,
+  `isrc_code` varchar(190) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `track_title` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `album_title` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `release_date` datetime NOT NULL,
+  `singer` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `composer` text,
+  `actor` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `actress` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `language` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `parental_advisory` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `lyricist` text,
+  `label` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `album_thumbnail_path` text,
+  `genres` varchar(100) DEFAULT NULL,
+  `youtube_id` varchar(512) DEFAULT NULL,
+  `popularity_index` int(11) DEFAULT NULL,
+  `created` datetime NOT NULL,
+  `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `deleted` tinyint(1) NOT NULL,
+  `valid` tinyint(1) DEFAULT NULL,
+  `thumbnail` varchar(512) DEFAULT NULL,
+  `max_resolution_thumbnail` varchar(512) DEFAULT NULL,
+  `album_release_date` datetime DEFAULT NULL,
+  `s3_album_thumbnail_path` text,
+  `s3_video_thumbnail_path` text,
+  `job_tag` varchar(128) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `INDEX_POPULARITY` (`popularity_index`),
+  KEY `KEY_TRACK_TITLE` (`track_title`(191)),
+  KEY `KEY_ISRC` (`isrc_code`),
+  KEY `KEY_ALBUM` (`album_title`(191)),
+  KEY `KEY_language` (`language`(191)),
+  KEY `KEY_YOUTUBE_ID` (`youtube_id`),
+  KEY `track_id_key` (`track_id`),
+  KEY `KEY_JOB_TAG` (`job_tag`)
+);
+
+
+insert into gaana_top_songs (select *, now(), now(), false, null, null, null, null , null , null , null from tg_album_enrich where track_id in (select track_id from top_play_count_songs));

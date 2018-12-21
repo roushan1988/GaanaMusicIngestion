@@ -1,5 +1,6 @@
 package com.til.prime.timesSubscription.service.impl;
 
+import com.google.common.collect.Lists;
 import com.til.prime.timesSubscription.dao.GaanaDataRepository;
 import com.til.prime.timesSubscription.dao.JobRepository;
 import com.til.prime.timesSubscription.enums.JobEnum;
@@ -18,10 +19,9 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -29,6 +29,7 @@ import java.io.OutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -60,7 +61,8 @@ public class FileWriterServiceImpl implements FileWriterService {
     private MailSender mailSender;
 
     @Override
-    @Scheduled(cron = "${mx.gaana.sheet.mail.cron}")
+//    @Scheduled(cron = "${mx.gaana.sheet.mail.cron}")
+    @PostConstruct
     public void prepareExcel(){
         LOG.info("Starting with file write and mailing");
         Date date = new Date();
@@ -72,6 +74,8 @@ public class FileWriterServiceImpl implements FileWriterService {
     }
 
     private boolean prepareExcel(Date start, Date end, JobEntity job){
+        List<String> doneLanguages = Arrays.asList("English", "Hindi", "Punjabi", "Bengali", "Telugu", "Tamil", "Bhojpuri", "Kannada", "Marathi", "Malayalam", "Gujarati");
+        String language = "RemainingLanguages";
         try {
             int page = 0;
             List<MxGaanaDbEntity> list = new ArrayList<>();
@@ -79,36 +83,40 @@ public class FileWriterServiceImpl implements FileWriterService {
             loop1:
             while (true) {
                 try {
-                    List<MxGaanaDbEntity> models = gaanaDao.findByJobTagAndYoutubeIdNotNullAndUpdatedBetweenOrderByPopularityIndexDesc(MXVideoTestServiceImpl.CURRENT_JOB_TAG, start, end, new PageRequest(page, 1000));
+                    List<MxGaanaDbEntity> models = gaanaDao.findByLanguageNotIn(doneLanguages);
                     page++;
                     if (CollectionUtils.isEmpty(models)) {
                         break loop1;
                     }
                     list.addAll(models);
+                    break loop1;
                 } catch (Exception e) {
                     LOG.error("Exception", e);
                 }
             }
             for (MxGaanaDbEntity entity : list) {
-                if (!entity.getYoutubeId().equals("NA") && StringUtils.isNotEmpty(entity.getS3AlbumThumbnailPath()) && StringUtils.isNotEmpty(entity.getS3VideoThumbnailPath())) {
+//                if (!entity.getYoutubeId().equals("NA") && StringUtils.isNotEmpty(entity.getS3AlbumThumbnailPath()) && StringUtils.isNotEmpty(entity.getS3VideoThumbnailPath())) {
                     list2.add(entity);
-                }
+//                }
             }
             job.setRecordCount(list2.size());
-            String gaanaOutputDirectoryPath = new StringBuilder(localFolder).append("/")
-                    .append(list2.get(0).getPopularityIndex()).append("-").append(list2.get(list2.size()-1).getPopularityIndex()).append("-").append(System.currentTimeMillis()).append(".xls").toString();
-            File gaanaFile = new File(gaanaOutputDirectoryPath);
-            gaanaFile.getParentFile().mkdirs();
-            try {
-                boolean success = writeDetailsToFile(list2, gaanaFile);
-                if(success){
-                    mailSender.sendMail(emailSubject, "Please find the song upload file attached below.", recipients.split(","), ccList.split(","), new String[]{gaanaOutputDirectoryPath});
+            List<List<MxGaanaDbEntity>> lists = Lists.partition(list2, 50000);
+            boolean success = false;
+            for(int i =0; i<lists.size(); i++){
+                String gaanaOutputDirectoryPath = new StringBuilder(localFolder).append("/")
+                        .append(language).append("-").append(i).append(".xls").toString();
+                File gaanaFile = new File(gaanaOutputDirectoryPath);
+                gaanaFile.getParentFile().mkdirs();
+                try {
+                    success = writeDetailsToFile(lists.get(i), gaanaFile);
+//                if(success){
+//                    mailSender.sendMail(emailSubject, "Please find the song upload file attached below.", recipients.split(","), ccList.split(","), new String[]{gaanaOutputDirectoryPath});
+//                }
+                } catch (IOException e) {
+                    LOG.error("Exception stacktrace: ", e);
                 }
-                return success;
-            } catch (IOException e) {
-                LOG.error("Exception stacktrace: ", e);
-                return false;
             }
+            return success;
         }catch (Exception e){
             return false;
         }

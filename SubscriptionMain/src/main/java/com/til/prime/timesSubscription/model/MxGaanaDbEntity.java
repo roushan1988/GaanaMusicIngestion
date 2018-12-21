@@ -13,7 +13,8 @@ import java.util.List;
  * mysql -B -uroot gaana -e "SELECT track_id FROM temp_tg_album_enrich;" > test.csv
  */
 @Entity
-@Table(name = "poc_gaana_songs")
+//@Table(name = "poc_gaana_songs")
+@Table(name = "gaana_top_songs")
 public class MxGaanaDbEntity extends BaseModel {
 
     @OneToMany(mappedBy = "song", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
