@@ -3,10 +3,10 @@ package com.til.prime.timesSubscription.service.impl;
 import com.til.prime.timesSubscription.dao.GaanaDataRepository;
 import com.til.prime.timesSubscription.dao.JobRepository;
 import com.til.prime.timesSubscription.dao.RawDataRepository;
-import com.til.prime.timesSubscription.model.RawMxGaanaDbEntity;
-import com.til.prime.timesSubscription.pojo.SearchTuple;
+import com.til.prime.timesSubscription.model.MxGaanaDbEntity;
 import com.til.prime.timesSubscription.service.EsService;
 import com.til.prime.timesSubscription.service.FileWriterService;
+import com.til.prime.timesSubscription.service.MXVideoTestService;
 import com.til.prime.timesSubscription.service.MailSender;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -24,14 +24,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -39,7 +40,7 @@ public class FileWriterServiceImpl implements FileWriterService {
 
     private static final Logger LOG = Logger.getLogger(FileWriterServiceImpl.class);
     private static final String[] headerList= {"Video S3 Path", "Youtube URL", "Publisher Name", "Video Type", "Album Name", "Album Release Date", "Album Thumbnail Path","Artist Name / Group","Video Title","Audio Language","Singers","Release Date","Genre Level 1","Video Thumbnail","Star", "Gaana ID"};
-    private static final String[] headerListNew= {"Video Id", "Youtube Id", "Video Title", "Audio Language", "Gaana Id", "Gaana Track Title", "Album Name", "Release Date","Singers","Star"};
+//    private static final String[] headerListNew= {"Video Id", "Youtube Id", "Video Title", "Audio Language", "Gaana Id", "Gaana Track Title", "Album Name", "Release Date","Singers","Star"};
 
     @Autowired
     private GaanaDataRepository gaanaDao;
@@ -63,6 +64,9 @@ public class FileWriterServiceImpl implements FileWriterService {
     private String ccList;
 
     @Autowired
+    private MXVideoTestService testService;
+
+    @Autowired
     private MailSender mailSender;
 
     @Autowired
@@ -70,8 +74,8 @@ public class FileWriterServiceImpl implements FileWriterService {
 
     @Override
 //    @Scheduled(cron = "${mx.gaana.sheet.mail.cron}")
-    @PostConstruct
-    public void prepareExcel(){
+//    @PostConstruct
+    public void readExcel() throws Exception{
 //        LOG.info("Starting with file write and mailing");
 //        Date date = new Date();
 //        JobEntity job = jobDao.findByName(JobEnum.GAANA_SHEET_MAIL_SENDER);
@@ -79,30 +83,42 @@ public class FileWriterServiceImpl implements FileWriterService {
 //        job.setStartTime(job.getEndTime());
 //        job.setEndTime(date);
 //        jobDao.save(job);
-        List<InputRow> rows = readExcel();
-        prepareExcel(rows);
+        int sheet = 0;
+        String language = "Hindi";
+        List<InputRow> rows = readExcel(sheet);
+        List<MxGaanaDbEntity> entities = new ArrayList<>();
+        for(InputRow row: rows){
+            MxGaanaDbEntity entity = new MxGaanaDbEntity();
+            entity.setTrackId(row.gaanaId);
+            entity.setYoutubeId(row.youtubeId);
+            entity.setCreated(new Date());
+            entity.setLanguage(language);
+            entities.add(entity);
+        }
+        entities = gaanaDao.saveAll(entities);
+        LOG.info("Done");
     }
 
     static class InputRow{
-        String videoId;
+        long gaanaId;
         String youtubeId;
-        String videoTitle;
-        String audioLanguage;
-        List<RawMxGaanaDbEntity> entities = new ArrayList<>();
+//        String videoTitle;
+//        String audioLanguage;
+//        List<RawMxGaanaDbEntity> entities = new ArrayList<>();
 
-        public InputRow(String videoId, String youtubeId, String videoTitle, String audioLanguage) {
-            this.videoId = videoId;
+        public InputRow(long gaanaId, String youtubeId) {
+            this.gaanaId = gaanaId;
             this.youtubeId = youtubeId;
-            this.videoTitle = videoTitle;
-            this.audioLanguage = audioLanguage;
+//            this.videoTitle = videoTitle;
+//            this.audioLanguage = audioLanguage;
         }
 
-        public String getVideoId() {
-            return videoId;
+        public long getGaanaId() {
+            return gaanaId;
         }
 
-        public void setVideoId(String videoId) {
-            this.videoId = videoId;
+        public void setGaanaId(long gaanaId) {
+            this.gaanaId = gaanaId;
         }
 
         public String getYoutubeId() {
@@ -112,86 +128,58 @@ public class FileWriterServiceImpl implements FileWriterService {
         public void setYoutubeId(String youtubeId) {
             this.youtubeId = youtubeId;
         }
-
-        public String getVideoTitle() {
-            return videoTitle;
-        }
-
-        public void setVideoTitle(String videoTitle) {
-            this.videoTitle = videoTitle;
-        }
-
-        public String getAudioLanguage() {
-            return audioLanguage;
-        }
-
-        public void setAudioLanguage(String audioLanguage) {
-            this.audioLanguage = audioLanguage;
-        }
-
-        public List<RawMxGaanaDbEntity> getEntities() {
-            return entities;
-        }
-
-        public void setEntities(List<RawMxGaanaDbEntity> entities) {
-            this.entities = entities;
-        }
     }
 
-    public List<InputRow> readExcel(){
+    public List<InputRow> readExcel(int sheetNumber){
         List<InputRow> list = new ArrayList<>();
         try {
-            OPCPackage pkg = OPCPackage.open(new File("/Users/roushan.singh1/Downloads/all_music_nogannaID.xlsx"));
+            OPCPackage pkg = OPCPackage.open(new File("/Users/roushan.singh1/Desktop/CompilationofWeek1.xlsx"));
 //            POIFSFileSystem fs = new POIFSFileSystem(new FileInputStream("/Users/roushan.singh1/Downloads/all_music_nogannaID.xlsx"));
             XSSFWorkbook wb = new XSSFWorkbook(pkg);
-            XSSFSheet sheet = wb.getSheetAt(0);
+            XSSFSheet sheet = wb.getSheetAt(sheetNumber);
             XSSFRow row;
             XSSFCell cell;
 
             int rows; // No of rows
             rows = sheet.getPhysicalNumberOfRows();
 
-            int cols = 4; // No of columns
-
+//            int cols = 4; // No of columns
+            int count=0;
             for(int r = 1; r < rows; r++) {
                 row = sheet.getRow(r);
                 if(row != null) {
-                    String videoId = row.getCell(0)!=null? row.getCell(0).toString():null;
-                    String ytId = row.getCell(2)!=null? row.getCell(2).toString():null;
-                    String videoTitle = row.getCell(3)!=null? row.getCell(3).toString():null;
-                    String audioLanguage = row.getCell(4)!=null? row.getCell(4).toString():null;
-                    list.add(new InputRow(videoId, ytId, videoTitle, audioLanguage));
+//                    row.getCell(16).setCellType(Cell.CELL_TYPE_NUMERIC);
+                    if(row.getCell(1)!=null && StringUtils.isNotEmpty(row.getCell(1).toString()) && row.getCell(16)!=null){
+                        count++;
+                    }
+                    try {
+                        if (row.getCell(1) != null && StringUtils.isNotEmpty(row.getCell(1).toString()) && row.getCell(16) != null) {
+                            String youtubeUrl = row.getCell(1).toString();
+                            long gaanaId = new BigDecimal(row.getCell(16).getNumericCellValue()).longValue();
+                            list.add(new InputRow(gaanaId, youtubeUrl));
+                        }
+                    }catch (Exception e){
+                        LOG.info("row: "+r);
+//                        LOG.error("", e);
+                    }
+//                    String videoId = row.getCell(0)!=null? row.getCell(0).toString():null;
+//                    String ytId = row.getCell(2)!=null? row.getCell(2).toString():null;
+//                    String videoTitle = row.getCell(3)!=null? row.getCell(3).toString():null;
+//                    String audioLanguage = row.getCell(4)!=null? row.getCell(4).toString():null;
+//                    list.add(new InputRow(videoId, ytId, videoTitle, audioLanguage));
                 }
             }
+            System.out.println(count);
         } catch(Exception ioe) {
-            ioe.printStackTrace();
+            LOG.error("", ioe);
         }
         LOG.info("Size: "+list.size());
         return list;
     }
 
-    private boolean prepareExcel(List<InputRow> rowList){
+    public boolean prepareExcel(List<MxGaanaDbEntity> rowList){
         try {
-            rowList.parallelStream().forEach(i -> {
-                SearchTuple tuple = new SearchTuple(i.audioLanguage, i.videoTitle);
-                List<RawMxGaanaDbEntity> searchResults = esService.search(tuple);
-//                System.out.println("======================================");
-//                System.out.println(tuple);
-//                if(searchResults==null){
-//                    System.out.println(searchResults);
-//                }else{
-//                    for(RawMxGaanaDbEntity entity: searchResults){
-//                        System.out.println(entity);
-//                    }
-//                }
-//                System.out.println("--------------------------------------");
-                if(searchResults==null){
-                    LOG.error("");
-                }
-                i.entities.addAll(searchResults);
-            });
-            LOG.info("ES Search done");
-            String gaanaOutputDirectoryPath = new StringBuilder(localFolder).append("/").append("YTtoGaanaSearchResults-").append(System.currentTimeMillis()).append(".xls").toString();
+            String gaanaOutputDirectoryPath = new StringBuilder(localFolder).append("/").append("ManualUploadSheet-").append(dayDateFormat.format(new Date())).append("-").append(rowList.size()).append(".xls").toString();
             File gaanaFile = new File(gaanaOutputDirectoryPath);
             gaanaFile.getParentFile().mkdirs();
             try {
@@ -210,14 +198,14 @@ public class FileWriterServiceImpl implements FileWriterService {
         }
     }
 
-    private boolean writeDetailsToFile(List<InputRow> rowWithResults, File file) throws IOException {
-        if(!rowWithResults.isEmpty()) {
+    private boolean writeDetailsToFile(List<MxGaanaDbEntity> gaanaDbEntities, File file) throws IOException {
+        if(!gaanaDbEntities.isEmpty()) {
             OutputStream outputStream = null;
             try {
                 outputStream = new FileOutputStream(file);
                 HSSFWorkbook workbook = new HSSFWorkbook();
                 HSSFSheet worksheet = workbook.createSheet("Sheet1");
-                for (int index = 0; index < headerListNew.length; index++) {
+                for (int index = 0; index < headerList.length; index++) {
                     worksheet.autoSizeColumn(index);
                 }
                 CellStyle cellStyle = workbook.createCellStyle();
@@ -228,29 +216,11 @@ public class FileWriterServiceImpl implements FileWriterService {
                 addHeaderCells(header, cellStyle);
 
                 int count = 1;
-                int rowCount = 1;
-                int nullCount = 0;
-                for (InputRow resultRow : rowWithResults) {
-                    boolean allNull = true;
-                    myloop:
-                    for(RawMxGaanaDbEntity raw: resultRow.getEntities()){
-                        if(raw!=null){
-                            allNull = false;
-                            break myloop;
-                        }
-                    }
-                    for(int i=0; i<resultRow.entities.size(); i++){
-                        HSSFRow row = worksheet.createRow(rowCount);
-                        addRowCells(row, cellStyle, resultRow, i);
-                        rowCount++;
-                    }
+                for (MxGaanaDbEntity entity : gaanaDbEntities) {
+                    HSSFRow row = worksheet.createRow(count);
+                    addRowCells(row, cellStyle, entity);
                     count++;
-                    if(allNull){
-                        nullCount++;
-                    }
                 }
-                LOG.info("NullCount: "+nullCount);
-                LOG.info("TotalCount: "+(count-1));
                 workbook.write(outputStream);
             } catch (Exception e) {
                 LOG.error("Exception while writing payment output to file: " + file.getAbsolutePath(), e);
@@ -265,89 +235,58 @@ public class FileWriterServiceImpl implements FileWriterService {
     }
 
     private void addHeaderCells(HSSFRow header, CellStyle cellStyle){
-        for(int index=0; index<headerListNew.length; index++){
+        for(int index=0; index<headerList.length; index++){
             HSSFCell cell = header.createCell(index);
             cell.setCellStyle(cellStyle);
-            cell.setCellValue(headerListNew[index]);
+            cell.setCellValue(headerList[index]);
         }
     }
 
     private static final DateFormat dayDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
-    private void addRowCells(HSSFRow row, CellStyle cellStyle, InputRow input, int resultIndex){
+    private void addRowCells(HSSFRow row, CellStyle cellStyle, MxGaanaDbEntity entity){
 //		"Video S3 Path", "Youtube URL", "Publisher Name", "Video Type", "Album Name", "Album Release Date", "Album Thumbnail Path","Artist Name / Group","Video Title","Audio Language","Singers","Release Date","Genre Level 1","Video Thumbnail","Star", "Gaana ID"
-        // "Video Id", "Youtube Id", "Video Title", "Audio Language", "Gaana Id", "Gaana Track Title", "Album Name", "Release Date","Singers","Star"
         if(row!=null) {
-            if(resultIndex==0){
-                row.createCell(0).setCellValue(input.getVideoId()); // video id
-                row.createCell(1).setCellValue(input.getYoutubeId()); // yt id
-                row.createCell(2).setCellValue(input.getVideoTitle()); // video title
-                row.createCell(3).setCellValue(input.getAudioLanguage()); // audio language
-                if(input.getEntities().get(resultIndex)!=null){
-                    row.createCell(4).setCellValue(input.getEntities().get(resultIndex).getTrackId()); // gaana id
-                    row.createCell(5).setCellValue(input.getEntities().get(resultIndex).getTrackTitle()); // gaana track title
-                    row.createCell(6).setCellValue(input.getEntities().get(resultIndex).getAlbumTitle()); // gaana album name
-                    if(input.getEntities().get(resultIndex).getReleaseDate()!=null){
-                        row.createCell(7).setCellValue(dayDateFormat.format(input.getEntities().get(resultIndex).getReleaseDate())); // release date
-                    }else{
-                        row.createCell(7).setCellValue(""); // release date
-                    }
-                    row.createCell(8).setCellValue(input.getEntities().get(resultIndex).getSinger()); // singers
-                    StringBuilder sb = new StringBuilder();
-                    if (StringUtils.isNotEmpty(input.getEntities().get(resultIndex).getActor())) {
-                        sb.append(input.getEntities().get(resultIndex).getActor());
-                    }
-                    if (StringUtils.isNotEmpty(input.getEntities().get(resultIndex).getActress())) {
-                        if (sb.length() > 0) {
-                            sb.append(", ");
-                        }
-                        sb.append(input.getEntities().get(resultIndex).getActress());
-                    }
-                    row.createCell(9).setCellValue(sb.toString()); // star
-                }else{
-                    row.createCell(4).setCellValue("No Search Result");
-                    row.createCell(5).setCellValue("No Search Result");
-                    row.createCell(6).setCellValue("No Search Result");
-                    row.createCell(7).setCellValue("No Search Result");
-                    row.createCell(8).setCellValue("No Search Result");
-                    row.createCell(9).setCellValue("No Search Result");
-                }
+            row.createCell(0).setCellValue(""); // video s3 path
+            row.createCell(1).setCellValue(entity.getYoutubeId()); // yt url
+            row.createCell(2).setCellValue(entity.getLabel()); // publisher name
+            row.createCell(3).setCellValue("Music"); // video type
+            row.createCell(4).setCellValue(entity.getAlbumTitle()); // album name
+            if (entity.getAlbumReleaseDate() != null) {
+                row.createCell(5).setCellValue(dayDateFormat.format(entity.getAlbumReleaseDate())); // album release date
+            }else if(entity.getReleaseDate() != null){
+                row.createCell(5).setCellValue(dayDateFormat.format(entity.getReleaseDate()));
             }else{
-                row.createCell(0).setCellValue("----"); // video id
-                row.createCell(1).setCellValue("----"); // yt id
-                row.createCell(2).setCellValue("----"); // video title
-                row.createCell(3).setCellValue("----"); // audio language
-                if(input.getEntities().get(resultIndex)!=null){
-                    row.createCell(4).setCellValue(input.getEntities().get(resultIndex).getTrackId()); // gaana id
-                    row.createCell(5).setCellValue(input.getEntities().get(resultIndex).getTrackTitle()); // gaana track title
-                    row.createCell(6).setCellValue(input.getEntities().get(resultIndex).getAlbumTitle()); // gaana album name
-                    if(input.getEntities().get(resultIndex).getReleaseDate()!=null){
-                        row.createCell(7).setCellValue(dayDateFormat.format(input.getEntities().get(resultIndex).getReleaseDate())); // release date
-                    }else{
-                        row.createCell(7).setCellValue(""); // release date
-                    }
-                    row.createCell(8).setCellValue(input.getEntities().get(resultIndex).getSinger()); // singers
-                    StringBuilder sb = new StringBuilder();
-                    if (StringUtils.isNotEmpty(input.getEntities().get(resultIndex).getActor())) {
-                        sb.append(input.getEntities().get(resultIndex).getActor());
-                    }
-                    if (StringUtils.isNotEmpty(input.getEntities().get(resultIndex).getActress())) {
-                        if (sb.length() > 0) {
-                            sb.append(", ");
-                        }
-                        sb.append(input.getEntities().get(resultIndex).getActress());
-                    }
-                    row.createCell(9).setCellValue(sb.toString()); // star
-                }else{
-                    row.createCell(4).setCellValue("No Search Result");
-                    row.createCell(5).setCellValue("No Search Result");
-                    row.createCell(6).setCellValue("No Search Result");
-                    row.createCell(7).setCellValue("No Search Result");
-                    row.createCell(8).setCellValue("No Search Result");
-                    row.createCell(9).setCellValue("No Search Result");
-                }
+                row.createCell(5).setCellValue("");
             }
-            for (int i = 0; i < headerListNew.length; i++) {
+            row.createCell(6).setCellValue(entity.getS3AlbumThumbnailPath());//find album thumbnail path
+            row.createCell(7).setCellValue(new StringBuilder("Various Artists").append(" - ").append(entity.getLanguage()).toString()); // artist name group
+            row.createCell(8).setCellValue(entity.getTrackTitle()); // video title
+            row.createCell(9).setCellValue(entity.getLanguage()); // audit language
+            row.createCell(10).setCellValue(entity.getSinger()); // singers
+            if (entity.getReleaseDate() != null) {
+                row.createCell(11).setCellValue(dayDateFormat.format(entity.getReleaseDate())); // release date
+            }else{
+                row.createCell(11).setCellValue("");
+            }
+            row.createCell(12).setCellValue(entity.getGenres()); // genre
+            row.createCell(13).setCellValue(entity.getS3VideoThumbnailPath()); // video thumbnail
+            StringBuilder sb = new StringBuilder();
+            if (StringUtils.isNotEmpty(entity.getActor())) {
+                sb.append(entity.getActor());
+            }
+            if (StringUtils.isNotEmpty(entity.getActress())) {
+                if (sb.length() > 0) {
+                    sb.append(", ");
+                }
+                sb.append(entity.getActress());
+            }
+            row.createCell(14).setCellValue(sb.toString()); // star
+            row.createCell(15).setCellValue(entity.getTrackId()); // gaana id
+            for (int i = 0; i < headerList.length; i++) {
+                if(row==null || row.getCell(i)==null || cellStyle==null){
+                    System.out.println("here");
+                }
                 row.getCell(i).setCellStyle(cellStyle);
             }
         }

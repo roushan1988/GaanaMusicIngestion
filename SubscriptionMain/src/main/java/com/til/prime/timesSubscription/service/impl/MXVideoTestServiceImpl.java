@@ -9,20 +9,23 @@ import com.til.prime.timesSubscription.pojo.GaanaMusicRESTResponse;
 import com.til.prime.timesSubscription.pojo.Genre;
 import com.til.prime.timesSubscription.pojo.Track;
 import com.til.prime.timesSubscription.service.ExecutorService;
+import com.til.prime.timesSubscription.service.FileWriterService;
 import com.til.prime.timesSubscription.service.MXVideoTestService;
 import com.til.prime.timesSubscription.service.S3FileOperations;
 import com.til.prime.timesSubscription.util.HttpConnectionUtils;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.io.FileReader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
@@ -30,7 +33,7 @@ import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 @Service
 public class MXVideoTestServiceImpl implements MXVideoTestService {
     private static final Logger LOG = Logger.getLogger(MXVideoTestServiceImpl.class);
-    public static final String CURRENT_JOB_TAG = "ActorActressSearchExcludingAlreadyValidGaanaYoutubeIds";
+    public static final String CURRENT_JOB_TAG = "MANUAL_FIRST_BATCH-2019-01-15";
 
     @Autowired
     S3FileOperations s3FileOperations;
@@ -54,10 +57,15 @@ public class MXVideoTestServiceImpl implements MXVideoTestService {
     @Autowired
     private GaanaDataRepository gaanaDao;
 
+    @Autowired
+    private FileWriterService fileWriterService;
+
     @Override
 //    @Scheduled(initialDelay = 1000, fixedDelay = 31536000000000l)
+    @PostConstruct
     public void test() throws Exception{
-        populateURLs();
+        List<MxGaanaDbEntity> result = populateURLs();
+        fileWriterService.prepareExcel(result);
     }
 
     private void updateYTUrl(MxGaanaDbEntity model, List<YTVideoCrawlerResponseItem> items){
@@ -261,58 +269,63 @@ public class MXVideoTestServiceImpl implements MXVideoTestService {
         return sb.toString().replaceAll(" ", "+").replaceAll(",", "+").replaceAll("\\?", "+").replaceAll("\\{", "(").replaceAll("\\}", ")");
     }
 
-    private void populateURLs() throws Exception{
+    private List<MxGaanaDbEntity> populateURLs() throws Exception{
         int page = 0;
+        List<MxGaanaDbEntity> result = new ArrayList<>();
         loop1:
-        while(true) {
+//        while(true) {
             try {
                 long start = System.currentTimeMillis();
                 LOG.info("Starting with this batch");
-                List<MxGaanaDbEntity> models = gaanaDao.findAllByYTNullAndActorOrActressPresent(new PageRequest(page++, 10));
+                List<MxGaanaDbEntity> models = gaanaDao.findAllByValidNullAndYoutubeIdNotNull();
                 if (CollectionUtils.isEmpty(models)) {
                     break loop1;
                 }
-                List<String> qList = models.stream().map(i -> generateSearchQuery(i)).collect(Collectors.toList());
-                List<Long> idList = models.stream().map(MxGaanaDbEntity::getId).collect(Collectors.toList());
-                LinkedHashMap<String, List<YTVideoCrawlerResponseItem>> response = searchVideosNew(qList);
-                Map<Long, List<YTVideoCrawlerResponseItem>> map = new HashMap<>();
-                for(Long id: idList){
-                    map.put(id, new ArrayList<>());
-                }
-                if (MapUtils.isNotEmpty(response)) {
-                    List<List<YTVideoCrawlerResponseItem>> resList = new ArrayList<>(response.values());
-                    for (int i=0; i<resList.size(); i++) {
-                        for (Object item : resList.get(i)) {
-                            if (item instanceof YTVideoCrawlerResponseItem) {
-                                updateViews((YTVideoCrawlerResponseItem) item);
-                                map.get(idList.get(i)).add((YTVideoCrawlerResponseItem) item);
-                            }
-                            if (item instanceof LinkedHashMap) {
-                                YTVideoCrawlerResponseItem item1 = new YTVideoCrawlerResponseItem();
-                                item1.setLink((String) ((LinkedHashMap) item).get("link"));
-                                item1.setTitle((String) ((LinkedHashMap) item).get("title"));
-                                item1.setPublisher((String) ((LinkedHashMap) item).get("publisher"));
-                                item1.setViews((String) ((LinkedHashMap) item).get("views"));
-                                item1.setTime((String) ((LinkedHashMap) item).get("time"));
-                                item1.setImg_thumbnail((String) ((LinkedHashMap) item).get("img_thumbnail"));
-                                item1.setImg_max_resolution((String) ((LinkedHashMap) item).get("img_max_resolution"));
-                                updateViews(item1);
-                                map.get(idList.get(i)).add(item1);
-                            }
-                        }
-                    }
-                }
-                for (MxGaanaDbEntity model : models) {
-                    updateYTUrl(model, map.get(model.getId()));
-                }
-                models.stream().forEach(model -> {
+//                List<String> qList = models.stream().map(i -> generateSearchQuery(i)).collect(Collectors.toList());
+//                List<Long> idList = models.stream().map(MxGaanaDbEntity::getId).collect(Collectors.toList());
+//                LinkedHashMap<String, List<YTVideoCrawlerResponseItem>> response = searchVideosNew(qList);
+//                Map<Long, List<YTVideoCrawlerResponseItem>> map = new HashMap<>();
+//                for(Long id: idList){
+//                    map.put(id, new ArrayList<>());
+//                }
+//                if (MapUtils.isNotEmpty(response)) {
+//                    List<List<YTVideoCrawlerResponseItem>> resList = new ArrayList<>(response.values());
+//                    for (int i=0; i<resList.size(); i++) {
+//                        for (Object item : resList.get(i)) {
+//                            if (item instanceof YTVideoCrawlerResponseItem) {
+//                                updateViews((YTVideoCrawlerResponseItem) item);
+//                                map.get(idList.get(i)).add((YTVideoCrawlerResponseItem) item);
+//                            }
+//                            if (item instanceof LinkedHashMap) {
+//                                YTVideoCrawlerResponseItem item1 = new YTVideoCrawlerResponseItem();
+//                                item1.setLink((String) ((LinkedHashMap) item).get("link"));
+//                                item1.setTitle((String) ((LinkedHashMap) item).get("title"));
+//                                item1.setPublisher((String) ((LinkedHashMap) item).get("publisher"));
+//                                item1.setViews((String) ((LinkedHashMap) item).get("views"));
+//                                item1.setTime((String) ((LinkedHashMap) item).get("time"));
+//                                item1.setImg_thumbnail((String) ((LinkedHashMap) item).get("img_thumbnail"));
+//                                item1.setImg_max_resolution((String) ((LinkedHashMap) item).get("img_max_resolution"));
+//                                updateViews(item1);
+//                                map.get(idList.get(i)).add(item1);
+//                            }
+//                        }
+//                    }
+//                }
+//                for (MxGaanaDbEntity model : models) {
+//                    updateYTUrl(model, map.get(model.getId()));
+//                }
+                models.parallelStream().forEach(model -> {
+                    String ytId = model.getYoutubeId().substring(32,43);
+                    model.setThumbnail("https://i.ytimg.com/vi/"+ytId+"/hqdefault.jpg");
+                    model.setMaxResolutionThumbnail("https://i.ytimg.com/vi/"+ytId+"/maxresdefault.jpg");
                     enrichWithGaanaInfo(model);
                     uploadVideoThumbnailToS3AndUpdate(model);
                     uploadAlbumThumbnailToS3AndUpdate(model);
+                    model.setValid(true);
                     model.setJobTag(CURRENT_JOB_TAG);
                 });
                 try {
-                    gaanaDao.saveAll(models);
+                    result = gaanaDao.saveAll(models);
                 }catch (Exception e){
                     LOG.error("Exception", e);
                 }
@@ -333,7 +346,8 @@ public class MXVideoTestServiceImpl implements MXVideoTestService {
 //            if(CollectionUtils.isNotEmpty(list)){
 //                executorService.getExecutorService().submit(new UrlPopulationTask(list, httpConnectionUtils, gaanaDao));
 //            }
-        }
+//        }
+        return result;
     }
 
 //    static class UrlPopulationTask implements Runnable {

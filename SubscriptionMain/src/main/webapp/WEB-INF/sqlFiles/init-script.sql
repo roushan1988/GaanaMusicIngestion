@@ -416,3 +416,47 @@ CREATE TABLE `yt_search_results`(
   INDEX `INDEX_VERIFIED` (`channel_verified`),
   CONSTRAINT `FK_GAANA` FOREIGN KEY (`gaana_id`) REFERENCES `poc_gaana_songs` (`id`)
 );
+
+CREATE TABLE `poc_gaana_songs_manual_from_sheets` (
+  `track_id` int(11) DEFAULT NULL,
+  `isrc_code` varchar(190) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `track_title` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `album_title` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `release_date` datetime NOT NULL,
+  `singer` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `composer` text,
+  `actor` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `actress` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `language` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `parental_advisory` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `lyricist` text,
+  `label` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `album_thumbnail_path` text,
+  `genres` varchar(100) DEFAULT NULL,
+  `youtube_id` varchar(512) DEFAULT NULL,
+  `popularity_index` int(11) DEFAULT NULL,
+  `created` datetime NOT NULL,
+  `updated` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `deleted` tinyint(1) NOT NULL,
+  `valid` tinyint(1) DEFAULT NULL,
+  `thumbnail` varchar(512) DEFAULT NULL,
+  `max_resolution_thumbnail` varchar(512) DEFAULT NULL,
+  `album_release_date` datetime DEFAULT NULL,
+  `s3_album_thumbnail_path` text,
+  `s3_video_thumbnail_path` text,
+  `job_tag` varchar(128) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `INDEX_POPULARITY` (`popularity_index`),
+  KEY `KEY_TRACK_TITLE` (`track_title`(191)),
+  KEY `KEY_ISRC` (`isrc_code`),
+  KEY `KEY_ALBUM` (`album_title`(191)),
+  KEY `KEY_language` (`language`(191)),
+  KEY `KEY_YOUTUBE_ID` (`youtube_id`),
+  KEY `track_id_key` (`track_id`),
+  KEY `KEY_JOB_TAG` (`job_tag`)
+);
+
+UPDATE poc_gaana_songs_manual_from_sheets t1 INNER JOIN tg_album_enrich t2 ON t1.track_id = t2.track_id SET t1.track_title = t2.track_title, t1.album_title = t2.album_title,
+ t1.release_date = t2.release_date, t1.singer = t2.singer, t1.composer = t2.composer, t1.actor = t2.actor, t1.actress = t2.actress, t1.language = t2.language, t1.label = t2.label,
+ t1.album_thumbnail_path = t2.album_thumbnail_path, t1.genres = t2.genres, t1.album_release_date = t2.release_date;

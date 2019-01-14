@@ -33,6 +33,8 @@ public interface GaanaDataRepository extends GenericJpaRepository<MxGaanaDbEntit
     List<MxGaanaDbEntity> findAllByYoutubeIdNotNullAndS3AlbumThumbnailPathNull();
     @Query(value="select m from MxGaanaDbEntity m where m.youtubeId is null and (length(m.actor)>0 or length(m.actress)>0)")
     List<MxGaanaDbEntity> findAllByYTNullAndActorOrActressPresent(Pageable pageable);
+    List<MxGaanaDbEntity> findAllByValidNullAndYoutubeIdNotNull();
+    List<MxGaanaDbEntity> findAllByYoutubeIdNotNullAndS3AlbumThumbnailPathIsNull();
     @Query(value="select count(m) from MxGaanaDbEntity m where m.youtubeId is null and (length(m.actor)>0 or length(m.actress)>0)")
     Long countByYTNullAndActorOrActressPresent();
 }
