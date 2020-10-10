@@ -84,9 +84,10 @@ public class FileWriterServiceImpl implements FileWriterService {
 //        job.setEndTime(date);
 //        jobDao.save(job);
         int sheet = 0;
-        String language = "Hindi";
+        String language = "English";
         List<InputRow> rows = readExcel(sheet);
         List<MxGaanaDbEntity> entities = new ArrayList<>();
+        int errorCount = 0;
         for(InputRow row: rows){
             MxGaanaDbEntity entity = new MxGaanaDbEntity();
             entity.setTrackId(row.gaanaId);
@@ -94,8 +95,15 @@ public class FileWriterServiceImpl implements FileWriterService {
             entity.setCreated(new Date());
             entity.setLanguage(language);
             entities.add(entity);
+            try {
+                gaanaDao.save(entity);
+            }catch (Exception e){
+                LOG.error("Error while saving", e);
+                errorCount++;
+            }
         }
-        entities = gaanaDao.saveAll(entities);
+        LOG.info("Error count: "+errorCount);
+//        entities = gaanaDao.saveAll(entities);
         LOG.info("Done");
     }
 
@@ -133,7 +141,7 @@ public class FileWriterServiceImpl implements FileWriterService {
     public List<InputRow> readExcel(int sheetNumber){
         List<InputRow> list = new ArrayList<>();
         try {
-            OPCPackage pkg = OPCPackage.open(new File("/Users/roushan.singh1/Desktop/CompilationofWeek1.xlsx"));
+            OPCPackage pkg = OPCPackage.open(new File("/Users/roushan.singh1/Desktop/CompilationofWeek5.xlsx"));
 //            POIFSFileSystem fs = new POIFSFileSystem(new FileInputStream("/Users/roushan.singh1/Downloads/all_music_nogannaID.xlsx"));
             XSSFWorkbook wb = new XSSFWorkbook(pkg);
             XSSFSheet sheet = wb.getSheetAt(sheetNumber);
@@ -148,14 +156,14 @@ public class FileWriterServiceImpl implements FileWriterService {
             for(int r = 1; r < rows; r++) {
                 row = sheet.getRow(r);
                 if(row != null) {
-//                    row.getCell(16).setCellType(Cell.CELL_TYPE_NUMERIC);
-                    if(row.getCell(1)!=null && StringUtils.isNotEmpty(row.getCell(1).toString()) && row.getCell(16)!=null){
+//                    row.getCell(15).setCellType(Cell.CELL_TYPE_NUMERIC);
+                    if(row.getCell(1)!=null && StringUtils.isNotEmpty(row.getCell(1).toString()) && row.getCell(15)!=null){
                         count++;
                     }
                     try {
-                        if (row.getCell(1) != null && StringUtils.isNotEmpty(row.getCell(1).toString()) && row.getCell(16) != null) {
+                        if (row.getCell(1) != null && StringUtils.isNotEmpty(row.getCell(1).toString()) && row.getCell(15) != null) {
                             String youtubeUrl = row.getCell(1).toString();
-                            long gaanaId = new BigDecimal(row.getCell(16).getNumericCellValue()).longValue();
+                            long gaanaId = new BigDecimal(row.getCell(15).getNumericCellValue()).longValue();
                             list.add(new InputRow(gaanaId, youtubeUrl));
                         }
                     }catch (Exception e){

@@ -457,6 +457,10 @@ CREATE TABLE `poc_gaana_songs_manual_from_sheets` (
   KEY `KEY_JOB_TAG` (`job_tag`)
 );
 
-UPDATE poc_gaana_songs_manual_from_sheets t1 INNER JOIN tg_album_enrich t2 ON t1.track_id = t2.track_id SET t1.track_title = t2.track_title, t1.album_title = t2.album_title,
+UPDATE poc_gaana_songs_manual_from_sheets t1 INNER JOIN tg_album_enrich t2 ON t1.track_id = t2.track_id and t1.created > "2019-02-14" SET t1.track_title = t2.track_title, t1.album_title = t2.album_title,
  t1.release_date = t2.release_date, t1.singer = t2.singer, t1.composer = t2.composer, t1.actor = t2.actor, t1.actress = t2.actress, t1.language = t2.language, t1.label = t2.label,
  t1.album_thumbnail_path = t2.album_thumbnail_path, t1.genres = t2.genres, t1.album_release_date = t2.release_date;
+
+
+select * from poc_gaana_songs_manual_from_sheets t1 INNER JOIN tg_album_enrich t2 ON t1.track_id = t2.track_id and t1.created > "2019-02-14" and t2.release_date = '2012-03-00 00:00:00';
+select GROUP_CONCAT(t2.track_id) from poc_gaana_songs_manual_from_sheets t1 INNER JOIN tg_album_enrich t2 ON t1.track_id = t2.track_id and t1.created > "2019-02-04" and t2.release_date = '2010-10-00 00:00:00'\G;

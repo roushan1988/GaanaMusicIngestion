@@ -26,6 +26,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
@@ -33,7 +35,8 @@ import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 @Service
 public class MXVideoTestServiceImpl implements MXVideoTestService {
     private static final Logger LOG = Logger.getLogger(MXVideoTestServiceImpl.class);
-    public static final String CURRENT_JOB_TAG = "MANUAL_FIRST_BATCH-2019-01-15";
+    public static final String CURRENT_JOB_TAG = "MANUAL_FIFTH_BATCH-2019-02-15";
+    private static AtomicInteger counter = new AtomicInteger(0);
 
     @Autowired
     S3FileOperations s3FileOperations;
@@ -64,8 +67,9 @@ public class MXVideoTestServiceImpl implements MXVideoTestService {
 //    @Scheduled(initialDelay = 1000, fixedDelay = 31536000000000l)
     @PostConstruct
     public void test() throws Exception{
-        List<MxGaanaDbEntity> result = populateURLs();
-        fileWriterService.prepareExcel(result);
+        populateURLs();
+        List<MxGaanaDbEntity> models = gaanaDao.findAllByValidTrueAndJobTag(CURRENT_JOB_TAG);
+        fileWriterService.prepareExcel(models);
     }
 
     private void updateYTUrl(MxGaanaDbEntity model, List<YTVideoCrawlerResponseItem> items){
@@ -269,7 +273,7 @@ public class MXVideoTestServiceImpl implements MXVideoTestService {
         return sb.toString().replaceAll(" ", "+").replaceAll(",", "+").replaceAll("\\?", "+").replaceAll("\\{", "(").replaceAll("\\}", ")");
     }
 
-    private List<MxGaanaDbEntity> populateURLs() throws Exception{
+    private void populateURLs() throws Exception{
         int page = 0;
         List<MxGaanaDbEntity> result = new ArrayList<>();
         loop1:
@@ -314,21 +318,41 @@ public class MXVideoTestServiceImpl implements MXVideoTestService {
 //                for (MxGaanaDbEntity model : models) {
 //                    updateYTUrl(model, map.get(model.getId()));
 //                }
-                models.parallelStream().forEach(model -> {
-                    String ytId = model.getYoutubeId().substring(32,43);
-                    model.setThumbnail("https://i.ytimg.com/vi/"+ytId+"/hqdefault.jpg");
-                    model.setMaxResolutionThumbnail("https://i.ytimg.com/vi/"+ytId+"/maxresdefault.jpg");
-                    enrichWithGaanaInfo(model);
-                    uploadVideoThumbnailToS3AndUpdate(model);
-                    uploadAlbumThumbnailToS3AndUpdate(model);
-                    model.setValid(true);
-                    model.setJobTag(CURRENT_JOB_TAG);
-                });
-                try {
-                    result = gaanaDao.saveAll(models);
-                }catch (Exception e){
-                    LOG.error("Exception", e);
+                ForkJoinPool myPool = new ForkJoinPool(50);
+                int size=1000;
+                for(int i=0; i<models.size(); i+=size){
+                    int end = Math.min(i + size, models.size());
+                    List<MxGaanaDbEntity> sublist = models.subList(i, end);
+                    myPool.submit(() ->
+                            sublist.parallelStream().forEach(model -> {
+                                String ytId = model.getYoutubeId().substring(32,43);
+                                model.setThumbnail("https://i.ytimg.com/vi/"+ytId+"/hqdefault.jpg");
+                                model.setMaxResolutionThumbnail("https://i.ytimg.com/vi/"+ytId+"/maxresdefault.jpg");
+                                enrichWithGaanaInfo(model);
+                                uploadVideoThumbnailToS3AndUpdate(model);
+                                uploadAlbumThumbnailToS3AndUpdate(model);
+                                model.setValid(true);
+                                model.setJobTag(CURRENT_JOB_TAG);
+                                counter.incrementAndGet();
+                                LOG.info("Counter: "+counter.intValue());
+                            })
+                    ).get();
+                    try {
+                        gaanaDao.saveAll(sublist);
+                    }catch (Exception e){
+                        LOG.error("Exception", e);
+                    }
                 }
+//                models.parallelStream().forEach(model -> {
+//                    String ytId = model.getYoutubeId().substring(32,43);
+//                    model.setThumbnail("https://i.ytimg.com/vi/"+ytId+"/hqdefault.jpg");
+//                    model.setMaxResolutionThumbnail("https://i.ytimg.com/vi/"+ytId+"/maxresdefault.jpg");
+//                    enrichWithGaanaInfo(model);
+//                    uploadVideoThumbnailToS3AndUpdate(model);
+//                    uploadAlbumThumbnailToS3AndUpdate(model);
+//                    model.setValid(true);
+//                    model.setJobTag(CURRENT_JOB_TAG);
+//                });
                 LOG.info("Done with this batch in millis: "+(System.currentTimeMillis()-start));
             }catch (Exception e){
                 LOG.error("Exception in batch: ", e);
@@ -347,7 +371,7 @@ public class MXVideoTestServiceImpl implements MXVideoTestService {
 //                executorService.getExecutorService().submit(new UrlPopulationTask(list, httpConnectionUtils, gaanaDao));
 //            }
 //        }
-        return result;
+        return;
     }
 
 //    static class UrlPopulationTask implements Runnable {
